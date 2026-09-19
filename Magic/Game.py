@@ -84,26 +84,38 @@ class Game:
 
             # ToDo: put actions on stack and pass priority around.
             # ToDo: instantly play Lands, no reaction possible there.
-            action = self.active_player.choose_action_dummy(
+            action, source = self.active_player.choose_action_dummy(
                 hit_landdrop=self.hit_landdrop,
             )
 
             # passing
-            if action is None:
+            if action == "Pass":
+                print("Passed during main phase.")
                 break
 
             # ToDo: Replace the next code with the stack.
             #       We instantly resolve actions for now.
-
-            if isinstance(action, Land):
+            
+            # play a land
+            if action == "Play":
                 if self.hit_landdrop:
-                    print("Already hit your landdrop this turn, what happened?")
-                    continue
+                    print("Already hit your landdrop this turn, illegal action.")
+                    continue                    
                 self.active_player.play_land_from_hand(action)
                 self.hit_landdrop = True
                 
-            elif isinstance(action, Creature):
+            elif action == "Cast":
+                print("Attempting to cast spell:", Creature(action).name)
                 self.active_player.play_creature_from_hand(action)
+
+            elif action == "Ability":
+                print("Activating ability:", Card(source).name)
+                ability = source.activated_ability
+                if not ability.can_activate(source, self.active_player):
+                    print("Activating unactivatable abilities is illegal.")
+                    continue
+                ability.pay_cost(source, self.active_player)
+                ability.activity(source, self.active_player)
 
             # end of "replace this code with the stack" block
 
