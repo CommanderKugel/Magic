@@ -14,6 +14,24 @@ Action = Literal[
 PASS: tuple[Action, None] = ("Pass", None)
 
 
+def _is_valid_action(i: str, max_idx: int) -> bool:
+    """Verify the input string maps to a valid action"""
+    if i.strip() == "":
+        print("Empty string is not an integer, idiot.")
+        return False
+    # not a number
+    for c in i:
+        if c not in "0123456789":
+            print("Choose an integer, idiot.")
+            return False
+    # out of bounds
+    if int(i) < 0 or int(i) >= max_idx:
+        print("Index out of range, idiot.")
+        return False
+    # all okay
+    return True
+
+
 class Player:
     def __init__(self, starting_life: int,  library: list[Card]):
         self.life = starting_life
@@ -141,19 +159,11 @@ class Player:
         # return chosen action
         return actions[int(i)]
 
-def _is_valid_action(i: str, max_idx: int) -> bool:
-    """Verify the input string maps to a valid action"""
-    if i.strip() == "":
-        print("Empty string is not an integer, idiot.")
-        return False
-    # not a number
-    for c in i:
-        if c not in "0123456789":
-            print("Choose an integer, idiot.")
-            return False
-    # out of bounds
-    if int(i) < 0 or int(i) >= max_idx:
-        print("Index out of range, idiot.")
-        return False
-    # all okay
-    return True
+    def binary_choice(self, question: str) -> bool:
+        """Choice if player wants to accack with the given creature."""
+        return (
+            input(f"{question}\ny/n: ")
+            .lower()
+            .strip()
+        ) == "y"
+    

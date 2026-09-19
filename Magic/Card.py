@@ -27,9 +27,15 @@ class Card:
     def __eq__(self, value):
         return self.id == value.id
 
+    def __hash__(self) -> int:
+        return hash(self.id)
+
 @dataclass
 class Land(Card):
     mana_color: Color = "None"
+
+    def __hash__(self) -> int:
+        return super.__hash__(self)
     
 @dataclass
 class Creature(Card):
@@ -37,3 +43,7 @@ class Creature(Card):
     subtype: str = ""
     power: int = 0
     toughness: int = 0
+    damage_counter: int = 0
+
+    def __hash__(self) -> int:
+        return super.__hash__(self)

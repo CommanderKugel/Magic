@@ -40,9 +40,12 @@ class Game:
         # for active player: assume there are only 2 players for now.
         self.turn += 1
         self.active_player = self.p1 if self.turn % 2 else self.p2
+        self.reactiva_player = self.p2 if self.turn % 2 else self.p1
         self.hit_landdrop = False
 
         self.beginning_phase()
+        self.main_phase()
+        self.combat_phase()
         self.main_phase()
     
     def beginning_phase(self) -> None:
@@ -78,6 +81,7 @@ class Game:
     
     def main_phase(self) -> None:
         """Play a whole main phase. There are two per turn, most of the time."""
+        print("[MAIN PHASE]")
         self.step = "Main"
         
         while True:
@@ -120,4 +124,89 @@ class Game:
                 ability.activity(source, self.active_player)
 
             # end of "replace this code with the stack" block
+
+    def combat_phase(self) -> None:
+        """Play a whole combat phase."""
+
+        def beginning_of_combat() -> None:
+            """Play beginning of combat step."""
+            print("[BEGINNING OF COMBAT]")
+            self.step = "BeginningOfCombat"
+            # ToDo: triggered abilities
+            # ToDo: priority
+
+        def declare_attackers() -> dict[Creature, list[Creature]]:
+            """Declare this turns attacker."""
+            print("[DECLARE ATTACKERS STEP]")
+            self.step = "DeclareAttacker"
+            attacker = {
+                creature: []
+                for creature in self.active_player.creatures
+                if self.active_player.binary_choice(
+                    f"Do you want to attack with {creature.name}?"
+                )
+            }
+            # ToDo: priority
+            return attacker
+
+        def declare_blockers(attacker: dict[Creature, list[Creature]]) -> dict[Creature, list[Creature]]:
+            """Declare blocker to this turns attackers."""
+            print("[DECLARE BLOCKERS STEP]")
+            self.step = "DeclareBlocker"
+            available_blocker = [c for c in self.reactiva_player.creatures]
+            for att in attacker.keys():
+                for blocker in available_blocker:
+                    if self.reactiva_player.binary_choice(
+                        f"Do you want to block {att.name} with {blocker.name}?"
+                    ):
+                        attacker[att].append(blocker)
+                        available_blocker.remove(blocker)
+            # ToDo: Priority
+            return attacker
+
+        def damage_step(attacker_: dict[Creature, list[Creature]]) -> None:
+            """Deal combat damage to creatures and players."""
+            print("[DAMAGE STEP]")
+            self.step = "Damage"
+
+            for attacker, blocker in attacker_.items():
+                # no blocker: deal damage to opponent
+                if len(blocker) == 0:
+                    self.reactiva_player.life -= attacker.power
+                # only one blocker
+                # equal trade of damage.
+                elif len(blocker) == 1:
+                    block = blocker[0]
+                    block.damage_counter += attacker.power
+                    attacker.damage_counter += block.power
+                elif len(blocker) > 1:
+                    raise NotImplementedError()
+
+            # actually kill creatures and players
+            self.state_based_actions()
+
+        def end_of_combat() -> None:
+            """Play end of combat step."""
+            print("[END OF COMBAT STEP]")
+            self.step = "EndOfCombat"
+            # ToDo: priority
+
+        beginning_of_combat()
+        attacker = declare_attackers()
+        attacker = declare_blockers(attacker)
+        damage_step(attacker)
+        end_of_combat()
+
+
+    def state_based_actions(self) -> None:
+        """Perform state based actions on this game. Only player life and creature dmg for now."""
+        for player in [self.p1, self.p2]:
+            if player.life <= 0:
+                print(f"Player {player} lost the game!")
+                raise
+            for creature in player.creatures:
+                if creature.damage_counter >= creature.toughness:
+                    print(f"[STATE BASED ACTIONS] {creature.name} dies due to damage.")
+                    player.graveyard.append(creature)
+                    player.creatures.remove(creature)
 
