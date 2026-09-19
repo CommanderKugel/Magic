@@ -16,8 +16,6 @@ bear = ALL_CARDS["Balduvian_Bears"]
 game.p1.creatures.append(bear)
 game.p2.creatures.append(bear)
 
-try:
-    while True:
-        game.play_turn()
-except:
-    print("game ended.")
+while True:
+    game.play_turn()
+

@@ -46,6 +46,7 @@ class Game:
         self.main_phase()
         self.combat_phase()
         self.main_phase()
+        self.end_phase()
 
     def clear_player_mana(self) -> None:
         """Clear all players floating mana."""
@@ -227,10 +228,17 @@ class Game:
             """
             print("[CLEANUP STEP]")
             self.step = "CleanupStep"
+            # remove damage countes from creatures
             for p in [self.p1, self.p2]:
                 for creature in p.creatures:
                     creature.damage_counter = 0
+                # remove floating mana
                 p.clear_floating_mana()
+            # discard due to handsize
+            while len(self.active_player.hand) > 7:
+                print("Discard due to handsize.")
+                card = self.active_player.target(own_hand=True)
+                self.active_player.discard(card)
 
         beginning_of_end_phase()
         end_phase()
