@@ -1,6 +1,8 @@
 from dataclasses import dataclass
 from typing import Literal
 
+from Magic.Ability import Ability
+
 Color = Literal[
     "White",
     "Blue",
@@ -18,6 +20,8 @@ class Card:
     color: list[Color] = None
     tapped: bool = False
     image: str = ""
+
+    activated_ability: Ability = None
 
 @dataclass
 class Land(Card):
