@@ -1,7 +1,7 @@
-from dataclasses import dataclass
 from random import shuffle
+from pathlib import Path
 
-from Magic.Card import Card, Bear, Forest
+from Magic.Card import Card
 
 def shuffle_library(lib: list[Card]) -> None:
     """Shuffle the library in-place."""
@@ -16,9 +16,13 @@ def draw_card(lib: list[Card]) -> Card | None:
         return None
     return lib.pop(0)
 
-def get_dummy_lib() -> list[Card]:
-    """Prepare a super basic 40 card deck with bears and forests."""
-    return (
-        [Bear for _ in range(24)] 
-        + [Forest for _ in range(16)]
-    )
+def load_from_decklist(decklist: str | Path, all_cards: dict[str, Card]) -> list[Card]:
+    """Load deck from a decklist."""
+    deck: list[Card] = []
+    with open(decklist, "r") as f:
+        for line in f.readlines():
+            content = line.split(" ")
+            amount = int(content[0])
+            card_name = content[1].strip()
+            deck.extend([all_cards[card_name] for _ in range(amount)])
+    return deck
