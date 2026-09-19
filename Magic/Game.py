@@ -19,13 +19,12 @@ class Game:
 
     def __repr__(self):
         return (
-            f"[HAND]      {["X" for _ in self.p2.hand]}\n"
-            f"[LAND]      {[c.name for c in self.p2.lands]}\n"
-            f"[CREATURES] {[c.name for c in self.p2.creatures]}\n"
-            f"[CREATURES] {[c.name for c in self.p1.creatures]}\n"
-            f"[LAND]      {[c.name for c in self.p1.lands]}\n"
-            f"[HAND]      {[c.name for c in self.p1.hand]}\n"
-            f"[MANA] {self.active_player.floating_mana}\n"
+            f"[OPP LAND]      {[c.name for c in self.reactiva_player.lands]}\n"
+            f"[OPP CREATURES] {[c.name for c in self.reactiva_player.creatures]}\n"
+            f"[OWN CREATURES] {[c.name for c in self.active_player.creatures]}\n"
+            f"[OWN LAND]      {[c.name for c in self.active_player.lands]}\n"
+            f"[OWN HAND]      {[c.name for c in self.active_player.hand]}\n"
+            f"[OWN MANA] {self.active_player.floating_mana}\n"
         )
 
     def prepare(self) -> None:
@@ -47,6 +46,11 @@ class Game:
         self.main_phase()
         self.combat_phase()
         self.main_phase()
+
+    def clear_player_mana(self) -> None:
+        """Clear all players floating mana."""
+        self.p1.clear_floating_mana()
+        self.p2.clear_floating_mana()
     
     def beginning_phase(self) -> None:
         """Play the whole beginning phase of this turn."""
@@ -78,6 +82,7 @@ class Game:
         untap_step()
         upkeep_step()
         draw_step()
+        self.clear_player_mana()
     
     def main_phase(self) -> None:
         """Play a whole main phase. There are two per turn, most of the time."""
@@ -124,6 +129,7 @@ class Game:
                 ability.activity(source, self.active_player)
 
             # end of "replace this code with the stack" block
+        self.clear_player_mana()
 
     def combat_phase(self) -> None:
         """Play a whole combat phase."""
@@ -196,7 +202,40 @@ class Game:
         attacker = declare_blockers(attacker)
         damage_step(attacker)
         end_of_combat()
+        self.clear_player_mana()
 
+    def end_phase(self) -> None:
+        """Play a whole end phase."""
+
+        def beginning_of_end_phase() -> None:
+            """Play the beggning of the end phase."""
+            print("[BEGINNING OF END PHASE]")
+            self.step = "BeginnningOfEndPhase"
+            # ToDo: triggered abilities
+            pass
+
+        def end_phase() -> None:
+            """Play the end phase of this turn."""
+            print("[END STEP]")
+            self.step = "EndStep"
+            # ToDo: priority
+            pass
+
+        def cleanup_step() -> None:
+            """Play the cleanup step of this turn.
+            - remove damage counter from creatures.
+            """
+            print("[CLEANUP STEP]")
+            self.step = "CleanupStep"
+            for p in [self.p1, self.p2]:
+                for creature in p.creatures:
+                    creature.damage_counter = 0
+                p.clear_floating_mana()
+
+        beginning_of_end_phase()
+        end_phase()
+        cleanup_step()
+        self.clear_player_mana()
 
     def state_based_actions(self) -> None:
         """Perform state based actions on this game. Only player life and creature dmg for now."""

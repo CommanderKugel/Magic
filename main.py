@@ -12,4 +12,12 @@ p2 = Player(20, load_from_decklist(list_path, ALL_CARDS))
 
 game = Game(p1, p2)
 game.prepare()
-game.play_turn()
+bear = ALL_CARDS["Balduvian_Bears"]
+game.p1.creatures.append(bear)
+game.p2.creatures.append(bear)
+
+try:
+    while True:
+        game.play_turn()
+except:
+    print("game ended.")
