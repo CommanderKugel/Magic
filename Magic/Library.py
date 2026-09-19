@@ -1,5 +1,6 @@
 from random import shuffle
 from pathlib import Path
+from copy import deepcopy
 
 from Magic.Card import Card
 
@@ -24,5 +25,5 @@ def load_from_decklist(decklist: str | Path, all_cards: dict[str, Card]) -> list
             content = line.split(" ")
             amount = int(content[0])
             card_name = content[1].strip()
-            deck.extend([all_cards[card_name] for _ in range(amount)])
+            deck.extend([deepcopy(all_cards[card_name]) for _ in range(amount)])
     return deck

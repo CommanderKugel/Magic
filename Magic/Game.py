@@ -25,6 +25,7 @@ class Game:
             f"[CREATURES] {[c.name for c in self.p1.creatures]}\n"
             f"[LAND]      {[c.name for c in self.p1.lands]}\n"
             f"[HAND]      {[c.name for c in self.p1.hand]}\n"
+            f"[MANA] {self.active_player.floating_mana}\n"
         )
 
     def prepare(self) -> None:
@@ -100,13 +101,14 @@ class Game:
             if action == "Play":
                 if self.hit_landdrop:
                     print("Already hit your landdrop this turn, illegal action.")
-                    continue                    
-                self.active_player.play_land_from_hand(action)
+                    continue
+                print("Playing Land:", source.name)
+                self.active_player.play_land_from_hand(source)
                 self.hit_landdrop = True
                 
             elif action == "Cast":
-                print("Attempting to cast spell:", Creature(action).name)
-                self.active_player.play_creature_from_hand(action)
+                print("Attempting to cast spell:", source.name)
+                self.active_player.play_creature_from_hand(source)
 
             elif action == "Ability":
                 print("Activating ability:", Card(source).name)

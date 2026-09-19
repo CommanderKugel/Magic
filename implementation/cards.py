@@ -9,6 +9,7 @@ ALL_CARDS = {
         mana_color="Green",
         tapped=False,
         image="Forest.png",
+        activated_ability=TapForGreen,
     ),
 
     "Balduvian_Bears": Creature(

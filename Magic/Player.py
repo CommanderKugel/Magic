@@ -69,6 +69,9 @@ class Player:
 
         def is_valid_action(i: str, max_idx: int) -> bool:
             """Verify the input string maps to a valid action"""
+            if i.strip() == "":
+                print("Empty string is not an integer, idiot.")
+                return False
             # not a number
             for c in i:
                 if c not in "0123456789":
@@ -85,16 +88,16 @@ class Player:
         actions = (
             [
                 (
-                    "Play" if isinstance(c, Land) else "Cast",
-                    c
+                    "Play" if isinstance(card, Land) else "Cast",
+                    card
                 ) 
-                for c in self.hand
-                if not isinstance(c, Land) or not hit_landdrop
+                for card in self.hand
+                if not isinstance(card, Land) or not hit_landdrop
             ] + [
                 ("Ability", x)
                 for x in self.lands + self.creatures + self.hand
                 if x.activated_ability is not None
-                and x.activated_ability.can_activate(x)
+                and x.activated_ability.can_activate(x, self)
             ] + [
                 PASS
             ]
@@ -102,7 +105,7 @@ class Player:
 
         # human chooses from actions
         for i, (act, card) in enumerate(actions):
-            print(f"{i}: {act}; {card}")
+            print(f"{i}: {act}; {card.name if card else ""}")
         i = input("\nChoose an action by index: ")
 
         # action legality
