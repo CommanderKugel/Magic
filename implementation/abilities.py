@@ -1,5 +1,5 @@
 from Magic.Ability import Ability
-from Magic.Card import Card, Land
+from Magic.Card import Card
 from Magic.Player import Player
 
 
@@ -7,7 +7,7 @@ def not_tapped_and_on_field(source: Card, owner: Player) -> bool:
     """Check if the card is untapped and on the field."""
     return (
         not source.tapped
-        and any(c is source for c in owner.creatures + owner.lands)
+        and source in owner.creatures + owner.lands
     )
 
 def tap_card(source: Card, owner: Player) -> None:

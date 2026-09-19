@@ -1,3 +1,4 @@
+from uuid import uuid1
 from random import shuffle
 from pathlib import Path
 from copy import deepcopy
@@ -25,5 +26,10 @@ def load_from_decklist(decklist: str | Path, all_cards: dict[str, Card]) -> list
             content = line.split(" ")
             amount = int(content[0])
             card_name = content[1].strip()
-            deck.extend([deepcopy(all_cards[card_name]) for _ in range(amount)])
+            deck.extend([
+                deepcopy(all_cards[card_name]) 
+                for _ in range(amount)
+            ])
+    for card in deck:
+        card.id = uuid1()
     return deck

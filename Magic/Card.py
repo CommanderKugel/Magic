@@ -15,6 +15,7 @@ Color = Literal[
 
 @dataclass
 class Card:
+    id: str = ""
     name: str = ""
     type: str = ""
     color: list[Color] = None
@@ -22,6 +23,9 @@ class Card:
     image: str = ""
 
     activated_ability: Ability = None
+
+    def __eq__(self, value):
+        return self.id == value.id
 
 @dataclass
 class Land(Card):
