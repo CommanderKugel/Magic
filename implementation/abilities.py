@@ -1,6 +1,6 @@
 from Magic.Ability import Ability
 from Magic.Card import Card
-from Magic.Player import Player
+from Player.Player import Player
 
 
 def not_tapped_and_on_field(source: Card, owner: Player) -> bool:

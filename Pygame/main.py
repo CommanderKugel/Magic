@@ -4,7 +4,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
-from Magic.Player import Player
+from Player.Player import Player
 from Magic.Game import Game
 from Magic.Library import get_dummy_lib
 

@@ -1,4 +1,4 @@
-from Magic.Player import Player
+from Player.Player import Player
 from Magic.Card import Card, Creature, Land
 from Magic.Library import shuffle_library
 
@@ -49,7 +49,7 @@ class Game:
         self.end_phase()
 
     def clear_player_mana(self) -> None:
-        """Clear all players floating mana."""
+        """Clear all players floating mana. Helper method."""
         self.p1.clear_floating_mana()
         self.p2.clear_floating_mana()
     
@@ -256,4 +256,3 @@ class Game:
                     print(f"[STATE BASED ACTIONS] {creature.name} dies due to damage.")
                     player.graveyard.append(creature)
                     player.creatures.remove(creature)
-
