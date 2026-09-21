@@ -88,11 +88,12 @@ class CLIPlayer(Player):
         print(f"Target: {target.name if isinstance(target, Card) else "Player"}")
         return target
 
-    def choose_action_dummy(self, sorcery_speed: bool, hit_landdrop: bool) -> tuple[Action, Card | None]:
+    def choose_action(self, sorcery_speed: bool, hit_landdrop: bool, opponent) -> tuple[Action, Card | None]:
         """Manually choose an action to make. Returns (ActionType, Card | None)"""
         actions = self.collect_actions(
             sorcery_speed=sorcery_speed,
             hit_landdrop=hit_landdrop,
+            opponent=opponent,
         )
         # auto pass in case of no legal actions
         if (
@@ -106,7 +107,6 @@ class CLIPlayer(Player):
                 for _, card in actions
             )
         ):
-            print("Auto skipping because no legal actions.")
             return actions[0]
         # human chooses from actions
         for i, (act, card) in enumerate(actions):

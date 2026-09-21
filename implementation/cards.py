@@ -1,5 +1,7 @@
-from Magic.Card import Land, Creature
-from implementation.abilities import TapForGreen
+import implementation.abilities
+
+from Magic.Card import Land, Creature, Sorcery
+
 
 ALL_CARDS = {
     "Forest": Land(
@@ -9,7 +11,7 @@ ALL_CARDS = {
         mana_color="Green",
         tapped=False,
         image="Forest.png",
-        activated_ability=TapForGreen,
+        activated_ability=implementation.abilities.TapForGreen,
     ),
 
     "Balduvian_Bears": Creature(
@@ -23,4 +25,12 @@ ALL_CARDS = {
         tapped=False,
         image="Balduvian_Bears.png",
     ),
+
+    "Horrific_Assault": Sorcery(
+        name="Horrific Assault",
+        ability=implementation.abilities.Punch,
+        color=["Green"],
+        cost={"Green": 1},
+        image="Horrific_Assault.png",
+    )
 }

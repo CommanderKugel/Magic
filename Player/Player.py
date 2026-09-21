@@ -98,7 +98,7 @@ class Player:
         """To be implemented by child class."""
         raise NotImplementedError()
 
-    def choose_action_dummy(self, sorcery_speed: bool, hit_landdrop: bool) -> tuple[Action, Card | None]:
+    def choose_action(self, sorcery_speed: bool, hit_landdrop: bool, opponent) -> tuple[Action, Card | None]:
         """To be implemented by child class."""
         raise NotImplementedError()
 
@@ -106,7 +106,7 @@ class Player:
         """To be implemented by child class."""
         raise NotImplementedError()
 
-    def collect_actions(self, sorcery_speed: bool, hit_landdrop: bool) -> list[tuple[Action, Card]]:
+    def collect_actions(self, sorcery_speed: bool, hit_landdrop: bool, opponent) -> list[tuple[Action, Card]]:
         """Generate a list of all pseudo-legal actions."""
         actions = []
         # cast spells
@@ -128,7 +128,7 @@ class Player:
             ("Ability", card)
             for card in self.lands + self.creatures + self.hand
             if card.activated_ability is not None
-            and card.activated_ability.can_activate(card, self)
+            and card.activated_ability.can_activate(card, self, opponent)
         ] 
         # passing
         actions.append(PASS)

@@ -43,11 +43,12 @@ class RandomPlayer(Player):
 
         return random.choice(targets)
 
-    def choose_action_dummy(self, sorcery_speed: bool, hit_landdrop: bool) -> tuple[Action, Card | None]:
+    def choose_action(self, sorcery_speed: bool, hit_landdrop: bool, opponent) -> tuple[Action, Card | None]:
         """Choose an action at random. Returns (ActionType, Card | None)"""
         actions = self.collect_actions(
             sorcery_speed=sorcery_speed, 
-            hit_landdrop=hit_landdrop
+            hit_landdrop=hit_landdrop,
+            opponent=opponent,
         )
         return random.choice(actions)
 

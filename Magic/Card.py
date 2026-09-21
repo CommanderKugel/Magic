@@ -49,27 +49,30 @@ class Land(Card):
 class Spell(Card):
     """Parent Class for Creature, Sorcery and Instant."""
     cost: dict[Color, int] = None
+    sorcery_speed: bool = True
 
     def __hash__(self):
         return super().__hash__(self)
 
 @dataclass
 class Creature(Spell):
+    type: CardType = "Creature"
     power: int = 0
     toughness: int = 0
     damage_counter: int = 0
     subtype: str = ""
-    type: CardType = "Creature"
 
     def __hash__(self) -> int:
         return super.__hash__(self)
 
 @dataclass
 class Sorcery(Spell):
-    ability: Ability | None = None
     type: CardType = "Sorcery"
+    targets: list[Card] | None = None
+    ability: Ability | None = None
 
 @dataclass
 class Instant(Spell):
-    ability: Ability | None = None
     type: CardType = "Instant"
+    sorcery_speed = False
+    ability: Ability | None = None
