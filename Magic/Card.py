@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from typing import Literal
+from typing import Literal, Callable
 
 from Magic.Ability import Ability
 
@@ -12,12 +12,19 @@ Color = Literal[
     "None",
 ]
 
+CardType = Literal[
+    "Basic Land",
+    "Creature",
+    "Sorcery",
+    "Instant",
+]
+
 
 @dataclass
 class Card:
+    type: CardType
     id: str = ""
     name: str = ""
-    type: str = ""
     color: list[Color] = None
     tapped: bool = False
     image: str = ""
@@ -32,6 +39,7 @@ class Card:
 
 @dataclass
 class Land(Card):
+    type: CardType = "Basic Land"
     mana_color: Color = "None"
 
     def __hash__(self) -> int:
@@ -39,8 +47,8 @@ class Land(Card):
     
 @dataclass
 class Spell(Card):
+    """Parent Class for Creature, Sorcery and Instant."""
     cost: dict[Color, int] = None
-    subtype: str = ""
 
     def __hash__(self):
         return super().__hash__(self)
@@ -50,14 +58,18 @@ class Creature(Spell):
     power: int = 0
     toughness: int = 0
     damage_counter: int = 0
+    subtype: str = ""
+    type: CardType = "Creature"
 
     def __hash__(self) -> int:
         return super.__hash__(self)
 
 @dataclass
 class Sorcery(Spell):
-    ...
+    ability: Ability | None = None
+    type: CardType = "Sorcery"
 
 @dataclass
 class Instant(Spell):
-    ...
+    ability: Ability | None = None
+    type: CardType = "Instant"
