@@ -86,21 +86,6 @@ class Player:
         """To be implemented by child class."""
         raise NotImplementedError()
 
-    
-    def play_creature_from_hand(self, creature: Card) -> None:
-        """Cast a creature from hand. Raises Value error if Card not present in hand."""
-        if self.pay_for_manacost(creature):
-            print("Successfully payed the creatures Manacost.")
-            self.hand.remove(creature)
-            self.creatures.append(creature)
-        else:
-            print("Did not succeed on paying the creatures Manacost.")
-
-    def play_land_from_hand(self, land: Land) -> None:
-        """Play a land from hand. Raises Value error if Card not present in hand."""
-        self.lands.append(land)
-        self.hand.remove(land)
-
     def target(
         self, 
         opp = None, # Player

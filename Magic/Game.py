@@ -28,6 +28,8 @@ class Game:
             f"[OWN CREATURES] {[c.name for c in self.active_player.creatures]}\n"
             f"[OWN LAND]      {[c.name for c in self.active_player.lands]}\n"
             f"[OWN HAND]      {[c.name for c in self.active_player.hand]}\n"
+            f"\n"
+            f"[STACK] {self.stack}\n"
             f"[OWN MANA] {self.active_player.floating_mana}\n"
         )
 
@@ -41,10 +43,12 @@ class Game:
     def play_turn(self) -> None:
         """Play a whole turn of the game."""
         # for active player: assume there are only 2 players for now.
-        self.turn += 1
         self.active_player = self.p1 if self.turn % 2 else self.p2
         self.reactive_player = self.p2 if self.turn % 2 else self.p1
+        self.turn += 1
         self.hit_landdrop = False
+
+        print("[PLAY TURN] active player:", self.active_player.name)
 
         self.beginning_phase()
         self.main_phase()
@@ -244,6 +248,7 @@ class Game:
         while True:
             print("[STATE]", state)
             print("Priority Player:", priority_player.name, "\n")
+            print(self)
 
             # 5. Player with Priority may choose an action
             if state == STATE_5:
@@ -258,7 +263,8 @@ class Game:
                     assert len(self.stack) == 0
                     assert card in priority_player.hand
                     print("Playing a Land:", card.name)
-                    priority_player.play_land_from_hand(card)
+                    priority_player.lands.append(card)
+                    priority_player.hand.remove(card)
                     self.hit_landdrop = True
                     # goto 5., no reaction to land drops
                     continue
@@ -279,6 +285,7 @@ class Game:
                     assert not (action == "Ability" and card.activated_ability.is_mana_ability)
                     assert not (action == "Play" and isinstance(card, Land))
 
+                    # Pay cost for Activated Abilities
                     if action == "Ability":
                         print("Checking Ability requirements:", card.name)
                         if not card.activated_ability.can_activate(card, priority_player):
@@ -286,10 +293,14 @@ class Game:
                             continue
                         card.activated_ability.pay_cost(card, priority_player)
 
-                    if action == "Cast" and not priority_player.pay_for_manacost(card):
-                        print("Paying Mana to cast Creature:", card.name)
-                        print(f"Could not pay for manacost of {card.name}.")
-                        continue
+                    # Pay cost for Casting Creatures
+                    if action == "Cast":
+                        if not priority_player.pay_for_manacost(card):
+                            print(f"Could not pay for manacost of {card.name}.")
+                            continue
+                        else:
+                            # remove card from hand - its a spell now
+                            owner.hand.remove(card)
 
                     print("Putting Action on the stack:", action, card.name)
                     stack_object = StackObject(
@@ -308,6 +319,7 @@ class Game:
                     print("Passing.")
                     pass_counter += 1
                     state = STATE_6
+                    continue
             
             # 6. Priority was passed
             if state == STATE_6:
@@ -329,6 +341,7 @@ class Game:
                 # all players passed
                 print("All Players have Passed.")
                 state = STATE_7
+                continue
             
             # 7. Resolve stack
             if state == STATE_7:
@@ -339,15 +352,16 @@ class Game:
                     print("Nothing left on the stack to resolve. Returning now.")
                     return
                 
+                # remove Card from stack
                 stack_object = self.stack.pop(-1)
                 action = stack_object.action
                 card = stack_object.source
                 owner = stack_object.owner
 
-                # resolve Casting Creatures
+                # resolve Casting Creatures -> put it on the field
                 if stack_object.action == "Cast" and isinstance(card, Creature):
                     print("Resolving casting a Creature:", card.name)
-                    stack_object.owner.play_creature_from_hand(card)
+                    stack_object.owner.creatures.append(card)
                     # ToDo: ETB
                 
                 # resolve Activated or Triggered Abilities

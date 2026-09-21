@@ -10,9 +10,6 @@ list_path = Path(__file__).resolve().parent / "resources/dummy_list.txt"
 p1 = CLIPlayer(20, load_from_decklist(list_path, ALL_CARDS))
 p2 = CLIPlayer(20, load_from_decklist(list_path, ALL_CARDS))
 
-p1.floating_mana["Green"] = 4
-p2.floating_mana["Green"] = 2
-
 p1.name = "P1"
 p2.name = "P2"
 

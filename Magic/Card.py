@@ -38,12 +38,26 @@ class Land(Card):
         return super.__hash__(self)
     
 @dataclass
-class Creature(Card):
+class Spell(Card):
     cost: dict[Color, int] = None
     subtype: str = ""
+
+    def __hash__(self):
+        return super().__hash__(self)
+
+@dataclass
+class Creature(Spell):
     power: int = 0
     toughness: int = 0
     damage_counter: int = 0
 
     def __hash__(self) -> int:
         return super.__hash__(self)
+
+@dataclass
+class Sorcery(Spell):
+    ...
+
+@dataclass
+class Instant(Spell):
+    ...
