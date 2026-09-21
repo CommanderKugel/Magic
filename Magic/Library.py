@@ -31,5 +31,5 @@ def load_from_decklist(decklist: str | Path, all_cards: dict[str, Card]) -> list
                 for _ in range(amount)
             ])
     for card in deck:
-        card.id = uuid1()
+        card.id = str(uuid1())
     return deck

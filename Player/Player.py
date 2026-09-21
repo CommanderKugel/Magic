@@ -1,4 +1,5 @@
 import random
+import uuid
 from typing import Literal, Any
 
 from Magic.Card import Card, Land, Creature, Color
@@ -34,6 +35,8 @@ def _is_valid_action(i: str, max_idx: int) -> bool:
 
 class Player:
     def __init__(self, starting_life: int,  library: list[Card]):
+        self.name: str
+
         self.life = starting_life
         self.library: list[Card] = library
         self.graveyard: list[Card] = []
@@ -93,7 +96,7 @@ class Player:
         else:
             print("Did not succeed on paying the creatures Manacost.")
 
-    def play_land_from_hand(self, land: Card) -> None:
+    def play_land_from_hand(self, land: Land) -> None:
         """Play a land from hand. Raises Value error if Card not present in hand."""
         self.lands.append(land)
         self.hand.remove(land)
@@ -110,7 +113,7 @@ class Player:
         """To be implemented by child class."""
         raise NotImplementedError()
 
-    def choose_action_dummy(self, hit_landdrop: bool) -> tuple[Action, Card | None]:
+    def choose_action_dummy(self, sorcery_speed: bool, hit_landdrop: bool) -> tuple[Action, Card | None]:
         """To be implemented by child class."""
         raise NotImplementedError()
 
@@ -119,7 +122,7 @@ class Player:
         raise NotImplementedError()
 
     def collect_actions(self, sorcery_speed: bool, hit_landdrop: bool) -> list[tuple[Action, Card]]:
-        """Generate a list of all legal actions."""
+        """Generate a list of all pseudo-legal actions."""
         actions = []
         # cast spells
         if sorcery_speed:
