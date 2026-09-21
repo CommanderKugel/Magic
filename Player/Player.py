@@ -2,7 +2,7 @@ import random
 import uuid
 from typing import Literal, Any
 
-from Magic.Card import Card, Land, Creature, Color
+from Magic.Card import Card, Spell, Land, Creature, Color
 from Magic.Library import draw_card
 
 Action = Literal[
@@ -114,7 +114,11 @@ class Player:
             actions += [
                 ("Cast", card)
                 for card in self.hand
-                if not isinstance(card, Land)
+                if isinstance(card, Spell)
+                and (
+                    sorcery_speed 
+                    or not card.sorcery_speed
+                )
             ]
         # play lands
         if sorcery_speed and not hit_landdrop:

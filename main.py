@@ -28,4 +28,3 @@ game.p1.hand.append(deepcopy(ALL_CARDS["Forest"]))
 game.p2.hand.append(deepcopy(ALL_CARDS["Forest"]))
 
 game.play_turn()
-
