@@ -31,7 +31,7 @@ def draw_card(lib: list[Card]) -> Card | None:
         return None
     return lib.pop(0)
 
-def load_from_decklist(decklist: str | Path, all_cards: dict[str, Card]) -> list[Card]:
+def load_from_decklist(decklist: str | Path, get_card: Callable) -> list[Card]:
     """Load deck from a decklist."""
     deck: list[Card] = []
     with open(decklist, "r") as f:
@@ -40,7 +40,7 @@ def load_from_decklist(decklist: str | Path, all_cards: dict[str, Card]) -> list
             amount = int(content[0])
             card_name = content[1].strip()
             deck.extend([
-                deepcopy(all_cards[card_name]) 
+                get_card(card_name) 
                 for _ in range(amount)
             ])
     for card in deck:

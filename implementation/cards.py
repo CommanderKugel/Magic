@@ -25,6 +25,16 @@ _ALL_CARDS = {
         activated_ability=implementation.abilities.TapForGreen,
     ),
 
+    "Mountain": Land(
+        name="Mountain", 
+        color=["None"], 
+        type="Basic Land", 
+        mana_color="Red",
+        tapped=False,
+        image="Mountain.png",
+        activated_ability=implementation.abilities.TapForRed,
+    ),
+
     "Balduvian_Bears": Creature(
         name="Balduvian_Bears",
         type="Creature",
@@ -43,5 +53,13 @@ _ALL_CARDS = {
         color=["Green"],
         cost={"Green": 1},
         image="Horrific_Assault.png",
+    ),
+
+    "Lightning_Bolt": Instant(
+        name="Lightbing Bolt",
+        ability=implementation.abilities.Bolt,
+        color=["Red"],
+        cost={"Red": 1},
+        image="Lightning_Bolt.png",
     )
 }

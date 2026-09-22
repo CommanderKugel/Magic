@@ -19,11 +19,27 @@ def fight_has_targets(source: Card, owner: Player, opponent: Player) -> bool:
         and len(opponent.creatures) > 0
     )
 
+def always_castable(source: Card, owner: Player, opponent: Player) -> bool:
+    """Check nothing. Return True."""
+    return True
+
 # PAY COST
 
 def tap_card(source: Card, owner: Player, opponent: Player) -> None:
     """Tap the source."""
     source.tapped = True
+
+def single_target_creature_or_player(source: Card, owner: Player, opponent: Player) -> None:
+    """Choose any target that has life."""
+    assert isinstance(source, Instant | Sorcery)
+    target = owner.target(
+        opp=opponent,
+        own_player=True,
+        own_creatures=True,
+        opp_player=True,
+        opp_creatures=True,    
+    )
+    source.targets = [target]
 
 def collect_fight_targets(source: Instant | Sorcery, owner: Player, opponent: Player) -> None:
     """Choose two creatures for fight effect."""
@@ -34,6 +50,15 @@ def collect_fight_targets(source: Instant | Sorcery, owner: Player, opponent: Pl
 
 # EFFECT
 
+def add_g_mana(source: Card, owner: Player, opponent: Player) -> None:
+    """Add one Green Mana to the owners Manapool."""
+    owner.floating_mana["Green"] += 1
+
+def add_r_mana(source: Card, owner: Player, opponent: Player) -> None:
+    """Add one Green Mana to the owners Manapool."""
+    owner.floating_mana["Red"] += 1
+    owner.floating_mana["Green"] += 2
+
 def punch(source: Instant | Sorcery, owner: Player, opponent: Player) -> None:
     """Puncher deals dmg equal to its power to Bag."""
     assert isinstance(source, (Instant, Sorcery))
@@ -43,10 +68,16 @@ def punch(source: Instant | Sorcery, owner: Player, opponent: Player) -> None:
     if puncher in owner.creatures and bag in opponent.creatures:
         bag.damage_counter += puncher.power
 
-def add_g_mana(source: Card, owner: Player, opponent: Player) -> None:
-    """Add one Green Mana to the owners Manapool."""
-    owner.floating_mana["Green"] += 1
-
+def bolt(source: Card, owner: Player, opponent: Player) -> None:
+    """Deal 3 damage to the sources target."""
+    assert isinstance(source, (Instant, Sorcery))
+    assert len(source.targets) == 1
+    target = source.targets[0]
+    assert isinstance(target, (Player, Creature))
+    if isinstance(target, Player):
+        target.life -= 3
+    if isinstance(target, Creature):
+        target.damage_counter += 3
 
 TapForGreen = Ability(
     is_mana_ability=True,
@@ -55,9 +86,23 @@ TapForGreen = Ability(
     activity=add_g_mana,
 )
 
+TapForRed = Ability(
+    is_mana_ability=True,
+    can_activate=not_tapped_and_on_field,
+    pay_cost=tap_card,
+    activity=add_r_mana,
+)
+
 Punch = Ability(
     is_mana_ability=False,
     can_activate=fight_has_targets,
     pay_cost=collect_fight_targets,
     activity=punch,
+)
+
+Bolt = Ability(
+    is_mana_ability=False,
+    can_activate=always_castable,
+    pay_cost=single_target_creature_or_player,
+    activity=bolt,
 )
