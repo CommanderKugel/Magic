@@ -55,8 +55,7 @@ class Player:
         for _ in range(n):
             c = draw_card(self.library)
             if c is None:
-                print("LOL decked out!")
-                return
+                raise Exception(f"{self.name} decked out!")
             self.hand.append(c)
 
     def discard(self, card: Card | None) -> None:
@@ -66,7 +65,6 @@ class Player:
         self.graveyard.append(card)
         self.hand.remove(card)
         
-    
     def clear_floating_mana(self) -> None:
         """Sets all floating mana to zero."""
         self.floating_mana = {
@@ -103,7 +101,7 @@ class Player:
         raise NotImplementedError()
 
     def collect_actions(self, sorcery_speed: bool, hit_landdrop: bool, opponent) -> list[tuple[Action, Card]]:
-        """Generate a list of all pseudo-legal actions."""
+        """Generate a list of all legal non-mana-ability actions."""
         actions = []
         # cast spells
         actions.extend([
@@ -124,9 +122,21 @@ class Player:
             ("Ability", card)
             for card in self.lands + self.creatures + self.hand
             if card.activated_ability is not None
+            and not card.activated_ability.is_mana_ability
             and card.activated_ability.can_activate(card, self, opponent)
         ] 
         # passing
         actions.append(PASS)
+        return actions
+
+    def collect_mana_abilities(self) -> list[tuple[Action, Card, Color]]:
+        """Generate a list of all mana-ability actions."""
+        actions = [
+            ("Ability", card, card.activated_ability)
+            for card in self.lands + self.creatures + self.hand
+            if card.activated_ability is not None
+            and card.activated_ability.is_mana_ability
+            and card.activated_ability.can_activate(card, self, None)
+        ]
         return actions
     

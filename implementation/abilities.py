@@ -52,12 +52,13 @@ def collect_fight_targets(source: Instant | Sorcery, owner: Player, opponent: Pl
 
 def add_g_mana(source: Card, owner: Player, opponent: Player) -> None:
     """Add one Green Mana to the owners Manapool."""
+    print(f"[MANA] tapping {source.name} for G")
     owner.floating_mana["Green"] += 1
 
 def add_r_mana(source: Card, owner: Player, opponent: Player) -> None:
     """Add one Green Mana to the owners Manapool."""
+    print(f"[MANA] tapping {source.name} for R.")
     owner.floating_mana["Red"] += 1
-    owner.floating_mana["Green"] += 2
 
 def punch(source: Instant | Sorcery, owner: Player, opponent: Player) -> None:
     """Puncher deals dmg equal to its power to Bag."""
@@ -81,6 +82,7 @@ def bolt(source: Card, owner: Player, opponent: Player) -> None:
 
 TapForGreen = Ability(
     is_mana_ability=True,
+    mana_color="Green",
     can_activate=not_tapped_and_on_field,
     pay_cost=tap_card,
     activity=add_g_mana,
@@ -88,6 +90,7 @@ TapForGreen = Ability(
 
 TapForRed = Ability(
     is_mana_ability=True,
+    mana_color="Red",
     can_activate=not_tapped_and_on_field,
     pay_cost=tap_card,
     activity=add_r_mana,

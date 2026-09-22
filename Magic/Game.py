@@ -1,6 +1,7 @@
 from Player.Player import Player
 from Magic.Card import Card, Creature, Land, Sorcery, Instant
 from Magic.Stack import StackObject
+from Magic.Library import shuffle_library
 
 
 class Game:
@@ -30,7 +31,14 @@ class Game:
             f"[OWN MANA] {self.active_player.floating_mana}\n"
         )
 
+    def prepare_game(self) -> None:
+        """Shuffle the library, then draw 7 cards."""
+        for player in [self.p1, self.p2]:
+            shuffle_library(player.library)
+            player.draw(7)
+
     def prepare_turn(self) -> None:
+        """Reset some values in preparation of the game."""
         # for active player: assume there are only 2 players for now.
         self.turn += 1
         self.active_player = self.p1 if self.turn % 2 else self.p2
@@ -297,7 +305,7 @@ class Game:
                     if action == "Cast":
 
                         # Pay Manacost
-                        if not priority_player.pay_for_manacost(card):
+                        if not priority_player.pay_for_manacost(card, non_priority_player):
                             print(f"[OOPS] {priority_player.name} messed up Mana cost of {card.name}")
                             continue
 
@@ -357,7 +365,6 @@ class Game:
 
                 # End prioroty juggling if stack is empty.
                 if len(self.stack) == 0:
-                    print("[DONE] stack is empty, no more priority.")
                     return
                 
                 # remove Card from stack
