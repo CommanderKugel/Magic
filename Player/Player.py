@@ -76,9 +76,69 @@ class Player:
             "None": 0,
         }
 
-    def pay_for_manacost(self, card: Creature) -> bool:
-        """To be implemented by child class."""
-        raise NotImplementedError()
+    def pay_for_manacost(self, card: Creature, opponent) -> bool:
+        """
+        Tries to pay for manacost. 
+        Returns True if cost was payed, False if not.
+        Mana can be lost if the payment was messed up.
+        Randomly activates mana abilities to pay, if not enough floating mana is available.
+        Only supports moncolored spells for now.
+        """
+        assert (
+            len(card.cost) == 1
+            or len(card.cost) == 2 and "None" in card.cost.keys()
+        )
+        color = list(card.cost.keys())[0]
+        assert color != "None"
+
+        # 1. determine mana cost
+        colored_cost = card.cost.get(color, 0)
+        generic_cost = card.cost.get("None", 0)
+
+        # 2. determine available mana
+        mana_abilities: list[Ability, Card, Color] = self.collect_mana_abilities()
+        colored_available = self.floating_mana.get(color, 0) + sum(
+            1 
+            for _, card, _ 
+            in mana_abilities if card.activated_ability.mana_color == color
+        )
+        generic_available = sum(self.floating_mana.values()) + len(mana_abilities) - colored_cost
+
+        # 3. return False if not enough mana is available
+        if colored_cost > colored_available or generic_cost > generic_available:
+            return False
+
+        # 4. pay using floating mana
+        used = min(self.floating_mana[color], colored_cost)
+        self.floating_mana[color] -= used
+        colored_cost -= used
+
+        used = min(self.floating_mana["None"], generic_cost)
+        self.floating_mana["None"] -= used
+        generic_cost -= used
+
+        # 5. pay using mana abilities
+        random.shuffle(mana_abilities)
+        for _, card, _ in mana_abilities:
+            if colored_cost == 0 and generic_cost == 0:
+                return True
+
+            color_needed = card.activated_ability.mana_color == color and colored_cost > 0
+            generic_needed = generic_cost > 0
+
+            # only activate abilities that are useful to us
+            if color_needed or generic_needed:
+                card.activated_ability.pay_cost(card, self, opponent)
+                card.activated_ability.activity(card, self, opponent)
+
+                if color_needed:
+                    self.floating_mana[color] -= 1
+                    colored_cost -= 1
+                elif generic_needed:
+                    self.floating_mana[color] -= 1
+                    generic_cost -= 1
+        
+        return generic_cost == 0 and colored_cost == 0
 
     def target(
         self, 

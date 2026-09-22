@@ -107,7 +107,6 @@ class CLIPlayer(Player):
             )
             for action, card in actions
         ):
-            print("auto-passing for CLIPlayer.")
             return PASS
         # human chooses from actions
         print("\n" + str(self.floating_mana))
