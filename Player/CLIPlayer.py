@@ -1,7 +1,7 @@
 import random
 from typing import Any
 
-from Magic.Card import Card, Creature, Land
+from Magic.Card import Card, Land, Spell, Creature, Instant
 from Player.Player import (
     Player,
     _is_valid_action,
@@ -72,7 +72,7 @@ class CLIPlayer(Player):
             for card in self.hand:
                 targets.append(("OwnHand", card))
         if opp_player:
-            targets.append(opp)
+            targets.append(("OppPlayer", opp))
         if opp_creatures:
             for creature in opp.creatures:
                 targets.append(("OppCreature", creature))
@@ -96,19 +96,21 @@ class CLIPlayer(Player):
             opponent=opponent,
         )
         # auto pass in case of no legal actions
-        if (
-            len(actions) == 1 
-            or all(
-                card is None
-                or (
-                    card.activated_ability is not None
-                    and card.activated_ability.is_mana_ability
+        if not any(
+            (
+                action != "Pass"
+                and (
+                    action != "Ability" 
+                    or not card.activated_ability.is_mana_ability
                 )
-                for _, card in actions
+                
             )
+            for action, card in actions
         ):
-            return actions[0]
+            print("auto-passing for CLIPlayer.")
+            return PASS
         # human chooses from actions
+        print("\n" + str(self.floating_mana))
         for i, (act, card) in enumerate(actions):
             print(f"{i}: {act}; {card.name if card else ""}")
         i = input("\nChoose an action by index: ")

@@ -110,16 +110,12 @@ class Player:
         """Generate a list of all pseudo-legal actions."""
         actions = []
         # cast spells
-        if sorcery_speed:
-            actions += [
-                ("Cast", card)
-                for card in self.hand
-                if isinstance(card, Spell)
-                and (
-                    sorcery_speed 
-                    or not card.sorcery_speed
-                )
-            ]
+        actions.extend([
+            ("Cast", card)
+            for card in self.hand
+            if isinstance(card, Spell) 
+            and (sorcery_speed or not card.sorcery_speed)
+        ])
         # play lands
         if sorcery_speed and not hit_landdrop:
             actions += [
