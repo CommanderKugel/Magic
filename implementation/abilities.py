@@ -73,8 +73,8 @@ def bolt(source: Card, owner: Player, opponent: Player) -> None:
     """Deal 3 damage to the sources target."""
     assert isinstance(source, (Instant, Sorcery))
     assert len(source.targets) == 1
-    target = source.targets[0]
-    assert isinstance(target, (Player, Creature))
+    _, target = source.targets[0]
+    assert isinstance(target, (Player, Creature)), target
     if isinstance(target, Player):
         target.life -= 3
     if isinstance(target, Creature):

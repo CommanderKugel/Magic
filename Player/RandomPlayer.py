@@ -30,7 +30,7 @@ class RandomPlayer(Player):
             for card in self.hand:
                 targets.append(("OwnHand", card))
         if opp_player:
-            targets.append(opp)
+            targets.append(("OppPlayer", opp))
         if opp_creatures:
             for creature in opp.creatures:
                 targets.append(("OppCreature", creature))
