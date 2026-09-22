@@ -2,19 +2,13 @@ import random
 from typing import Any
 
 from Magic.Card import Card, Creature, Land
-from Player.Player import (
-    Player,
-    Action,
-)
+from Magic.Ability import Ability
+from Player.Player import Player, Action, Color
 
 
 class RandomPlayer(Player):
-    def __init__(self, starting_life, library):
-        super().__init__(starting_life, library)
-
-    def pay_for_manacost(self, card):
-        """Pays for mana. Spent colored mana at random to pay for colorless."""
-        raise NotImplementedError()
+    def __init__(self, name, starting_life, library):
+        super().__init__(name, starting_life, library)
 
     def target(
         self, 

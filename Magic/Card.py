@@ -2,22 +2,7 @@ from dataclasses import dataclass
 from typing import Literal, Callable
 
 from Magic.Ability import Ability
-
-Color = Literal[
-    "White",
-    "Blue",
-    "Black",
-    "Red",
-    "Green",
-    "None",
-]
-
-CardType = Literal[
-    "Basic Land",
-    "Creature",
-    "Sorcery",
-    "Instant",
-]
+from Magic.Literals import CardType, Color
 
 
 @dataclass

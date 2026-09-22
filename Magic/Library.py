@@ -1,7 +1,6 @@
 from uuid import uuid1
 from random import shuffle
 from pathlib import Path
-from copy import deepcopy
 from typing import Callable
 
 from Magic.Card import Card

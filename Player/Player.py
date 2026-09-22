@@ -4,13 +4,9 @@ from typing import Literal, Any
 
 from Magic.Card import Card, Spell, Land, Creature, Color
 from Magic.Library import draw_card
+from Magic.Literals import Action
+from Magic.Ability import Ability
 
-Action = Literal[
-    "Pass",
-    "Play",
-    "Cast",
-    "Ability",
-]
 
 PASS: tuple[Action, None] = ("Pass", None)
 
