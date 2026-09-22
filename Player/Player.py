@@ -34,8 +34,8 @@ def _is_valid_action(i: str, max_idx: int) -> bool:
 
 
 class Player:
-    def __init__(self, starting_life: int,  library: list[Card]):
-        self.name: str
+    def __init__(self, name: str, starting_life: int,  library: list[Card]):
+        self.name: str = name
 
         self.life = starting_life
         self.library: list[Card] = library

@@ -11,8 +11,8 @@ from Player.Player import (
 
 
 class CLIPlayer(Player):
-    def __init__(self, starting_life, library):
-        super().__init__(starting_life, library)
+    def __init__(self, name, starting_life, library):
+        super().__init__(name, starting_life, library)
 
     def pay_for_manacost(self, card: Creature) -> bool:
         """Return True if the cost was payed successfully. False if not."""
