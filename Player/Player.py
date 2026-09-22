@@ -55,7 +55,7 @@ class Player:
         for _ in range(n):
             c = draw_card(self.library)
             if c is None:
-                raise Exception(f"{self.name} decked out!")
+                raise Exception(f"not {self.name}")
             self.hand.append(c)
 
     def discard(self, card: Card | None) -> None:

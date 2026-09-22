@@ -3,37 +3,36 @@ from copy import deepcopy
 
 from Magic.Game import Game
 from Player.CLIPlayer import CLIPlayer
+from Player.RandomPlayer import RandomPlayer
 from Magic.Library import load_from_decklist, shuffle, seed_players_cards
 from implementation.cards import get_card
 
-list_path = Path(__file__).resolve().parent / "resources/dummy_list.txt"
+bear_list_path = Path(__file__).resolve().parent / "resources/bear_list.txt"
+bolt_list_path = Path(__file__).resolve().parent / "resources/bolt_list.txt"
 
-p1 = CLIPlayer(20, load_from_decklist(list_path, get_card))
-p2 = CLIPlayer(20, load_from_decklist(list_path, get_card))
+def run():
+    p1 = RandomPlayer("P1", 20, load_from_decklist(bear_list_path, get_card))
+    p2 = RandomPlayer("P2", 20, load_from_decklist(bear_list_path, get_card))
+    game = Game(p1, p2)
 
-p1.name = "P1"
-p2.name = "P2"
+    game.prepare_game()
 
-game = Game(p1, p2)
-shuffle(game.p1.library)
-shuffle(game.p2.library)
+    print("=" * 20, "PLAY NEW GAME", "=" * 20)
+    try:
+        import time
+        start_time = time.time_ns()
+        while True:
+            game.play_turn()
+    except Exception as e:
+        end_time = time.time_ns()
+        winner = e.args[0]
+        print("[ERROR]", e)
+    return winner, end_time - start_time
 
-game.p1.creatures = [get_card("Balduvian_Bears")]
-game.p2.creatures = [get_card("Balduvian_Bears")]
-
-game.p1.hand = [
-    get_card("Lightning_Bolt"),
-    get_card("Balduvian_Bears"),
-    get_card("Mountain"),
-    get_card("Forest"),
-    get_card("Forest"),
+results = [
+    run()
+    for _ in range(10)
 ]
 
-seed_players_cards(p1)
-seed_players_cards(p2)
-
-game.p1.floating_mana["Green"] = 2
-game.p1.floating_mana["Red"] = 1
-
-game.prepare_turn()
-game.main_phase()
+for winner, time in results:
+    print(f"winner: {winner}, time: {time}")

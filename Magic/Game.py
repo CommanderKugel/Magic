@@ -224,15 +224,20 @@ class Game:
 
     def state_based_actions(self) -> None:
         """Perform state based actions on this game. Only player life and creature dmg for now."""
+        loosers = []
         for player in [self.p1, self.p2]:
             if player.life <= 0:
-                print(f"Player {player} lost the game!")
-                raise
+                loosers.append(player)
             for creature in player.creatures:
                 if creature.damage_counter >= creature.toughness:
                     print(f"[STATE BASED ACTIONS] {creature.name} dies due to damage.")
                     player.graveyard.append(creature)
                     player.creatures.remove(creature)
+        if len(loosers) == 1:
+            winner = self.p1 if self.p1 not in loosers else self.p2
+            raise Exception(winner.name)
+        if len(loosers) == 2:
+            raise Exception("Draw")
 
     def priority(self, sorcery_speed: bool = False) -> None:
         """Handle passing of the priority between players using a state-machine."""
