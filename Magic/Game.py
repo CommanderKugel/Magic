@@ -30,14 +30,17 @@ class Game:
             f"[OWN MANA] {self.active_player.floating_mana}\n"
         )
 
-    def play_turn(self) -> None:
-        """Play a whole turn of the game."""
+    def prepare_turn(self) -> None:
         # for active player: assume there are only 2 players for now.
         self.turn += 1
         self.active_player = self.p1 if self.turn % 2 else self.p2
         self.reactive_player = self.p2 if self.turn % 2 else self.p1
         self.hit_landdrop = False
 
+    def play_turn(self) -> None:
+        """Play a whole turn of the game."""
+        
+        self.prepare_turn()
         print("[PLAY TURN] active player:", self.active_player.name)
 
         self.beginning_phase()

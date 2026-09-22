@@ -1,9 +1,20 @@
+import copy
+import uuid
 import implementation.abilities
 
-from Magic.Card import Land, Creature, Sorcery
+from Magic.Card import Card, Land, Creature, Sorcery, Instant
 
 
-ALL_CARDS = {
+def get_card(name: str) -> Card:
+    """Fetch copy of a card by name."""
+    card = _ALL_CARDS.get(name, None)
+    if card is None:
+        raise ValueError(f"Card name '{name}' does not exist.")
+    card = copy.deepcopy(card)
+    card.id = str(uuid.uuid1())
+    return card
+
+_ALL_CARDS = {
     "Forest": Land(
         name="Forest", 
         color=["None"], 

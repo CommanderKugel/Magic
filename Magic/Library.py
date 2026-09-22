@@ -2,12 +2,25 @@ from uuid import uuid1
 from random import shuffle
 from pathlib import Path
 from copy import deepcopy
+from typing import Callable
 
 from Magic.Card import Card
 
 def shuffle_library(lib: list[Card]) -> None:
     """Shuffle the library in-place."""
     shuffle(lib)
+
+def seed_list(l: list[Card]) -> None:
+    """Give list of cards IDs."""
+    for card in l:
+        card.id = str(uuid1())
+
+def seed_players_cards(p) -> None:
+    """Give all cards a player controls IDs. p is an instance of Player."""
+    for l in [
+        p.hand, p.lands, p.creatures, p.library, p.graveyard
+    ]:
+        seed_list(l)
 
 def draw_card(lib: list[Card]) -> Card | None:
     """Removes Top Card from library (in-place) and returns it.
