@@ -66,7 +66,7 @@ class Player:
         self.hand.remove(card)
         
     def clear_floating_mana(self) -> None:
-        """Sets all floating mana to zero."""
+        """Set all floating mana to zero."""
         self.floating_mana = {
             "White": 0,
             "Blue": 0,
@@ -157,6 +157,10 @@ class Player:
         raise NotImplementedError()
 
     def binary_choice(self, question: str) -> bool:
+        """To be implemented by child class."""
+        raise NotImplementedError()
+
+    def distribute_damage_to_blocker(self, attacker: Creature, blocker: list[Creature]) -> dict[Card, int]:
         """To be implemented by child class."""
         raise NotImplementedError()
 

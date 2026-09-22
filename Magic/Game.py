@@ -161,7 +161,10 @@ class Game:
                     attacker.damage_counter += block.power
                     print(f"[DAMAGE] {block.name} received {attacker.power} dmg and {attacker.name} received {block.power} dmg.")
                 elif len(blocker) > 1:
-                    raise NotImplementedError()
+                    damage_dist = self.active_player.distribute_damage_to_blocker(attacker, blocker)
+                    assert sum(damage_dist.values()) <= attacker.power
+                    for block in blocker:
+                        block.damage_counter += damage_dist.get(block, 0)
 
             # actually kill creatures and players
             self.state_based_actions()
