@@ -90,13 +90,13 @@ class CLIPlayer(Player):
 
     def distribute_damage_to_blocker(self, attacker, blocker) -> dict[Creature, int]:
         """Distribute the damage across the blockers. Random Player logic for now."""
-        remaining_power = attacker.power
+        remaining_power = attacker.get_power()
         random.shuffle(block)
         result = {}
         for block in blocker:
-            if block.toughness <= remaining_power:
-                result[block] = block.toughness
-                remaining_power -= block.toughness
+            if block.get_toughness() <= remaining_power:
+                result[block] = block.get_toughness()
+                remaining_power -= block.get_toughness()
             else:
                 result[block] = 0
         return result

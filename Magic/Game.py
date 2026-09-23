@@ -151,18 +151,18 @@ class Game:
             for attacker, blocker in attacker_.items():
                 # no blocker: deal damage to opponent
                 if len(blocker) == 0:
-                    self.reactive_player.life -= attacker.power
-                    print(f"[DAMAGE] {self.reactive_player.name} receivec {attacker.power} dmg.")
+                    self.reactive_player.life -= attacker.get_power()
+                    print(f"[DAMAGE] {self.reactive_player.name} receivec {attacker.get_power()} dmg.")
                 # only one blocker
                 # equal trade of damage.
                 elif len(blocker) == 1:
                     block = blocker[0]
-                    block.damage_counter += attacker.power
-                    attacker.damage_counter += block.power
-                    print(f"[DAMAGE] {block.name} received {attacker.power} dmg and {attacker.name} received {block.power} dmg.")
+                    block.damage_counter += attacker.get_power()
+                    attacker.damage_counter += block.get_power()
+                    print(f"[DAMAGE] {block.name} received {attacker.get_power()} dmg and {attacker.name} received {block.power} dmg.")
                 elif len(blocker) > 1:
                     damage_dist = self.active_player.distribute_damage_to_blocker(attacker, blocker)
-                    assert sum(damage_dist.values()) <= attacker.power
+                    assert sum(damage_dist.values()) <= attacker.get_power()
                     for block in blocker:
                         block.damage_counter += damage_dist.get(block, 0)
 
@@ -229,7 +229,7 @@ class Game:
             if player.life <= 0:
                 loosers.append(player)
             for creature in player.creatures:
-                if creature.damage_counter >= creature.toughness:
+                if creature.damage_counter >= creature.get_toughness():
                     print(f"[STATE BASED ACTIONS] {creature.name} dies due to damage.")
                     player.graveyard.append(creature)
                     player.creatures.remove(creature)

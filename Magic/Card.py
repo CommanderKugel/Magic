@@ -42,10 +42,18 @@ class Spell(Card):
 @dataclass
 class Creature(Spell):
     type: CardType = "Creature"
-    power: int = 0
+    base_power: int = 0
     toughness: int = 0
     damage_counter: int = 0
     subtype: str = ""
+
+    def get_power(self) -> int:
+        """Fetch this creatures power."""
+        return self.base_power
+
+    def get_toughness(self) -> int:
+        """Fetch this creatures toughness."""
+        return self.base_toughness
 
     def __hash__(self) -> int:
         return super.__hash__(self)

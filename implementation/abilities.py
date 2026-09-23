@@ -67,7 +67,7 @@ def punch(source: Instant | Sorcery, owner: Player, opponent: Player) -> None:
     puncher: Creature = source.targets[0]
     bag: Creature = source.targets[1]
     if puncher in owner.creatures and bag in opponent.creatures:
-        bag.damage_counter += puncher.power
+        bag.damage_counter += puncher.get_power()
 
 def bolt(source: Card, owner: Player, opponent: Player) -> None:
     """Deal 3 damage to the sources target."""
