@@ -14,44 +14,6 @@ class CLIPlayer(Player):
     def __init__(self, name, starting_life, library):
         super().__init__(name, starting_life, library)
 
-    def pay_for_manacost(self, card: Creature) -> bool:
-        """Return True if the cost was payed successfully. False if not."""
-        # check total mana
-        if sum(self.floating_mana.values()) < sum(card.cost.values()):
-            print("Not enough floating mana to cast this spell.")
-            return False
-        relevant_colors = [
-            c
-            for c in ["White", "Blue", "Black", "Red", "Green"]
-            if c in card.cost.keys()
-        ]
-        # check pips
-        if any(
-            self.floating_mana[c] < card.cost[c]
-            for c in relevant_colors
-        ):
-            print("not enough pips in floating mana to cast this spell.")
-            return False
-        # pay for colored mana now
-        for c in relevant_colors:
-            self.floating_mana[c] -= card.cost[c]
-        # pay for colorless mana using colorless floating mana
-        if "None" in card.cost:
-            if self.floating_mana["None"] >= card.cost["None"]:
-                self.floating_mana["None"] -= card.cost["None"]
-                return True
-            # pay for remaining colorless cost using floating colored mana
-            remaining = card.cost["None"] - self.floating_mana["None"]
-            self.floating_mana["None"] = 0
-            while remaining > 0:
-                c = random.choice([
-                    c for c in self.floating_mana.keys()
-                    if self.floating_mana[c] > 0
-                ])
-                self.floating_mana[c] -= 1
-                remaining -= 1
-        return True
-
     def target(
         self, 
         opp = None,

@@ -6,6 +6,7 @@ from Magic.Card import Card, Spell, Land, Creature, Color
 from Magic.Library import draw_card
 from Magic.Literals import Action
 from Magic.Ability import Ability
+from Magic.Buff import Buff
 
 
 PASS: tuple[Action, None] = ("Pass", None)
@@ -40,6 +41,8 @@ class Player:
         self.hand: list[Card] = []
         self.creatures: list[Creature] = []
         self.lands: list[Land] = []
+
+        self.eot_effects: list[Buff] = []
 
         self.floating_mana: dict[Color, int] = {
             "White": 0,

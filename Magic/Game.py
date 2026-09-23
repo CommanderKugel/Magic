@@ -2,7 +2,7 @@ from Player.Player import Player
 from Magic.Card import Card, Creature, Land, Sorcery, Instant
 from Magic.Stack import StackObject
 from Magic.Library import shuffle_library
-
+from Magic.Buff import Buff
 
 class Game:
     """Game sim of Magic: the gathering, only supporting 2 players for now."""
@@ -211,6 +211,11 @@ class Game:
                     creature.damage_counter = 0
                 # remove floating mana
                 p.clear_floating_mana()
+                for eot in p.eot_effects:
+                    if isinstance(eot, Buff):
+                        eot.target.buffs.remove(eot)
+                        p.eot_effects.remove(eot)
+                        del eot
             # discard due to handsize
             while len(self.active_player.hand) > 7:
                 print("Discard due to handsize.")

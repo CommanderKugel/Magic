@@ -18,7 +18,6 @@ _ALL_CARDS = {
     "Forest": Land(
         name="Forest", 
         color=["None"], 
-        type="Basic Land", 
         mana_color="Green",
         tapped=False,
         image="Forest.png",
@@ -28,7 +27,6 @@ _ALL_CARDS = {
     "Mountain": Land(
         name="Mountain", 
         color=["None"], 
-        type="Basic Land", 
         mana_color="Red",
         tapped=False,
         image="Mountain.png",
@@ -37,7 +35,6 @@ _ALL_CARDS = {
 
     "Balduvian_Bears": Creature(
         name="Balduvian_Bears",
-        type="Creature",
         subtype="Beast",
         color=["Green"],
         cost={"Green": 1, "None": 1},
@@ -61,5 +58,17 @@ _ALL_CARDS = {
         color=["Red"],
         cost={"Red": 1},
         image="Lightning_Bolt.png",
+    ),
+
+    "Giant_Growth": Instant(
+        name="Giant Growth",
+        ability=implementation.abilities.GiantGrowth,
+        color=["Green"],
+        cost={"Green": 1},
+        image="",
     )
 }
+
+for key, card in _ALL_CARDS.items():
+    if isinstance(card, Creature):
+        card.buffs = []

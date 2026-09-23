@@ -1,23 +1,23 @@
 from Magic.Ability import Ability
 from Magic.Card import Card, Creature, Instant, Sorcery
 from Player.Player import Player
+from Magic.Buff import Buff
 
 
 # CAN ACTIVATE
 
 def not_tapped_and_on_field(source: Card, owner: Player, opponent: Player) -> bool:
     """Check if the card is untapped and on the field."""
-    return (
-        not source.tapped
-        and source in owner.creatures + owner.lands
-    )
+    return not source.tapped and source in owner.creatures + owner.lands
 
 def fight_has_targets(source: Card, owner: Player, opponent: Player) -> bool:
     """Check if the player and opponent both control at least one Creature."""
-    return (
-        len(owner.creatures) > 0
-        and len(opponent.creatures) > 0
-    )
+    return len(owner.creatures) > 0 and len(opponent.creatures) > 0
+
+def one_creature_exists(source: Card, owner: Player, opponent: Player) -> bool:
+    """Check if at least one targettable Creature exists."""
+    # ToDo: shroud & hexproof
+    return len(owner.creatures) > 0 or len(opponent.creatures) > 0
 
 def always_castable(source: Card, owner: Player, opponent: Player) -> bool:
     """Check nothing. Return True."""
@@ -29,9 +29,9 @@ def tap_card(source: Card, owner: Player, opponent: Player) -> None:
     """Tap the source."""
     source.tapped = True
 
-def single_target_creature_or_player(source: Card, owner: Player, opponent: Player) -> None:
+def target_single_creature_or_player(source: Card, owner: Player, opponent: Player) -> None:
     """Choose any target that has life."""
-    assert isinstance(source, Instant | Sorcery)
+    assert isinstance(source, (Instant, Sorcery))
     target = owner.target(
         opp=opponent,
         own_player=True,
@@ -39,6 +39,18 @@ def single_target_creature_or_player(source: Card, owner: Player, opponent: Play
         opp_player=True,
         opp_creatures=True,    
     )
+    assert isinstance(target, (Card, Player))
+    source.targets = [target]
+
+def target_single_creature(source: Card, owner: Player, opponent: Player) -> None:
+    """Choose a target creature."""
+    assert isinstance(source, (Instant, Sorcery))
+    target = owner.target(
+        opp=opponent, 
+        own_creatures=True, 
+        opp_creatures=True,
+    )
+    assert isinstance(target, Card)
     source.targets = [target]
 
 def collect_fight_targets(source: Instant | Sorcery, owner: Player, opponent: Player) -> None:
@@ -73,12 +85,24 @@ def bolt(source: Card, owner: Player, opponent: Player) -> None:
     """Deal 3 damage to the sources target."""
     assert isinstance(source, (Instant, Sorcery))
     assert len(source.targets) == 1
-    _, target = source.targets[0]
+    target = source.targets[0]
     assert isinstance(target, (Player, Creature)), target
     if isinstance(target, Player):
         target.life -= 3
     if isinstance(target, Creature):
         target.damage_counter += 3
+
+def eot_p3p3(source: Card, owner: Player, opponent: Player) -> None:
+    """Target creature gets +3/+3 until end of turn."""
+    assert isinstance(source, (Instant, Sorcery))
+    assert len(source.targets) == 1
+    target = source.targets[0]
+    assert isinstance(target, Creature)
+    buff = Buff(target=target, power=3, toughness=3)
+    owner.eot_effects.append(buff)
+    target.buffs.append(buff)
+
+# INSTANCES
 
 TapForGreen = Ability(
     is_mana_ability=True,
@@ -106,6 +130,13 @@ Punch = Ability(
 Bolt = Ability(
     is_mana_ability=False,
     can_activate=always_castable,
-    pay_cost=single_target_creature_or_player,
+    pay_cost=target_single_creature_or_player,
     activity=bolt,
+)
+
+GiantGrowth = Ability(
+    is_mana_ability=False,
+    can_activate=one_creature_exists,
+    pay_cost=target_single_creature,
+    activity=eot_p3p3,
 )

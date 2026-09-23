@@ -35,7 +35,7 @@ class RandomPlayer(Player):
             for creature in opp.creatures:
                 targets.append(("OppCreature", creature))
 
-        return random.choice(targets)
+        return random.choice(targets)[1]
 
     def distribute_damage_to_blocker(self, attacker, blocker) -> dict[Creature, int]:
         """Distribute the damage across the blockers."""

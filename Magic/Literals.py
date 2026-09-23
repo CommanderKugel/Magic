@@ -16,10 +16,3 @@ Color = Literal[
     "Green",
     "None",
 ]
-
-CardType = Literal[
-    "Basic Land",
-    "Creature",
-    "Sorcery",
-    "Instant",
-]

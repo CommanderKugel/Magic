@@ -2,12 +2,12 @@ from dataclasses import dataclass
 from typing import Literal, Callable
 
 from Magic.Ability import Ability
-from Magic.Literals import CardType, Color
+from Magic.Literals import Color
+from Magic.Buff import Buff
 
 
 @dataclass
 class Card:
-    type: CardType
     id: str = ""
     name: str = ""
     color: list[Color] = None
@@ -24,7 +24,6 @@ class Card:
 
 @dataclass
 class Land(Card):
-    type: CardType = "Basic Land"
     mana_color: Color = "None"
 
     def __hash__(self) -> int:
@@ -41,18 +40,22 @@ class Spell(Card):
 
 @dataclass
 class Creature(Spell):
-    type: CardType = "Creature"
     base_power: int = 0
-    toughness: int = 0
+    base_toughness: int = 0
     damage_counter: int = 0
     subtype: str = ""
+    buffs: list[Buff] | None = None
 
     def get_power(self) -> int:
         """Fetch this creatures power."""
+        if len(self.buffs) > 0:
+            return self.base_power + sum(b.power for b in self.buffs)
         return self.base_power
 
     def get_toughness(self) -> int:
         """Fetch this creatures toughness."""
+        if len(self.buffs) > 0:
+            return self.base_toughness + sum(b.toughness for b in self.buffs)
         return self.base_toughness
 
     def __hash__(self) -> int:
@@ -60,12 +63,10 @@ class Creature(Spell):
 
 @dataclass
 class Sorcery(Spell):
-    type: CardType = "Sorcery"
     targets: list[Card] | None = None
     ability: Ability | None = None
 
 @dataclass
 class Instant(Spell):
-    type: CardType = "Instant"
     sorcery_speed = False
     ability: Ability | None = None
