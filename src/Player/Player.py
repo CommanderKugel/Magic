@@ -2,11 +2,11 @@ import random
 import uuid
 from typing import Literal, Any
 
-from Magic.Card import Card, Spell, Land, Creature, Color
-from Magic.Library import draw_card
-from Magic.Literals import Action
-from Magic.Ability import Ability
-from Magic.Buff import Buff
+from src.Magic.Card import Card, Spell, Land, Creature, Color
+from src.Magic.Library import draw_card
+from src.Magic.Literals import Action
+from src.Magic.Ability import Ability
+from src.Magic.Buff import Buff
 
 
 PASS: tuple[Action, None] = ("Pass", None)

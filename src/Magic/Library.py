@@ -3,7 +3,7 @@ from random import shuffle
 from pathlib import Path
 from typing import Callable
 
-from Magic.Card import Card
+from src.Magic.Card import Card
 
 def shuffle_library(lib: list[Card]) -> None:
     """Shuffle the library in-place."""
@@ -22,10 +22,7 @@ def seed_players_cards(p) -> None:
         seed_list(l)
 
 def draw_card(lib: list[Card]) -> Card | None:
-    """Removes Top Card from library (in-place) and returns it.
-    
-    Return None, if the library is empty.
-    """
+    """Removes Top Card from library (in-place) and returns it. Return None, if the library is empty."""
     if len(lib) == 0:
         return None
     return lib.pop(0)

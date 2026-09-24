@@ -1,8 +1,9 @@
-from Player.Player import Player
-from Magic.Card import Card, Creature, Land, Sorcery, Instant
-from Magic.Stack import StackObject
-from Magic.Library import shuffle_library
-from Magic.Buff import Buff
+from src.Player.Player import Player
+from src.Magic.Card import Card, Creature, Land, Sorcery, Instant
+from src.Magic.Stack import StackObject, PriorityData
+from src.Magic.Library import shuffle_library
+from src.Magic.Buff import Buff
+from src.Magic.Literals import PriorityState, Action
 
 class Game:
     """Game sim of Magic: the gathering, only supporting 2 players for now."""
@@ -244,173 +245,180 @@ class Game:
         if len(loosers) == 2:
             raise Exception("Draw")
 
+
+    def play_land(self, data: PriorityData, card: Land) -> None:
+        """Play a land for priority player."""
+        assert data.priority_player is self.active_player
+        assert len(self.stack) == 0
+        assert card in data.priority_player.hand
+        assert card not in data.priority_player.lands
+        print("Playing a Land:", card.name)
+        data.priority_player.lands.append(card)
+        data.priority_player.hand.remove(card)
+        self.hit_landdrop = True
+        # goto 5., no reaction to land drops
+        print(f"[PLAY] {data.priority_player.name} played {card.name}")
+
+    def activate_mana_ability(self, data: PriorityData, card: Card) -> None:
+        """Try activating an ability. Return True if can activate, False if not."""
+        print("Activating an Ability:", card.name)
+        ability = card.activated_ability
+        if not ability.can_activate(card, data.priority_player, data.non_priority_player):
+            print(f"[OOPS] {data.priority_player.name} messed up Ablity of {card.name}")
+            return
+        # instantly resolve mana abilities - they dont use the stack
+        ability.pay_cost(card, data.priority_player, data.non_priority_player)
+        ability.activity(card, data.priority_player, data.non_priority_player)
+        # goto 5.
+        print(f"[ABILITY] {data.priority_player.name} activated Ability of {card.name}")
+
+    def priority_pass(self, data: PriorityData) -> None:
+        """Priority_player passes. Update state and increase pass counter."""
+        data.pass_counter += 1
+        data.state = "Passing"
+        print(f"[PASSING] {data.priority_player.name} passes")
+
+    def put_action_on_stack(self, data: PriorityData, action: Action, card: Card) -> None:
+        """Put an Ability or Cast of a spell on the stack. Reset the pass counter. State is 'Action'."""
+        print(f"[{"ABILITY" if action == "Ability" else "CAST"}] {data.priority_player.name} plays {card.name}")
+        stack_object = StackObject(
+            action=action,
+            source=card,
+            owner=data.priority_player,
+        )
+        self.stack.append(stack_object)
+        data.pass_counter = 0
+        data.state = "Action"
+
+    def activate_ability(self, data: PriorityData, card: Card) -> None:
+        """Activate an ability. Pay its cost and put it on the stack. Keep priority."""
+        if not card.activated_ability.can_activate(card, data.priority_player, data.non_priority_player):
+            print(f"[OOPS] {data.priority_player.name} messed up activation cost of {card.name}")
+            return
+        card.activated_ability.pay_cost(card, data.priority_player, data.non_priority_player)
+        self.put_action_on_stack(data, "Ability", card)
+
+    def cast_spell(self, data: PriorityData, card: Card) -> None:
+        """Cast a spell. Pay its cost, remove it from hand and put it on the stack. Keep priority."""
+        # Pay Manacost
+        if not data.priority_player.pay_for_manacost(card, data.non_priority_player):
+            print(f"[OOPS] {data.priority_player.name} messed up Mana cost of {card.name}")
+            return
+        # Pay extra cost for instants and sorceries, e.g. choose targets
+        if isinstance(card, (Instant, Sorcery)):
+            if not card.ability.can_activate(card, data.priority_player, data.non_priority_player):
+                print(f"[OOPS] {data.priority_player.name} messed up activation cost of {card.name}")
+                return
+            card.ability.pay_cost(card, data.priority_player, data.non_priority_player)
+        # remove card from hand
+        data.priority_player.hand.remove(card)
+        self.put_action_on_stack(data, "Cast", card)
+
+    def swap_priority(self, data: PriorityData) -> None:
+        """On 2 or less passes, non_active_player receives priority. Otherwise, resolve the next item on the stack."""
+        self.state_based_actions()
+        # single pass: give priority to opponent
+        if data.pass_counter < 2:
+            data.swap_priority()
+            # goto 5.
+            data.state = "Action"
+        # all players passed: resolve top item from the stack
+        data.state = "Resolve"
+    
+    def resolve_top_object_from_stack(self, data: PriorityData) -> None:
+        """Pop and resolve the top item from the stack. Perform statebased actions. active player receives priority."""
+        assert len(self.stack) > 0
+        # remove Card from stack
+        stack_object = self.stack.pop(-1)
+        action = stack_object.action
+        card = stack_object.source
+        owner = stack_object.owner
+        opponent = self.p2 if owner is self.p1 else self.p1
+        print(f"[RESOLVE] resolving {"Ability" if action == "Ability" else "Cast"} of {card.name}")
+
+        # resolve Casting Spells
+        if stack_object.action == "Cast":
+            # Creature -> put it on the field
+            if isinstance(card, Creature):
+                owner.creatures.append(card)
+                # ToDo: 
+                
+            # Sorceries or Instants -> resolve abilities
+            if isinstance(card, (Instant, Sorcery)):
+                card.ability.activity(card, owner, opponent)
+        
+        # resolve Activated or Triggered Abilities
+        if stack_object.action == "Ability":
+            card.activated_ability.activity(card, owner, opponent)
+
+        self.state_based_actions()
+
+        # goto 3.
+        data.priority_player = self.active_player
+        data.non_priority_player = self.reactive_player
+        data.state = "Action"
+        data.pass_counter = 0
+
     def priority(self, sorcery_speed: bool = False) -> None:
         """Handle passing of the priority between players using a state-machine."""
-        self.stack: list[StackObject] = []
-
-        STATE_5 = "Action"
-        STATE_6 = "Passing"
-        STATE_7 = "RESOLVE"
-
+        assert len(self.stack) == 0
         # 1. Beginning of Step/Phase
         # 2. State based actions
         # 3. Triggered Abilities
         # 4. Active Player receives priority
-        priority_player = self.active_player
-        non_priority_player = self.reactive_player
-
         # look at concepts/Stack.md for more details
-        state = STATE_5
-        pass_counter = 0
+        data = PriorityData(
+            state="Action",
+            priority_player=self.active_player,
+            non_priority_player=self.reactive_player,
+            pass_counter=0,
+        )
+
         while True:
             # 5. Player with Priority may choose an action
-            if state == STATE_5:
-                (action, card) = priority_player.choose_action(
-                    sorcery_speed=(
-                        sorcery_speed 
-                        and (len(self.stack) == 0) 
-                        and (priority_player is self.active_player)
-                    ),
+            if data.state == "Action":
+                so_sp = (
+                    sorcery_speed 
+                    and (len(self.stack) == 0) 
+                    and (data.priority_player is self.active_player)
+                )
+                (action, card) = data.priority_player.choose_action(
+                    sorcery_speed=so_sp,
                     hit_landdrop=self.hit_landdrop and sorcery_speed,
-                    opponent=non_priority_player,
+                    opponent=data.non_priority_player,
                 )
 
-                # Playing lands
+                # Playing Lands
                 if action == "Play" and isinstance(card, Land):
-                    assert priority_player is self.active_player
-                    assert len(self.stack) == 0
-                    assert card in priority_player.hand
-                    print("Playing a Land:", card.name)
-                    priority_player.lands.append(card)
-                    priority_player.hand.remove(card)
-                    self.hit_landdrop = True
-                    # goto 5., no reaction to land drops
-                    print(f"[PLAY] {priority_player.name} played {card.name}")
-                    continue
+                    self.play_land(data, card)
 
                 # Mana Abilities
                 if action == "Ability" and card.activated_ability.is_mana_ability:
-                    print("Activating an Ability:", card.name)
-                    ability = card.activated_ability
-                    if not ability.can_activate(card, priority_player, non_priority_player):
-                        print(f"[OOPS] {priority_player.name} messed up Ablity of {card.name}")
-                        continue
-                    # instantly resolve mana abilities - they dont use the stack
-                    ability.pay_cost(card, priority_player, non_priority_player)
-                    ability.activity(card, priority_player, non_priority_player)
-                    # goto 5.
-                    print(f"[ABILITY] {priority_player.name} activated Ability of {card.name}")
-                    continue
+                    self.activate_mana_ability(data, card)
 
-                # Put all other actions on the stack
-                if action != "Pass":
-                    assert not (action == "Ability" and card.activated_ability.is_mana_ability)
-                    assert not (action == "Play" and isinstance(card, Land))
-
-                    # Pay cost for Activated Abilities
-                    if action == "Ability":
-                        if not card.activated_ability.can_activate(card, priority_player, non_priority_player):
-                            print(f"[OOPS] {priority_player.name} messed up activation cost of {card.name}")
-                            continue
-                        card.activated_ability.pay_cost(card, priority_player, non_priority_player)
-
-                    # Pay cost for casting spells
-                    if action == "Cast":
-
-                        # Pay Manacost
-                        if not priority_player.pay_for_manacost(card, non_priority_player):
-                            print(f"[OOPS] {priority_player.name} messed up Mana cost of {card.name}")
-                            continue
-
-                        # Pay extra cost for instants and sorceries, e.g. choose targets
-                        if isinstance(card, (Instant, Sorcery)):
-                            if not card.ability.can_activate(
-                                card, priority_player, non_priority_player
-                            ):
-                                print(f"[OOPS] {priority_player.name} messed up activation cost of {card.name}")
-                                continue
-                            card.ability.pay_cost(card, priority_player, non_priority_player)
-                            
-                        priority_player.hand.remove(card)
-
-                    x = "ABILITY" if action == "Ability" else "CASE"
-                    print(f"[{x}] {priority_player.name} plays {card.name}")
-                    stack_object = StackObject(
-                        action=action,
-                        source=card,
-                        owner=priority_player,
-                    )
-                    self.stack.append(stack_object)
-                    pass_counter = 0
-
-                    # goto 5., keep priority
-                    continue
-                
                 # Passing
-                else:
-                    pass_counter += 1
-                    state = STATE_6
-                    print(f"[PASSING] {priority_player.name} passes")
-                    continue
+                if action == "Pass":
+                    self.priority_pass(data)
+
+                # Activate Abilities
+                if action == "Ability" and not card.activated_ability.is_mana_ability:
+                    self.activate_ability(data, card)
+
+                # Cast Spells
+                if action == "Cast":
+                    self.cast_spell(data, card)
+
+                # goto 5. if not passed, else go to 6.
+                continue
             
             # 6. Priority was passed
-            if state == STATE_6:
-                self.state_based_actions()
-
-                # give priority to opponent
-                if pass_counter < 2:
-                    if priority_player == self.active_player:
-                        priority_player = self.reactive_player
-                        non_priority_player = self.active_player
-                    else:
-                        priority_player = self.active_player
-                        non_priority_player = self.reactive_player
-
-                    # goto 5.
-                    state = STATE_5
-                    continue
-
-                # all players passed
-                state = STATE_7
+            if data.state == "Passing":
+                self.swap_priority(data)
+                # goto 5. if one pass in a row, else goto 7.
             
             # 7. Resolve stack
-            if state == STATE_7:
-
-                # End prioroty juggling if stack is empty.
+            if data.state == "Resolve":
                 if len(self.stack) == 0:
                     return
-                
-                # remove Card from stack
-                stack_object = self.stack.pop(-1)
-                action = stack_object.action
-                card = stack_object.source
-                owner = stack_object.owner
-                opponent = self.p2 if owner is self.p1 else self.p1
-
-                x = "Ability" if action == "Ability" else "Cast"
-                print(f"[RESOLVE] resolving {x} of {card.name}")
-
-                # resolve Casting Spells
-                if stack_object.action == "Cast":
-
-                    # Creature -> put it on the field
-                    if isinstance(card, Creature):
-                        owner.creatures.append(card)
-                        # ToDo: ETB
-
-                    # Sorceries or Instants -> resolve abilities
-                    if isinstance(card, (Instant, Sorcery)):
-                        card.ability.activity(card, owner, opponent)
-                
-                # resolve Activated or Triggered Abilities
-                # ToDo: collect targets on stack object (maybe dict?)
-                if stack_object.action == "Ability":
-                    card.activated_ability.activity(card, owner, opponent)
-
-                self.state_based_actions()
-
-                # goto 3.
-                priority_player = self.active_player
-                non_priority_player = self.reactive_player
-                state = STATE_5
-                pass_counter = 0
+                self.resolve_top_object_from_stack(data)
+                # goto 5. if stack resolved, else return

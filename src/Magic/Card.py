@@ -1,9 +1,9 @@
 from dataclasses import dataclass
 from typing import Literal, Callable
 
-from Magic.Ability import Ability
-from Magic.Literals import Color
-from Magic.Buff import Buff
+from src.Magic.Ability import Ability
+from src.Magic.Literals import Color
+from src.Magic.Buff import Buff
 
 
 @dataclass

@@ -1,8 +1,8 @@
 import pygame as pg
 from pathlib import Path
 
-from Magic.Game import Game
-from Magic.Card import Card
+from src.Magic.Game import Game
+from src.Magic.Card import Card
 
 PROJECT_ROOT = Path(__file__).parent.parent
 CARD_DIR = PROJECT_ROOT / "resources"

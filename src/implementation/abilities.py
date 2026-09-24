@@ -1,7 +1,7 @@
-from Magic.Ability import Ability
-from Magic.Card import Card, Creature, Instant, Sorcery
-from Player.Player import Player
-from Magic.Buff import Buff
+from src.Magic.Ability import Ability
+from src.Magic.Card import Card, Creature, Instant, Sorcery
+from src.Player.Player import Player
+from src.Magic.Buff import Buff
 
 
 # CAN ACTIVATE

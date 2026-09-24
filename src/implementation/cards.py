@@ -1,8 +1,8 @@
 import copy
 import uuid
-import implementation.abilities
+import src.implementation.abilities
 
-from Magic.Card import Card, Land, Creature, Sorcery, Instant
+from src.Magic.Card import Card, Land, Creature, Sorcery, Instant
 
 
 def get_card(name: str) -> Card:
@@ -21,7 +21,7 @@ _ALL_CARDS = {
         mana_color="Green",
         tapped=False,
         image="Forest.png",
-        activated_ability=implementation.abilities.TapForGreen,
+        activated_ability=src.implementation.abilities.TapForGreen,
     ),
 
     "Mountain": Land(
@@ -30,7 +30,7 @@ _ALL_CARDS = {
         mana_color="Red",
         tapped=False,
         image="Mountain.png",
-        activated_ability=implementation.abilities.TapForRed,
+        activated_ability=src.implementation.abilities.TapForRed,
     ),
 
     "Balduvian_Bears": Creature(
@@ -46,7 +46,7 @@ _ALL_CARDS = {
 
     "Horrific_Assault": Sorcery(
         name="Horrific Assault",
-        ability=implementation.abilities.Punch,
+        ability=src.implementation.abilities.Punch,
         color=["Green"],
         cost={"Green": 1},
         image="Horrific_Assault.png",
@@ -54,7 +54,7 @@ _ALL_CARDS = {
 
     "Lightning_Bolt": Instant(
         name="Lightbing Bolt",
-        ability=implementation.abilities.Bolt,
+        ability=src.implementation.abilities.Bolt,
         color=["Red"],
         cost={"Red": 1},
         image="Lightning_Bolt.png",
@@ -62,7 +62,7 @@ _ALL_CARDS = {
 
     "Giant_Growth": Instant(
         name="Giant Growth",
-        ability=implementation.abilities.GiantGrowth,
+        ability=src.implementation.abilities.GiantGrowth,
         color=["Green"],
         cost={"Green": 1},
         image="",

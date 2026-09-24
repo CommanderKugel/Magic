@@ -4,11 +4,11 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
-from Player.Player import Player
+from src.Player.Player import Player
 from Magic.Game import Game
 from Magic.Library import get_dummy_lib
 
-from Pygame.Board import draw_game, load_card_images
+from src.Pygame.Board import draw_game, load_card_images
 
 
 screen = pg.display.set_mode((1800, 1200))

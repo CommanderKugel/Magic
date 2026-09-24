@@ -1,8 +1,8 @@
 import random
 from typing import Any
 
-from Magic.Card import Card, Land, Spell, Creature, Instant
-from Player.Player import (
+from src.Magic.Card import Card, Land, Spell, Creature, Instant
+from src.Player.Player import (
     Player,
     _is_valid_action,
     Action,

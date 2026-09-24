@@ -16,3 +16,9 @@ Color = Literal[
     "Green",
     "None",
 ]
+
+PriorityState = Literal[
+    "Action",
+    "Passing",
+    "Resolve",
+]

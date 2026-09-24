@@ -1,9 +1,9 @@
 import random
 from typing import Any
 
-from Magic.Card import Card, Creature, Land
-from Magic.Ability import Ability
-from Player.Player import Player, Action, Color
+from src.Magic.Card import Card, Creature, Land
+from src.Magic.Ability import Ability
+from src.Player.Player import Player, Action, Color
 
 
 class RandomPlayer(Player):
