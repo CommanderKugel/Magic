@@ -1,6 +1,6 @@
 from src.Player.Player import Player
 from src.Magic.Card import Card, Creature, Land, Sorcery, Instant
-from src.Magic.Stack import StackObject, PriorityData
+from src.Magic.Stack import StackObject, PriorityData, PriorityState
 from src.Magic.Library import shuffle_library
 from src.Magic.Buff import Buff
 from src.Magic.Literals import PriorityState, Action
@@ -12,10 +12,10 @@ class Game:
         self.p2 = p2
         
         self.turn = 0
-        self.active_player = None
-        self.reactive_player = None
+        self.active_player: Player
+        self.reactive_player: Player
 
-        self.step = None
+        self.step: PriorityState
         self.hit_landdrop = False
 
         self.stack: list[StackObject] = []
@@ -299,7 +299,7 @@ class Game:
         self.put_action_on_stack(data, "Ability", card)
 
     def cast_spell(self, data: PriorityData, card: Card) -> None:
-        """Cast a spell. Pay its cost, remove it from hand and put it on the stack. Keep priority."""
+        """Cast a spell. For more info, look at 'concepts/Cast_or_Activate.md'."""
         # Pay Manacost
         if not data.priority_player.pay_for_manacost(card, data.non_priority_player):
             print(f"[OOPS] {data.priority_player.name} messed up Mana cost of {card.name}")
@@ -322,6 +322,7 @@ class Game:
             data.swap_priority()
             # goto 5.
             data.state = "Action"
+            return
         # all players passed: resolve top item from the stack
         data.state = "Resolve"
     
@@ -334,18 +335,19 @@ class Game:
         card = stack_object.source
         owner = stack_object.owner
         opponent = self.p2 if owner is self.p1 else self.p1
-        print(f"[RESOLVE] resolving {"Ability" if action == "Ability" else "Cast"} of {card.name}")
+        #print(f"[RESOLVE] resolving {"Ability" if action == "Ability" else "Cast"} of {card.name}")
 
         # resolve Casting Spells
         if stack_object.action == "Cast":
             # Creature -> put it on the field
             if isinstance(card, Creature):
                 owner.creatures.append(card)
-                # ToDo: 
+                # ToDo: etb
                 
             # Sorceries or Instants -> resolve abilities
             if isinstance(card, (Instant, Sorcery)):
                 card.ability.activity(card, owner, opponent)
+                owner.graveyard.append(card)
         
         # resolve Activated or Triggered Abilities
         if stack_object.action == "Ability":
