@@ -1,37 +1,50 @@
 from src.Magic.Ability import Ability
-from src.Magic.Card import Card, Creature, Instant, Sorcery
+from src.Magic.Card import Card, Land, Creature, Instant, Sorcery
 from src.Player.Player import Player
 from src.Magic.Buff import Buff
 
 
 # CAN ACTIVATE
 
-def not_tapped_and_on_field(source: Card, owner: Player, opponent: Player) -> bool:
-    """Check if the card is untapped and on the field."""
-    return not source.tapped and source in owner.creatures + owner.lands
+def always_castable(source: Card, owner: Player, opponent: Player) -> bool:
+    """Card can always be cast."""
+    return True
 
-def fight_has_targets(source: Card, owner: Player, opponent: Player) -> bool:
-    """Check if the player and opponent both control at least one Creature."""
-    return len(owner.creatures) > 0 and len(opponent.creatures) > 0
+def card_not_tapped_and_on_field(source: Card, owner: Player, opponent: Player) -> bool:
+    """Check if the card is untapped and on the field."""
+    return not source.tapped and (
+        source in owner.lands
+        if isinstance(source, Land)
+        else source in owner.creatures
+    )
 
 def one_creature_exists(source: Card, owner: Player, opponent: Player) -> bool:
     """Check if at least one targettable Creature exists."""
     # ToDo: shroud & hexproof
     return len(owner.creatures) > 0 or len(opponent.creatures) > 0
 
-def always_castable(source: Card, owner: Player, opponent: Player) -> bool:
-    """Check nothing. Return True."""
-    return True
+def fight_has_targets(source: Card, owner: Player, opponent: Player) -> bool:
+    """Check if the player and opponent both control at least one Creature."""
+    # ToDo: hexproof & shroud
+    return len(owner.creatures) > 0 and len(opponent.creatures) > 0
 
-# PAY COST
+# SELECT TARAGETS
 
-def tap_card(source: Card, owner: Player, opponent: Player) -> None:
-    """Tap the source."""
-    source.tapped = True
+def no_targets(source: Card, owner: Player, opponent: Player) -> None:
+    """Card does not target anything."""
+    return None
+
+def target_single_creature(source: Card, owner: Player, opponent: Player) -> None:
+    """Choose a target creature."""
+    target = owner.target(
+        opp=opponent, 
+        own_creatures=True, 
+        opp_creatures=True,
+    )
+    source.targets = [target]
 
 def target_single_creature_or_player(source: Card, owner: Player, opponent: Player) -> None:
-    """Choose any target that has life."""
-    assert isinstance(source, (Instant, Sorcery))
+    """Choose any target that can take damage."""
     target = owner.target(
         opp=opponent,
         own_player=True,
@@ -39,28 +52,25 @@ def target_single_creature_or_player(source: Card, owner: Player, opponent: Play
         opp_player=True,
         opp_creatures=True,    
     )
-    assert isinstance(target, (Card, Player))
     source.targets = [target]
 
-def target_single_creature(source: Card, owner: Player, opponent: Player) -> None:
-    """Choose a target creature."""
-    assert isinstance(source, (Instant, Sorcery))
-    target = owner.target(
-        opp=opponent, 
-        own_creatures=True, 
-        opp_creatures=True,
-    )
-    assert isinstance(target, Card)
-    source.targets = [target]
-
-def collect_fight_targets(source: Instant | Sorcery, owner: Player, opponent: Player) -> None:
-    """Choose two creatures for fight effect."""
-    assert isinstance(source, (Instant, Sorcery))
+def target_two_creatures_to_fight(source: Card, owner: Player, opponent: Player) -> None:
+    """Target one creature the owner controls and one creature the opponent controls."""
     puncher = owner.target(own_creatures=True)
     bag = owner.target(opp=opponent, opp_creatures=True)
     source.targets = [puncher, bag]
 
-# EFFECT
+# PAY COST
+
+def no_cost(source: Card, owner: Player, opponent: Player) -> None:
+    """Ability does not require an additional cost."""
+    return None
+
+def tap_card(source: Card, owner: Player, opponent: Player) -> None:
+    """Tap the source."""
+    source.tapped = True
+
+# ACTIVITY
 
 def add_g_mana(source: Card, owner: Player, opponent: Player) -> None:
     """Add one Green Mana to the owners Manapool."""
@@ -80,24 +90,26 @@ def punch(source: Instant | Sorcery, owner: Player, opponent: Player) -> None:
     bag: Creature = source.targets[1]
     if puncher in owner.creatures and bag in opponent.creatures:
         bag.damage_counter += puncher.get_power()
+    else:
+        print(f"[PUNCH] source={source} fizzles.")
 
 def bolt(source: Card, owner: Player, opponent: Player) -> None:
     """Deal 3 damage to the sources target."""
-    assert isinstance(source, (Instant, Sorcery))
-    assert len(source.targets) == 1
     target = source.targets[0]
-    assert isinstance(target, (Player, Creature)), target
     if isinstance(target, Player):
         target.life -= 3
-    if isinstance(target, Creature):
-        target.damage_counter += 3
-
+    elif isinstance(target, Creature):
+        if (
+            target in opponent.creatures
+            or target in owner.creatures
+        ):
+            target.damage_counter += 3
+        else:
+            print(f"[BOLT] source={source} fizzles.")
+    
 def eot_p3p3(source: Card, owner: Player, opponent: Player) -> None:
     """Target creature gets +3/+3 until end of turn."""
-    assert isinstance(source, (Instant, Sorcery))
-    assert len(source.targets) == 1
-    target = source.targets[0]
-    assert isinstance(target, Creature)
+    target: Creature = source.targets[0]
     buff = Buff(target=target, power=3, toughness=3)
     owner.eot_effects.append(buff)
     target.buffs.append(buff)
@@ -107,36 +119,38 @@ def eot_p3p3(source: Card, owner: Player, opponent: Player) -> None:
 TapForGreen = Ability(
     is_mana_ability=True,
     mana_color="Green",
-    can_activate=not_tapped_and_on_field,
-    pay_cost=tap_card,
-    activity=add_g_mana,
+    _can_activate=card_not_tapped_and_on_field,
+    _choose_targets=no_targets,
+    _pay_cost=tap_card,
+    _activity=add_g_mana,
 )
 
 TapForRed = Ability(
     is_mana_ability=True,
     mana_color="Red",
-    can_activate=not_tapped_and_on_field,
-    pay_cost=tap_card,
-    activity=add_r_mana,
+    _can_activate=card_not_tapped_and_on_field,
+    _choose_targets=no_targets,
+    _pay_cost=tap_card,
+    _activity=add_r_mana,
 )
 
 Punch = Ability(
-    is_mana_ability=False,
-    can_activate=fight_has_targets,
-    pay_cost=collect_fight_targets,
-    activity=punch,
+    _can_activate=fight_has_targets,
+    _choose_targets=target_two_creatures_to_fight,
+    _pay_cost=no_cost,
+    _activity=punch,
 )
 
 Bolt = Ability(
-    is_mana_ability=False,
-    can_activate=always_castable,
-    pay_cost=target_single_creature_or_player,
-    activity=bolt,
+    _can_activate=always_castable, # ToDo: hexproof & shroud
+    _choose_targets=target_single_creature_or_player,
+    _pay_cost=no_cost,
+    _activity=bolt,
 )
 
 GiantGrowth = Ability(
-    is_mana_ability=False,
-    can_activate=one_creature_exists,
-    pay_cost=target_single_creature,
-    activity=eot_p3p3,
+    _can_activate=one_creature_exists,
+    _choose_targets=target_single_creature,
+    _pay_cost=no_cost,
+    _activity=eot_p3p3,
 )

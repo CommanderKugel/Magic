@@ -34,6 +34,7 @@ class Spell(Card):
     """Parent Class for Creature, Sorcery and Instant."""
     cost: dict[Color, int] = None
     sorcery_speed: bool = True
+    targets: list[Card] | None = None
 
     def __hash__(self):
         return super().__hash__(self)
@@ -63,10 +64,8 @@ class Creature(Spell):
 
 @dataclass
 class Sorcery(Spell):
-    targets: list[Card] | None = None
     ability: Ability | None = None
 
 @dataclass
 class Instant(Spell):
-    sorcery_speed = False
     ability: Ability | None = None

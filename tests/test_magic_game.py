@@ -37,34 +37,33 @@ def game() -> Game:
 @pytest.fixture
 def mock_mana_ability() -> Ability:
     """Mock a mana ability."""
-    return Ability(
-        is_mana_ability=True,
-        can_activate=MagicMock(return_value=True),
-        pay_cost=MagicMock(),
-        activity=MagicMock(),
-    )
+    a = Ability(is_mana_ability=True)
+    a.can_activate = MagicMock(return_value=True)
+    a.choose_targets = MagicMock()
+    a.pay_cost = MagicMock()
+    a.activity = MagicMock()
+    return a
 
 @pytest.fixture
 def mock_ability() -> Ability:
     """Mock a non-mana ability."""
-    return Ability(
-        is_mana_ability=False,
-        can_activate=MagicMock(return_value=True),
-        pay_cost=MagicMock(),
-        activity=MagicMock(),
-    )
+    a = Ability(is_mana_ability=False)
+    a.can_activate = MagicMock(return_value=True)
+    a.choose_targets = MagicMock()
+    a.pay_cost = MagicMock()
+    a.activity = MagicMock()
+    return a
 
 @pytest.fixture
 def mock_land() -> Land:
     """Mock a land Card."""
     land = get_card("Forest")
     land.name = "Mock_Land"
-    land.activated_ability = Ability(
-        is_mana_ability=True,
-        can_activate=MagicMock(return_value=True),
-        pay_cost=MagicMock(),
-        activity=MagicMock(),
-    )
+    land.activated_ability = Ability(is_mana_ability=True)
+    land.activated_ability.can_activate = MagicMock(return_value=True)
+    land.activated_ability.choose_targets=MagicMock()
+    land.activated_ability.pay_cost=MagicMock()
+    land.activated_ability.activity=MagicMock()
     return land
 
 @pytest.fixture
