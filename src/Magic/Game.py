@@ -160,7 +160,7 @@ class Game:
                     block = blocker[0]
                     block.damage_counter += attacker.get_power()
                     attacker.damage_counter += block.get_power()
-                    print(f"[DAMAGE] {block.name} received {attacker.get_power()} dmg and {attacker.name} received {block.power} dmg.")
+                    print(f"[DAMAGE] {block.name} received {attacker.get_power()} dmg and {attacker.name} received {block.get_power()} dmg.")
                 elif len(blocker) > 1:
                     damage_dist = self.active_player.distribute_damage_to_blocker(attacker, blocker)
                     assert sum(damage_dist.values()) <= attacker.get_power()
