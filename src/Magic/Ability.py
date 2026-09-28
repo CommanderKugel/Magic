@@ -9,9 +9,9 @@ class Ability:
     mana_color: Color | None = None
 
     _can_activate: Callable[[Any, Any, Any], bool] | None = None
-    _choose_targets: Callable[[Any, Any, Any], bool] | None = None
-    _pay_cost: Callable[[Any, Any, Any], bool] | None = None
-    _activity: Callable[[Any, Any, Any], bool] | None = None
+    _choose_targets: Callable[[Any, Any, Any], None] | None = None
+    _pay_cost: Callable[[Any, Any, Any], None] | None = None
+    _activity: Callable[[Any, Any, Any], None] | None = None
 
     def can_activate(self, source, owner, opponent):
         return self._can_activate(source, owner, opponent)
