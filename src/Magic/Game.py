@@ -291,12 +291,50 @@ class Game:
         data.state = "Action"
 
     def activate_ability(self, data: PriorityData, card: Card) -> None:
-        """Activate an ability. Pay its cost and put it on the stack. Keep priority."""
-        if not card.activated_ability.can_activate(card, data.priority_player, data.non_priority_player):
-            print(f"[OOPS] {data.priority_player.name} messed up activation cost of {card.name}")
+        """Activate an ability. For more info, look at 'concepts/Cast_or_Activate.md'."""
+
+        # 1. Announce activating an ability.
+        # ToDo: cards with multiple activated abilities
+
+        # 2. Making decisions
+        # ToDo: modus
+
+        # 5. Legality check
+        # Move to front to avoid having to revert and debug ridiculous boardstates
+
+        if not card.activated_ability.can_activate(
+            card, data.priority_player, data.non_priority_player
+        ):
             return
+
+        # 3. Choosing targets
+
+        card.activated_ability.choose_targets(card, data.priority_player, data.non_priority_player)
+
+        # 4. Determine distribution
+
+        # 6. Determine total cost
+        # ToDo: Activated abilities that cost mana
+
+        # 7. Use mana-abilities
+        # 8. Pay the cost
+        # ToDo: split creating mana and paying mana in 2 functions
+
+        if (
+            False 
+            and not data.priority_player.pay_for_manacost(cost, data.non_priority_player)
+        ):
+            return
+
         card.activated_ability.pay_cost(card, data.priority_player, data.non_priority_player)
+        
+        # 1. again - put ability on the stack
+        # Move to end to avoid having to revert and debug ridiculous boardstates
+        
         self.put_action_on_stack(data, "Ability", card)
+
+        # 9. Ability was activated successfully
+        # ToDo: triggered abilities        
 
     def cast_spell(self, data: PriorityData, card: Card) -> None:
         """Cast a spell. For more info, look at 'concepts/Cast_or_Activate.md'."""
