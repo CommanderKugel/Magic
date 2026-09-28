@@ -79,7 +79,7 @@ class Player:
             "None": 0,
         }
 
-    def pay_for_manacost(self, card: Creature, opponent) -> bool:
+    def pay_for_manacost(self, cost: dict[Color, int], opponent) -> bool:
         """
         Tries to pay for manacost. 
         Returns True if cost was payed, False if not.
@@ -88,15 +88,15 @@ class Player:
         Only supports moncolored spells for now.
         """
         assert (
-            len(card.cost) == 1
-            or len(card.cost) == 2 and "None" in card.cost.keys()
+            len(cost) == 1
+            or len(cost) == 2 and "None" in cost.keys()
         )
-        color = list(card.cost.keys())[0]
+        color = list(cost.keys())[0]
         assert color != "None"
 
         # 1. determine mana cost
-        colored_cost = card.cost.get(color, 0)
-        generic_cost = card.cost.get("None", 0)
+        colored_cost = cost.get(color, 0)
+        generic_cost = cost.get("None", 0)
 
         # 2. determine available mana
         mana_abilities: list[Ability, Card, Color] = self.collect_mana_abilities()
