@@ -300,19 +300,64 @@ class Game:
 
     def cast_spell(self, data: PriorityData, card: Card) -> None:
         """Cast a spell. For more info, look at 'concepts/Cast_or_Activate.md'."""
-        # Pay Manacost
-        if not data.priority_player.pay_for_manacost(card, data.non_priority_player):
-            print(f"[OOPS] {data.priority_player.name} messed up Mana cost of {card.name}")
+        
+        # 1. Announce casting a spell
+        # ToDo: casting from graveyard or exile (zone other than hand)
+        # ToDo: Double-sided (mdfc)
+        # ToDo: multi- & split-cards (fire//ice)
+
+        # 2. Making decisions
+        # ToDo: modus
+        # ToDo: alternate and/or additional cost
+        # ToDo: variable cost (X)
+        # ToDo: splice onto
+
+        # 5. Legality check
+        # Move to front to avoid having to revert and debug ridiculous boardstates
+        # Hope legal action generation helps
+        # ToDo: add quick check if enough mana exists to pay for cost
+
+        if (
+            isinstance(card, (Instant, Sorcery)) 
+            and not card.ability.can_activate(
+                card, data.priority_player, data.non_priority_player
+            )
+        ):
             return
-        # Pay extra cost for instants and sorceries, e.g. choose targets
+
+        # 3. Choosing targets
+        # ToDo: creatures that target on cast
+        # ToDo: keywords (Aura)
+
         if isinstance(card, (Instant, Sorcery)):
-            if not card.ability.can_activate(card, data.priority_player, data.non_priority_player):
-                print(f"[OOPS] {data.priority_player.name} messed up activation cost of {card.name}")
-                return
+            card.ability.choose_targets(card, data.priority_player, data.non_priority_player)
+
+        # 4. Determine distribution
+
+        # 6. Determine total cost
+        # ToDo: Affinity
+
+        cost = card.cost
+
+        # 7. Use mana-abilities
+        # 8. Pay the cost
+        # ToDo: split creating mana and paying mana in 2 functions
+
+        if not data.priority_player.pay_for_manacost(cost, data.non_priority_player):
+            return
+
+        if isinstance(card, (Instant, Sorcery)):
             card.ability.pay_cost(card, data.priority_player, data.non_priority_player)
-        # remove card from hand
+
+        # 1. again - put spell on the stack
+        # Move to end to avoid having to revert and debug ridiculous boardstates
+
         data.priority_player.hand.remove(card)
         self.put_action_on_stack(data, "Cast", card)
+
+        # 9. spell is cast successfully
+        # ToDo: triggered abilities
+        # ToDo: Cascade
 
     def swap_priority(self, data: PriorityData) -> None:
         """On 2 or less passes, non_active_player receives priority. Otherwise, resolve the next item on the stack."""
