@@ -119,10 +119,10 @@ class Player:
         generic_cost = cost.get("None", 0)
 
         # 2. determine available mana
-        mana_abilities: list[Ability, Card, Color] = self.collect_mana_abilities()
+        mana_abilities: list[Ability, Card] = self.collect_mana_abilities()
         colored_available = self.floating_mana.get(color, 0) + sum(
             1 
-            for _, card, _ 
+            for _, card 
             in mana_abilities if card.activated_ability.mana_color == color
         )
         generic_available = sum(self.floating_mana.values()) + len(mana_abilities) - colored_cost
@@ -142,7 +142,7 @@ class Player:
 
         # 5. pay using mana abilities
         random.shuffle(mana_abilities)
-        for _, card, _ in mana_abilities:
+        for _, card in mana_abilities:
             if colored_cost == 0 and generic_cost == 0:
                 return True
 
