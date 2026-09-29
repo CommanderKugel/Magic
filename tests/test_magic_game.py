@@ -18,7 +18,58 @@ from src.Player.Player import Player
 from src.implementation.cards import get_card
 
 
+class TestBeginningPhase:
+    """Test simulating the beginning phase. Including untap-, upkeep- & draw-step."""
+
+    def test_untap_step_untapps_creatures(self, game, mock_bear):
+        """All creatures should be untapped after untap step."""
+        mock_bear.tapped = True
+        game.p1.creatures = [mock_bear]
+        game.priority = MagicMock()
+
+        game.untap_step()
+
+        assert mock_bear in game.p1.creatures
+        assert not mock_bear.tapped
+        game.priority.assert_not_called()
+
+    def test_untap_step_untapps_lands(self, game, mock_land):
+        """All lands should be untapped after untap step."""
+        mock_land.tapped = True
+        game.p1.lands = [mock_land]
+        game.priority = MagicMock()
+
+        game.untap_step()
+
+        assert mock_land in game.p1.lands
+        assert not mock_land.tapped
+        game.priority.assert_not_called()
+
+    # TODO: skip permanents that dont untap during the upkeep
+
+    def test_upkeep_uses_prioroty(self, game):
+        """Priority is played at instant speed during upkeep."""
+        game.priority = MagicMock()
+
+        game.upkeep_step()
+
+        game.priority.assert_called_once_with(sorcery_speed=False)
+
+    # TODO: upkeep step triggers abilities
+
+    def test_draw_step_draws_a_card(self, game):
+        """One card is drawn during upkeep."""
+        game.p1.draw = MagicMock()
+        game.priority = MagicMock()
+
+        game.draw_step()
+
+        game.p1.draw.assert_called_once_with(1)
+        game.priority.assert_called_once_with(sorcery_speed=False)
+
+
 class TestHelperMethods:
+    """Test misc helper methods that are part of the game."""
 
     # PLAYING LANDS
     

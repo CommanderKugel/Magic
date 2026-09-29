@@ -62,38 +62,46 @@ class Game:
         """Clear all players floating mana. Helper method."""
         self.p1.clear_floating_mana()
         self.p2.clear_floating_mana()
+
+    def untap_step(self) -> None:
+        """Play the untap step. See concepts/Turn.md for more info."""
+        # ToDo: Triggered abilities
+        # ToDo: Phasing
+        # ToDo: day/night
+        
+        print("[UNTAP]")
+        self.step = "Untap"
+
+        # untap all permanents active player controls
+        # no priority in this step
+
+        for creature in self.active_player.creatures:
+            creature.tapped = False
+
+        for land in self.active_player.lands:
+            land.tapped = False
+
+    def upkeep_step(self) -> None:
+        """Play the Upkeep step. See concepts/Turn.md for more info."""
+        print("[UPKEEP]")
+        self.step = "Upkeep"
+
+        # ToDo: Triggered abilities
+
+        self.priority(sorcery_speed=False)
+
+    def draw_step(self) -> None:
+        """Play the Draw step. See concepts/Turn.md for more info."""
+        print("[DRAW]")
+        self.step = "Draw"
+        self.active_player.draw(1)
+        self.priority(sorcery_speed=False)
     
     def beginning_phase(self) -> None:
-        """Play the whole beginning phase of this turn."""
-
-        def untap_step():
-            """Play the untap step."""
-            print("[UNTAP]")
-            self.step = "Untap"
-            # ToDo: Triggered Abilities
-            self.priority(sorcery_speed=False)
-
-            for creature in self.active_player.creatures:
-                creature.tapped = False
-            for land in self.active_player.lands:
-                land.tapped = False
-
-        def upkeep_step():
-            """Play the Upkeep step."""
-            print("[UPKEEP]")
-            self.step = "Upkeep"
-            self.priority(sorcery_speed=False)
-
-        def draw_step():
-            """Play the Draw step."""
-            print("[DRAW]")
-            self.step = "Draw"
-            # ToDo: priority
-            self.active_player.draw(1)
-        
-        untap_step()
-        upkeep_step()
-        draw_step()
+        """Play the whole beginning phase of this turn. See concepts/Turn.md for more info."""        
+        self.untap_step()
+        self.upkeep_step()
+        self.draw_step()
         self.clear_player_mana()
     
     def main_phase(self) -> None:
