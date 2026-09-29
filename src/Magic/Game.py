@@ -301,6 +301,7 @@ class Game:
 
         # 5. Legality check
         # Move to front to avoid having to revert and debug ridiculous boardstates
+        # ToDo: add quick check if enough mana exists to pay for cost
 
         if not card.activated_ability.can_activate(
             card, data.priority_player, data.non_priority_player

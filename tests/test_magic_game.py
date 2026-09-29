@@ -142,10 +142,17 @@ class TestHelperMethods:
         """Activating an ability puts it on the stack."""
         data = build_priority_data(game)
         game.put_action_on_stack = MagicMock()
+        game.p1.pay_for_manacost = MagicMock(return_value=True)
+
         game.activate_ability(data, mock_bear)
+
         mock_bear.activated_ability.can_activate.assert_called_once_with(
             mock_bear, data.priority_player, data.non_priority_player,
         )
+        mock_bear.activated_ability.choose_targets.assert_called_once_with(
+            mock_bear, data.priority_player, data.non_priority_player,
+        )
+        data.priority_player.pay_for_manacost.assert_not_called()
         mock_bear.activated_ability.pay_cost.assert_called_once_with(
             mock_bear, data.priority_player, data.non_priority_player,
         )
@@ -156,13 +163,18 @@ class TestHelperMethods:
 
     def test_activate_ability_can_not_activate(self, game, mock_bear):
         """Ability can not activate and is not put on the stack."""
-        mock_bear.activated_ability.can_activate = MagicMock(return_value=False)
         data = build_priority_data(game)
         game.put_action_on_stack = MagicMock()
+        game.p1.pay_for_manacost = MagicMock(return_value=True)
+        mock_bear.activated_ability.can_activate = MagicMock(return_value=False)
+
         game.activate_ability(data, mock_bear)
+
         mock_bear.activated_ability.can_activate.assert_called_once_with(
             mock_bear, data.priority_player, data.non_priority_player,
         )
+        mock_bear.activated_ability.choose_targets.assert_not_called()
+        data.priority_player.pay_for_manacost.assert_not_called()
         mock_bear.activated_ability.pay_cost.assert_not_called()
         mock_bear.activated_ability.activity.assert_not_called()
         game.put_action_on_stack.assert_not_called()
