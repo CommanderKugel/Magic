@@ -247,17 +247,23 @@ class Game:
 
 
     def play_land(self, data: PriorityData, card: Land) -> None:
-        """Play a land for priority player."""
-        assert data.priority_player is self.active_player
-        assert len(self.stack) == 0
-        assert card in data.priority_player.hand
-        assert card not in data.priority_player.lands
-        print("Playing a Land:", card.name)
+        """Play a land."""
+        # 1. Announce playing the land.
+        # ToDo: Playing from graveyard or exile (zone other than hand)
+        # ToDo: Double-sided (mdfc)
+
+        # 2. Immediate ETB
+        # ToDo: replacement effects (e.g. enters tapped)
+
         data.priority_player.lands.append(card)
         data.priority_player.hand.remove(card)
+
+        # 3. Increment played lands counter
+        
         self.hit_landdrop = True
-        # goto 5., no reaction to land drops
-        print(f"[PLAY] {data.priority_player.name} played {card.name}")
+
+        # 4. Land was played successfully
+        # ToDo: Landfall
 
     def activate_mana_ability(self, data: PriorityData, card: Card) -> None:
         """Try activating an ability. Return True if can activate, False if not."""

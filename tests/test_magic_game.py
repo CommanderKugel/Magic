@@ -108,10 +108,14 @@ class TestHelperMethods:
         """Playing a land makes the landdrop correctly."""
         data = build_priority_data(game)
         game.p1.hand = [mock_land]
+        game.put_action_on_stack = MagicMock()
+
         game.play_land(data, mock_land)
+
         assert mock_land not in game.p1.hand, "Land Should have been removed from Hand."
         assert mock_land in game.p1.lands, "Land should have appeard on the Field."
         assert game.hit_landdrop, "Landdrop has been made."
+        game.put_action_on_stack.assert_not_called()
 
     # ACTIVATING MANA ABILITIES
 
