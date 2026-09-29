@@ -61,6 +61,44 @@ class Player:
             "None": 0,
         }
 
+
+    # ==================================================================================
+    # API FOR PLAYER- AND BOT-CLASSES
+    # to implement a new player or bot, implement the following functions
+    # ==================================================================================
+
+
+    def target(
+        self, 
+        opp = None, # Player
+        own_player: bool = False,
+        own_creatures: bool = False, 
+        own_hand: bool = False,
+        opp_player: bool = False,
+        opp_creatures: bool = False,
+    ) -> Card | Any:
+        """To be implemented by child class."""
+        raise NotImplementedError()
+
+    def choose_action(self, sorcery_speed: bool, hit_landdrop: bool, opponent) -> tuple[Action, Card | None]:
+        """To be implemented by child class."""
+        raise NotImplementedError()
+
+    def binary_choice(self, question: str) -> bool:
+        """To be implemented by child class."""
+        raise NotImplementedError()
+
+    def distribute_damage_to_blocker(self, attacker: Creature, blocker: list[Creature]) -> dict[Card, int]:
+        """To be implemented by child class."""
+        raise NotImplementedError()
+
+
+    # ==================================================================================
+    # AUTOMATIC MANA PAYMENT
+    # this can be replaced by a player- or bot-class but doesnt have to.
+    # ==================================================================================
+
+
     def pay_for_manacost(self, cost: dict[Color, int], opponent) -> bool:
         """
         Tries to pay for manacost. 
@@ -125,67 +163,65 @@ class Player:
         
         return generic_cost == 0 and colored_cost == 0
 
-    def target(
-        self, 
-        opp = None, # Player
-        own_player: bool = False,
-        own_creatures: bool = False, 
-        own_hand: bool = False,
-        opp_player: bool = False,
-        opp_creatures: bool = False,
-    ) -> Card | Any:
-        """To be implemented by child class."""
-        raise NotImplementedError()
 
-    def choose_action(self, sorcery_speed: bool, hit_landdrop: bool, opponent) -> tuple[Action, Card | None]:
-        """To be implemented by child class."""
-        raise NotImplementedError()
+    # ==================================================================================
+    # PSEUDO-LEGAL ACTION GENERATION
+    # pseudo legal = action could maybe be activated but mana-costs are not checked yet.
+    # ==================================================================================
 
-    def binary_choice(self, question: str) -> bool:
-        """To be implemented by child class."""
-        raise NotImplementedError()
-
-    def distribute_damage_to_blocker(self, attacker: Creature, blocker: list[Creature]) -> dict[Card, int]:
-        """To be implemented by child class."""
-        raise NotImplementedError()
 
     def collect_actions(self, sorcery_speed: bool, hit_landdrop: bool, opponent) -> list[tuple[Action, Card]]:
         """Generate a list of all legal non-mana-ability actions."""
         actions = []
+
         # cast spells
-        actions.extend([
-            ("Cast", card)
-            for card in self.hand
-            if isinstance(card, Spell) 
-            and (sorcery_speed or not card.sorcery_speed)
-        ])
+        actions.extend(self.collect_casting_spells(sorcery_speed))
+
         # play lands
         if sorcery_speed and not hit_landdrop:
-            actions += [
-                ("Play", card)
-                for card in self.hand
-                if isinstance(card, Land)
-            ]
+            actions.extend(self.collect_landdrops())
+
         # activated abilities
-        actions += [
-            ("Ability", card)
-            for card in self.lands + self.creatures + self.hand
-            if card.activated_ability is not None
-            and not card.activated_ability.is_mana_ability
-            and card.activated_ability.can_activate(card, self, opponent)
-        ] 
+        actions.extend(self.collect_activated_abilities())
+
         # passing
         actions.append(PASS)
+
         return actions
 
-    def collect_mana_abilities(self) -> list[tuple[Action, Card, Color]]:
+    def collect_casting_spells(self, sorcery_speed=bool) -> list[tuple[Action, Spell]]:
+        """Generate a list of all spells that are possible to be cast."""
+        return [
+            ("Cast", card) 
+            for card in self.hand 
+            if isinstance(card, Spell)
+            and (
+                sorcery_speed 
+                or not card.sorcery_speed
+            )
+        ]
+
+    def collect_landdrops(self) -> list[tuple[Action, Land]]:
+        """Generate a list of all possible landdrops."""
+        return [("Play", card) for card in self.hand if isinstance(card, Land)]
+
+    def collect_activated_abilities(self) -> list[tuple[Action, Card]]:
+        """Generate a list of all activated abilities that can be activated."""
+        return [
+            ("Ability", card)
+            for card in self.hand + self.creatures + self.lands
+            if card.activated_ability is not None
+            and not card.activated_ability.is_mana_ability
+            and card.activated_ability.can_activate(card, self, None)
+        ]
+
+    def collect_mana_abilities(self) -> list[tuple[Action, Card]]:
         """Generate a list of all mana-ability actions."""
-        actions = [
-            ("Ability", card, card.activated_ability)
+        return [
+            ("Ability", card)
             for card in self.lands + self.creatures + self.hand
             if card.activated_ability is not None
             and card.activated_ability.is_mana_ability
             and card.activated_ability.can_activate(card, self, None)
         ]
-        return actions
     
