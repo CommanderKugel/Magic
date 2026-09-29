@@ -2,13 +2,25 @@ import random
 from typing import Any
 
 from src.Magic.Card import Card, Land, Spell, Creature, Instant
-from src.Player.Player import (
-    Player,
-    _is_valid_action,
-    Action,
-    PASS,
-)
+from src.Player.Player import Player, Action, PASS
 
+
+def _is_valid_action(i: str, max_idx: int) -> bool:
+    """Verify the input string maps to a valid action"""
+    if i.strip() == "":
+        print("Empty string is not an integer, idiot.")
+        return False
+    # not a number
+    for c in i:
+        if c not in "0123456789":
+            print("Choose an integer, idiot.")
+            return False
+    # out of bounds
+    if int(i) < 0 or int(i) >= max_idx:
+        print("Index out of range, idiot.")
+        return False
+    # all okay
+    return True
 
 class CLIPlayer(Player):
     def __init__(self, name, starting_life, library):
