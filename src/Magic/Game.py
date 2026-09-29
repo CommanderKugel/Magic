@@ -63,6 +63,10 @@ class Game:
         self.p1.clear_floating_mana()
         self.p2.clear_floating_mana()
 
+
+    # BEGINNING PHASE
+
+
     def untap_step(self) -> None:
         """Play the untap step. See concepts/Turn.md for more info."""
         # ToDo: Triggered abilities
@@ -103,17 +107,27 @@ class Game:
         self.upkeep_step()
         self.draw_step()
         self.clear_player_mana()
-    
+
+
+    # MAIN PHASE
+
+
     def main_phase(self) -> None:
-        """Play a whole main phase. There are two per turn, most of the time."""
+        """
+        Play a whole main phase. There are two per turn, most of the time.
+        See concepts/Turn.md for more info.
+        """
         # ToDo: Beginning of main phase triggers
+        # ToDo: Sagas
+
         print("[MAIN PHASE]")
+
         self.step = "Main"
         self.priority(sorcery_speed=True)
         self.clear_player_mana()
 
-    def combat_phase(self) -> None:
-        """Play a whole combat phase."""
+
+    # COMBAT PHASE
 
         def beginning_of_combat() -> None:
             """Play beginning of combat step."""
@@ -190,6 +204,10 @@ class Game:
         damage_step(attacker)
         end_of_combat()
         self.clear_player_mana()
+
+
+    # END PHASE
+
 
     def end_phase(self) -> None:
         """Play a whole end phase."""

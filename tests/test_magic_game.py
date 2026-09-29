@@ -67,6 +67,31 @@ class TestBeginningPhase:
         game.p1.draw.assert_called_once_with(1)
         game.priority.assert_called_once_with(sorcery_speed=False)
 
+    def test_beginning_phase_has_all_steps(self, game):
+        """There should be untap, upkeep and draw."""
+        game.untap_step = MagicMock()
+        game.upkeep_step = MagicMock()
+        game.draw_step = MagicMock()
+
+        game.beginning_phase()
+
+        game.untap_step.assert_called_once()
+        game.upkeep_step.assert_called_once()
+        game.draw_step.assert_called_once()
+
+
+class TestMainPhase:
+    """Test simulating the main phase."""
+
+    def test_main_phase_has_prio_at_sorcery_speed(self, game):
+        """In the main phase priority is gained at sorcery speed."""
+        game.priority = MagicMock()
+        game.clear_player_mana = MagicMock()
+
+        game.main_phase()
+
+        game.priority.assert_called_once_with(sorcery_speed=True)
+
 
 class TestHelperMethods:
     """Test misc helper methods that are part of the game."""
