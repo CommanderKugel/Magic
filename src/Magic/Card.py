@@ -68,4 +68,5 @@ class Sorcery(Spell):
 
 @dataclass
 class Instant(Spell):
+    sorcery_speed: bool = False
     ability: Ability | None = None
