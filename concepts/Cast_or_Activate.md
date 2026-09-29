@@ -49,3 +49,9 @@ Activating an ability follows the same steps as casting a spell, (602.2).
    (601.2i)
 - Triggered abilities go on the stack
 - Active Player receives Priority again
+
+## Mana Abilities
+
+Mana Abilities follow the same steps as activating normal abilities (605.3a),
+except the instantly resolve and do not use the stack (605.3b).
+Mana abilities cannot be activated until they fully resolve (605-3c), that wont be a problem in this simulator.

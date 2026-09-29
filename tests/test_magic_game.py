@@ -112,33 +112,11 @@ class TestHelperMethods:
 
         game.play_land(data, mock_land)
 
+        assert game.hit_landdrop == True
         assert mock_land not in game.p1.hand, "Land Should have been removed from Hand."
         assert mock_land in game.p1.lands, "Land should have appeard on the Field."
         assert game.hit_landdrop, "Landdrop has been made."
         game.put_action_on_stack.assert_not_called()
-
-    # ACTIVATING MANA ABILITIES
-
-    def test_activate_mana_ability_can_activate(self, game, mock_land):
-        """Activating a mana ability instantly resolves."""
-        data = build_priority_data(game)
-        game.activate_mana_ability(data, mock_land)
-        mock_land.activated_ability.can_activate.assert_called_once()
-        mock_land.activated_ability.pay_cost.assert_called_once_with(
-            mock_land, data.priority_player, data.non_priority_player
-        )
-        mock_land.activated_ability.activity.assert_called_once_with(
-            mock_land, data.priority_player, data.non_priority_player
-        )
-
-    def test_activate_mana_ability_can_not_activate(self, game, mock_land):
-        """Mana ability cant activate and does not resolve."""
-        mock_land.activated_ability.can_activate = MagicMock(return_value=False)
-        data = build_priority_data(game)
-        game.activate_mana_ability(data, mock_land)
-        mock_land.activated_ability.can_activate.assert_called_once()
-        mock_land.activated_ability.pay_cost.assert_not_called()
-        mock_land.activated_ability.activity.assert_not_called()
 
     # ACTIVATING ABILITIES
 
@@ -156,6 +134,7 @@ class TestHelperMethods:
         mock_bear.activated_ability.choose_targets.assert_called_once_with(
             mock_bear, data.priority_player, data.non_priority_player,
         )
+        # ToDo: mana cost for abilities
         data.priority_player.pay_for_manacost.assert_not_called()
         mock_bear.activated_ability.pay_cost.assert_called_once_with(
             mock_bear, data.priority_player, data.non_priority_player,
@@ -178,9 +157,53 @@ class TestHelperMethods:
             mock_bear, data.priority_player, data.non_priority_player,
         )
         mock_bear.activated_ability.choose_targets.assert_not_called()
+        # ToDo: mana cost for abilities
         data.priority_player.pay_for_manacost.assert_not_called()
         mock_bear.activated_ability.pay_cost.assert_not_called()
         mock_bear.activated_ability.activity.assert_not_called()
+        game.put_action_on_stack.assert_not_called()
+
+    def test_activate_mana_ability_can_activate(self, game, mock_land):
+        """Activating a mana ability instantly resolves."""
+        data = build_priority_data(game)
+        game.put_action_on_stack = MagicMock()
+        game.p1.pay_for_manacost = MagicMock(return_value=True)
+
+        game.activate_ability(data, mock_land)
+
+        mock_land.activated_ability.can_activate.assert_called_once_with(
+            mock_land, data.priority_player, data.non_priority_player,
+        )
+        mock_land.activated_ability.choose_targets.assert_called_once_with(
+            mock_land, data.priority_player, data.non_priority_player,
+        )
+        # ToDo: mana cost for abilities
+        data.priority_player.pay_for_manacost.assert_not_called()
+        mock_land.activated_ability.pay_cost.assert_called_once_with(
+            mock_land, data.priority_player, data.non_priority_player,
+        )
+        mock_land.activated_ability.activity.assert_called_with(
+            mock_land, data.priority_player, data.non_priority_player,
+        )
+        game.put_action_on_stack.assert_not_called()
+
+    def test_activate_mana_ability_can_not_activate(self, game, mock_land):
+        """Mana ability cant activate and does not resolve."""
+        data = build_priority_data(game)
+        game.put_action_on_stack = MagicMock()
+        game.p1.pay_for_manacost = MagicMock(return_value=True)
+        mock_land.activated_ability.can_activate = MagicMock(return_value=False)
+
+        game.activate_ability(data, mock_land)
+
+        mock_land.activated_ability.can_activate.assert_called_once_with(
+            mock_land, data.priority_player, data.non_priority_player,
+        )
+        mock_land.activated_ability.choose_targets.assert_not_called()
+        # ToDo: mana cost for abilities
+        data.priority_player.pay_for_manacost.assert_not_called()
+        mock_land.activated_ability.pay_cost.assert_not_called()
+        mock_land.activated_ability.activity.assert_not_called()
         game.put_action_on_stack.assert_not_called()
 
 

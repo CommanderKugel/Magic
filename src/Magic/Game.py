@@ -265,19 +265,6 @@ class Game:
         # 4. Land was played successfully
         # ToDo: Landfall
 
-    def activate_mana_ability(self, data: PriorityData, card: Card) -> None:
-        """Try activating an ability. Return True if can activate, False if not."""
-        print("Activating an Ability:", card.name)
-        ability = card.activated_ability
-        if not ability.can_activate(card, data.priority_player, data.non_priority_player):
-            print(f"[OOPS] {data.priority_player.name} messed up Ablity of {card.name}")
-            return
-        # instantly resolve mana abilities - they dont use the stack
-        ability.pay_cost(card, data.priority_player, data.non_priority_player)
-        ability.activity(card, data.priority_player, data.non_priority_player)
-        # goto 5.
-        print(f"[ABILITY] {data.priority_player.name} activated Ability of {card.name}")
-
     def priority_pass(self, data: PriorityData) -> None:
         """Priority_player passes. Update state and increase pass counter."""
         data.pass_counter += 1
@@ -336,9 +323,16 @@ class Game:
         card.activated_ability.pay_cost(card, data.priority_player, data.non_priority_player)
         
         # 1. again - put ability on the stack
+        # excep mana abilities: resolve them instantly.
         # Move to end to avoid having to revert and debug ridiculous boardstates
         
-        self.put_action_on_stack(data, "Ability", card)
+        if card.activated_ability.is_mana_ability:
+            card.activated_ability.activity(
+                card, data.priority_player, data.non_priority_player,
+            )
+        # non-mana ability
+        else:
+            self.put_action_on_stack(data, "Ability", card)
 
         # 9. Ability was activated successfully
         # ToDo: triggered abilities        
@@ -480,19 +474,15 @@ class Game:
                     opponent=data.non_priority_player,
                 )
 
-                # Playing Lands
-                if action == "Play" and isinstance(card, Land):
-                    self.play_land(data, card)
-
-                # Mana Abilities
-                if action == "Ability" and card.activated_ability.is_mana_ability:
-                    self.activate_mana_ability(data, card)
-
                 # Passing
                 if action == "Pass":
                     self.priority_pass(data)
 
-                # Activate Abilities
+                # Playing Lands
+                if action == "Play" and isinstance(card, Land):
+                    self.play_land(data, card)
+
+                # Activate Abilities (including mana abilities)
                 if action == "Ability" and not card.activated_ability.is_mana_ability:
                     self.activate_ability(data, card)
 
