@@ -88,7 +88,7 @@ class Player:
         """To be implemented by child class."""
         raise NotImplementedError()
 
-    def distribute_damage_to_blocker(self, attacker: Creature, blocker: list[Creature]) -> dict[Card, int]:
+    def choose_int_value(self, max: int) -> dict[Card, int]:
         """To be implemented by child class."""
         raise NotImplementedError()
 

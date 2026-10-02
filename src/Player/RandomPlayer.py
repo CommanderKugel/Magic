@@ -37,18 +37,9 @@ class RandomPlayer(Player):
 
         return random.choice(targets)[1]
 
-    def distribute_damage_to_blocker(self, attacker, blocker) -> dict[Creature, int]:
+    def choose_int_value(self, max) -> int:
         """Distribute the damage across the blockers."""
-        remaining_power = attacker.get_power()
-        random.shuffle(blocker)
-        result = {}
-        for block in blocker:
-            if block.get_toughness() <= remaining_power:
-                result[block] = block.get_toughness()
-                remaining_power -= block.get_toughness()
-            else:
-                result[block] = 0
-        return result
+        return random.randint(0, max)
 
     def choose_action(self, sorcery_speed: bool, hit_landdrop: bool, opponent) -> tuple[Action, Card | None]:
         """Choose an action at random. Returns (ActionType, Card | None)"""

@@ -62,19 +62,12 @@ class CLIPlayer(Player):
         print(f"Target: {target.name if isinstance(target, Card) else "Player"}")
         return target
 
-    def distribute_damage_to_blocker(self, attacker, blocker) -> dict[Creature, int]:
-        """Distribute the damage across the blockers. Random Player logic for now."""
-        remaining_power = attacker.get_power()
-        random.shuffle(block)
-        result = {}
-        for block in blocker:
-            if block.get_toughness() <= remaining_power:
-                result[block] = block.get_toughness()
-                remaining_power -= block.get_toughness()
-            else:
-                result[block] = 0
-        return result
-
+    def choose_int_value(self, max) -> dict[Creature, int]:
+        """Choose a numerical value."""
+        i = input(f"Choose a number between {min} and {max}:")
+        if not _is_valid_action(i, max):
+            return max
+        return int(i)
 
     def choose_action(self, sorcery_speed: bool, hit_landdrop: bool, opponent) -> tuple[Action, Card | None]:
         """Manually choose an action to make. Returns (ActionType, Card | None)"""
