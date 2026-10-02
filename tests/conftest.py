@@ -82,6 +82,7 @@ def mock_bear(mock_ability) -> Creature:
     """Mock a vanilla creature."""
     creature = get_card("Balduvian_Bears")
     creature.name = "Mock_reature"
+    creature.summoning_sick = False
     creature.activated_ability = mock_ability
     return creature
 
@@ -90,7 +91,8 @@ def mock_bear_factory():
     def _mock_bear() -> Creature:
         """Mock a vanilla creature."""
         creature = get_card("Balduvian_Bears")
-        creature.name = "Mock_reature"
+        creature.name = "Mock_creature"
+        creature.summoning_sick = False
         creature.activated_ability = MagicMock()
         return creature
     return _mock_bear

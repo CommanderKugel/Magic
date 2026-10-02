@@ -45,6 +45,8 @@ class Creature(Spell):
     base_toughness: int = 0
     damage_counter: int = 0
     subtype: str = ""
+
+    summoning_sick: bool = True
     buffs: list[Buff] | None = None
 
     def get_power(self) -> int:

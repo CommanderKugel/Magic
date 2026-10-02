@@ -68,17 +68,18 @@ class Game:
 
     def untap_step(self) -> None:
         """Play the untap step. See concepts/Turn.md for more info."""
+        print("[UNTAP]")
+
         # ToDo: Triggered abilities
         # ToDo: Phasing
         # ToDo: day/night
-        
-        print("[UNTAP]")
 
         # untap all permanents active player controls
         # no priority in this step
 
         for creature in self.active_player.creatures:
             creature.tapped = False
+            creature.summoning_sick = False
 
         for land in self.active_player.lands:
             land.tapped = False
@@ -140,7 +141,7 @@ class Game:
         # ToDo: defender
         # ToDo: cant attack
 
-        return not creature.tapped
+        return not creature.tapped and not creature.summoning_sick
 
     def wants_to_attack(self, creature: Creature, owner: Player) -> bool:
         """Binary choice if the creature should attack."""

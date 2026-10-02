@@ -34,6 +34,17 @@ class TestBeginningPhase:
         assert not mock_bear.tapped
         game.priority.assert_not_called()
 
+    def test_untap_step_removes_summoning_sickness(self, game, mock_bear):
+        """All creatures loose summoning sickness."""
+        mock_bear.summoning_sick = True
+        game.p1.creatures = [mock_bear]
+        game.priority = MagicMock()
+
+        game.untap_step()
+
+        assert not mock_bear.summoning_sick
+        game.priority.assert_not_called()
+
     def test_untap_step_untapps_lands(self, game, mock_land):
         """All lands should be untapped after untap step."""
         mock_land.tapped = True
@@ -120,6 +131,15 @@ class TestCombatPhase:
     def test_tapped_creature_cannot_attack(self, game, mock_bear):
         """Tapped creatures can not attack."""
         mock_bear.tapped = True
+        game.p1.creatures = [mock_bear]
+
+        can_attack = game.can_attack(mock_bear, game.p1)
+
+        assert not can_attack
+
+    def test_summoningsick_creature_cannot_attack(self, game, mock_bear):
+        """Tapped creatures can not attack."""
+        mock_bear.summoning_sick = True
         game.p1.creatures = [mock_bear]
 
         can_attack = game.can_attack(mock_bear, game.p1)
