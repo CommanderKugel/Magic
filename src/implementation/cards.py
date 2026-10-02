@@ -21,7 +21,7 @@ _ALL_CARDS = {
         mana_color="Green",
         tapped=False,
         image="Forest.png",
-        activated_ability=src.implementation.abilities.TapForGreen,
+        activated_ability=src.implementation.abilities.LandTapForGreen,
     ),
 
     "Mountain": Land(
@@ -30,7 +30,7 @@ _ALL_CARDS = {
         mana_color="Red",
         tapped=False,
         image="Mountain.png",
-        activated_ability=src.implementation.abilities.TapForRed,
+        activated_ability=src.implementation.abilities.LandTapForRed,
     ),
 
     "Balduvian_Bears": Creature(
@@ -42,6 +42,18 @@ _ALL_CARDS = {
         base_toughness=2,
         tapped=False,
         image="Balduvian_Bears.png",
+    ),
+
+    "Llanowar_Elves": Creature(
+        name="Llanowar Elves",
+        subtype="Elf Druid",
+        color=["Green"],
+        cost={"Green": 1},
+        base_power=1,
+        base_toughness=1,
+        tapped=False,
+        image="Llanowar_Elves.png",
+        activated_ability=src.implementation.abilities.CreatureTapForGreen,
     ),
 
     "Horrific_Assault": Sorcery(

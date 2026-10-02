@@ -1,2 +1,3 @@
 24 Balduvian_Bears
-16 Forest
+12 Forest
+4 Llanowar_Elves

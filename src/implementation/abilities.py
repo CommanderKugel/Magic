@@ -10,13 +10,13 @@ def always_castable(source: Card, owner: Player, opponent: Player) -> bool:
     """Card can always be cast."""
     return True
 
-def card_not_tapped_and_on_field(source: Card, owner: Player, opponent: Player) -> bool:
+def land_is_untapped_and_on_field(source: Land, owner: Player, opponent: Player) -> bool:
+    """Check if the land is untapped and on the field."""
+    return not source.tapped and source in owner.lands
+
+def creature_can_tap_and_on_field(source: Creature, owner: Player, opponent: Player) -> bool:
     """Check if the card is untapped and on the field."""
-    return not source.tapped and (
-        source in owner.lands
-        if isinstance(source, Land)
-        else source in owner.creatures
-    )
+    return not source.tapped and not source.summoning_sick and source in owner.creatures
 
 def one_creature_exists(source: Card, owner: Player, opponent: Player) -> bool:
     """Check if at least one targettable Creature exists."""
@@ -116,22 +116,31 @@ def eot_p3p3(source: Card, owner: Player, opponent: Player) -> None:
 
 # INSTANCES
 
-TapForGreen = Ability(
+LandTapForGreen = Ability(
     is_mana_ability=True,
     mana_color="Green",
-    _can_activate=card_not_tapped_and_on_field,
+    _can_activate=land_is_untapped_and_on_field,
     _choose_targets=no_targets,
     _pay_cost=tap_card,
     _activity=add_g_mana,
 )
 
-TapForRed = Ability(
+LandTapForRed = Ability(
     is_mana_ability=True,
     mana_color="Red",
-    _can_activate=card_not_tapped_and_on_field,
+    _can_activate=land_is_untapped_and_on_field,
     _choose_targets=no_targets,
     _pay_cost=tap_card,
     _activity=add_r_mana,
+)
+
+CreatureTapForGreen = Ability(
+    is_mana_ability=True,
+    mana_color="Green",
+    _can_activate=creature_can_tap_and_on_field,
+    _choose_targets=no_targets,
+    _pay_cost=tap_card,
+    _activity=add_g_mana,
 )
 
 Punch = Ability(
