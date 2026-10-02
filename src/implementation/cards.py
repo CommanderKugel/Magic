@@ -35,7 +35,7 @@ _ALL_CARDS = {
 
     "Balduvian_Bears": Creature(
         name="Balduvian_Bears",
-        subtype="Beast",
+        subtype=["Beast"],
         color=["Green"],
         cost={"Green": 1, "None": 1},
         base_power=2,
@@ -46,7 +46,7 @@ _ALL_CARDS = {
 
     "Llanowar_Elves": Creature(
         name="Llanowar Elves",
-        subtype="Elf Druid",
+        subtype=["Elf", "Druid"],
         color=["Green"],
         cost={"Green": 1},
         base_power=1,
@@ -58,7 +58,7 @@ _ALL_CARDS = {
 
     "Colossal_Dreadmaw": Creature(
         name="Colossal Dreadmaw",
-        subtype="Dinsaur",
+        subtype=["Dinsaur"],
         color=["Green"],
         cost={"Green": 2, "None": 4},
         base_power=6,
@@ -70,7 +70,7 @@ _ALL_CARDS = {
 
     "Storm_Crow": Creature(
         name="Storm Crow",
-        subtype="Bird",
+        subtype=["Bird"],
         color=["Blue"],
         cost={"Blue": 1, "None": 1},
         base_power=1,

@@ -44,7 +44,7 @@ class Creature(Spell):
     base_power: int = 0
     base_toughness: int = 0
     damage_counter: int = 0
-    subtype: str = ""
+    subtype: list[str] | None = None
 
     summoning_sick: bool = True
 
