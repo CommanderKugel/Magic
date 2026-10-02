@@ -74,12 +74,10 @@ def tap_card(source: Card, owner: Player, opponent: Player) -> None:
 
 def add_g_mana(source: Card, owner: Player, opponent: Player) -> None:
     """Add one Green Mana to the owners Manapool."""
-    print(f"[MANA] tapping {source.name} for G")
     owner.floating_mana["Green"] += 1
 
 def add_r_mana(source: Card, owner: Player, opponent: Player) -> None:
     """Add one Green Mana to the owners Manapool."""
-    print(f"[MANA] tapping {source.name} for R.")
     owner.floating_mana["Red"] += 1
 
 def punch(source: Instant | Sorcery, owner: Player, opponent: Player) -> None:
@@ -90,8 +88,6 @@ def punch(source: Instant | Sorcery, owner: Player, opponent: Player) -> None:
     bag: Creature = source.targets[1]
     if puncher in owner.creatures and bag in opponent.creatures:
         bag.damage_counter += puncher.get_power()
-    else:
-        print(f"[PUNCH] source={source} fizzles.")
 
 def bolt(source: Card, owner: Player, opponent: Player) -> None:
     """Deal 3 damage to the sources target."""
@@ -104,8 +100,6 @@ def bolt(source: Card, owner: Player, opponent: Player) -> None:
             or target in owner.creatures
         ):
             target.damage_counter += 3
-        else:
-            print(f"[BOLT] source={source} fizzles.")
     
 def eot_p3p3(source: Card, owner: Player, opponent: Player) -> None:
     """Target creature gets +3/+3 until end of turn."""
