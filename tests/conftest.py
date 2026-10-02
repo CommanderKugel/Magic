@@ -86,6 +86,16 @@ def mock_bear(mock_ability) -> Creature:
     return creature
 
 @pytest.fixture
+def mock_bear_factory():
+    def _mock_bear() -> Creature:
+        """Mock a vanilla creature."""
+        creature = get_card("Balduvian_Bears")
+        creature.name = "Mock_reature"
+        creature.activated_ability = MagicMock()
+        return creature
+    return _mock_bear
+
+@pytest.fixture
 def mock_bolt(mock_ability) -> Instant:
     """Mock an instant spell."""
     instant: Instant = get_card("Lightning_Bolt")

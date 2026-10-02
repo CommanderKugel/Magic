@@ -28,6 +28,7 @@ A turn consists of 5 phases in this order - beginning, precombat main, combat, p
 only creature can attack or block (506.3)
 
 1. Beginning of Combat (507.)
+- triggered abilities
 - active player gets priority (507.2)
 
 2. Declare Attackers Step (508.)
@@ -47,7 +48,7 @@ only creature can attack or block (506.3)
 3. Declare Blockers Step (509.)
 - defending player declares blocker
     - choose which cretures will block which attacker (509.1a)
-        - must be untapped
+    - blocker must be untapped
     - restictions (cant block) (509.1b)
     - determine cost to block (509.1d)
     - activate mana abilities (509.1e)

@@ -127,79 +127,223 @@ class Game:
 
     def beginning_of_combat_step(self) -> None:
         """Play beginning of combat step. See concepts/Turn.md for more info."""
-        print("[BEGINNING OF COMBAT]")
 
         # ToDo: triggered abilities
 
         self.priority(sorcery_speed=False)
 
-        def declare_attackers() -> dict[Creature, list[Creature]]:
-            """Declare this turns attacker."""
-            print("[DECLARE ATTACKERS STEP]")
-            self.step = "DeclareAttacker"
-            attacker = {}
-            for creature in self.active_player.creatures:
-                if self.active_player.binary_choice(
-                    f"Do you want to attack with {creature.name}?"
+    def can_attack(self, creature: Creature, owner: Player) -> bool:
+        """Returns True if the creature can attack, False if not."""
+
+        # ToDo: summoning sickness
+        # ToDo: haste
+        # ToDo: defender
+        # ToDo: cant attack
+
+        return not creature.tapped
+
+    def wants_to_attack(self, creature: Creature, owner: Player) -> bool:
+        """Binary choice if the creature should attack."""
+
+        # ToDo: goad
+        # ToDo: attacks each turn if able
+
+        return owner.binary_choice(f"Do you wnat to attack with {creature.name}?")
+
+    def declare_attacker_step(self) -> dict[Creature, list[Creature]]:
+        """Declare this turns attacker. See concepts/Turn.md for more info."""
+
+        # ToDo: Planeswalker
+
+        attacker = {
+            creature: []
+            for creature in self.active_player.creatures
+
+            if self.can_attack(creature, self.active_player)
+
+            # ToDo: requirements (e.g. attacks if able)
+            and self.wants_to_attack(creature, self.active_player)
+        }
+        
+        # ToDo: attacker restrictions (e.g. cannot attack alone) -> remove from list
+        # ToDo: determine extra cost -> activate mana abilities -> pay cost
+
+        for att, _ in attacker.items():
+            att.tapped = True
+            print(f"[ATTACKER] {att.name}")
+
+        # ToDo: Triggered abilities
+        
+        self.priority(sorcery_speed=False)
+        return attacker
+
+    def can_block(self, blocker: Creature, owner: Player) -> bool:
+        """Returns True if the creature can block. Does not mean specific attacker can be blocked though."""
+
+        # ToDo: cant block
+
+        return not blocker.tapped
+
+    def can_be_blocked(self, attacker: Creature, defender: Creature) -> bool:
+        """Returns Ture if attacking creature can be blocked by blocker, False if not."""
+
+        # ToDo: flying
+        # ToDo: protection
+        # ToDo: cant be blocked
+
+        return True
+
+    def declare_blocker_step(self, all_attacker: dict[Creature, list[Creature]]) -> dict[Creature, list[Creature]]:
+        """Declare blocker to this turns attackers. See concepts/Turn.md for more info."""
+
+        # ToDo: pre-filter blocker for perfomance
+        # -> is untapped, not summoningsick or has haste
+
+        available_blocker = [
+            creature 
+            for creature in self.reactive_player.creatures
+            if self.can_block(creature, self.reactive_player)
+        ]
+
+        unavailable_blocker = []
+
+        for attacker in all_attacker.keys():
+            for blocker in available_blocker:
+                if blocker in unavailable_blocker:
+                    continue
+
+                if (
+                    self.can_be_blocked(attacker, blocker)
+                    and self.reactive_player.binary_choice(
+                        f"Do you want to block {attacker.name} with {blocker.name}?"
+                    )
                 ):
-                    attacker[creature] = []
-                    print(f"[ATTACKER] attacking with {creature.name}")
-            self.priority(sorcery_speed=False)
-            return attacker
+                    # ToDo: determine extra costs -> activate mana abilities -> pay extra costs
 
-        def declare_blockers(attacker: dict[Creature, list[Creature]]) -> dict[Creature, list[Creature]]:
-            """Declare blocker to this turns attackers."""
-            print("[DECLARE BLOCKERS STEP]")
-            self.step = "DeclareBlocker"
-            available_blocker = [c for c in self.reactive_player.creatures]
-            for att in attacker.keys():
-                for blocker in available_blocker:
-                    if self.reactive_player.binary_choice(
-                        f"Do you want to block {att.name} with {blocker.name}?"
-                    ):
-                        attacker[att].append(blocker)
-                        available_blocker.remove(blocker)
-                        print(f"[BLOCKER] blocking {att.name} with {blocker.name}")
-            self.priority(sorcery_speed=False)
-            return attacker
+                    # creature blocks attacker
+                    all_attacker[attacker].append(blocker)
 
-        def damage_step(attacker_: dict[Creature, list[Creature]]) -> None:
-            """Deal combat damage to creatures and players."""
-            print("[DAMAGE STEP]")
-            self.step = "Damage"
+                    # creatures can only block one attacker at a time
+                    unavailable_blocker.append(blocker)
 
-            for attacker, blocker in attacker_.items():
-                # no blocker: deal damage to opponent
-                if len(blocker) == 0:
-                    self.reactive_player.life -= attacker.get_power()
-                    print(f"[DAMAGE] {self.reactive_player.name} receivec {attacker.get_power()} dmg.")
-                # only one blocker
-                # equal trade of damage.
-                elif len(blocker) == 1:
-                    block = blocker[0]
-                    block.damage_counter += attacker.get_power()
-                    attacker.damage_counter += block.get_power()
-                    print(f"[DAMAGE] {block.name} received {attacker.get_power()} dmg and {attacker.name} received {block.get_power()} dmg.")
-                elif len(blocker) > 1:
-                    damage_dist = self.active_player.distribute_damage_to_blocker(attacker, blocker)
-                    assert sum(damage_dist.values()) <= attacker.get_power()
-                    for block in blocker:
-                        block.damage_counter += damage_dist.get(block, 0)
+        for attacker, b in all_attacker.items():
+            for blocker in b:
+                print(f"[BLOCK] {blocker.name} blocks {attacker.name}")
+            if len(b) == 0:
+                print(f"[BLOCK] unblocked - {attacker.name}")
 
-            # actually kill creatures and players
-            self.state_based_actions()
+        # ToDo: triggered abilities
+                    
+        self.priority(sorcery_speed=False)
 
-        def end_of_combat() -> None:
-            """Play end of combat step."""
-            print("[END OF COMBAT STEP]")
-            self.step = "EndOfCombat"
-            self.priority(sorcery_speed=False)
+        return all_attacker
 
-        beginning_of_combat()
-        attacker = declare_attackers()
-        attacker = declare_blockers(attacker)
-        damage_step(attacker)
-        end_of_combat()
+    def deal_combat_damage_to_creature(
+        self, 
+        attacker: Creature, 
+        victim: Creature,
+        attacking_player: Player,
+        defending_player: Player,
+        amount: int | None = None
+    ) -> None:
+        """Attacker deals damage to the victim."""
+
+        # ToDo: wither
+        # ToDo: trample (only if opponent == self.active_player)
+
+        if amount is None:
+            victim.damage_counter += attacker.get_power()
+        
+        # damage is not None
+        else: 
+            victim.damage_counter += amount
+
+        # ToDo: triggered abilities
+
+    def deal_combat_damage_to_player(
+        self, attacker: Creature, player: Player, amount: int | None = None
+    ) -> None:
+        """Attacker deals damage to the victim."""
+
+        # ToDo: toxic
+        # ToDo: infect
+
+        if amount is None:
+            player.life -= attacker.get_power()
+
+        # damage is not None 
+        else: 
+            player.life -= amount
+        
+        # ToDo: triggered abilities
+
+    def assign_combat_damage(self, attacker: Creature, blocker: list[Creature]) -> None:
+        """Assign combat damage among defending creatures."""
+        dmg_left = attacker.get_power()
+
+        for victim in blocker:
+
+            # creatures cannot deal damage or be dealt damage if they are removed from the field
+            if victim not in self.reactive_player.creatures:
+                continue
+
+            # deal damage to attacking creature
+            self.deal_combat_damage_to_creature(
+                victim, attacker, self.reactive_player, self.active_player,
+            )
+
+            # if attacking creature can only assign damage equal to its power
+            if dmg_left <= 0:
+                continue
+            
+            # determine how much damage the attacker deals to this specific blocker
+            dmg = self.active_player.choose_int_value(dmg_left)
+            dmg_left = max(dmg - dmg_left, 0)
+            self.deal_combat_damage_to_creature(
+                attacker, victim, self.active_player, self.reactive_player, amount=dmg,
+            )
+
+    def damage_step(self, all_attacker: dict[Creature, list[Creature]]) -> None:
+        """Deal combat damage to creatures and players. See concepts/Turn.md for more info."""
+
+        for attacker, blocker in all_attacker.items():
+
+            # no camage assignment if the attacking creature left the battlefield
+            if attacker not in self.active_player.creatures:
+                continue
+
+            # no blocker: deal damage to opponent
+            if len(blocker) == 0:
+                print("A")
+                self.deal_combat_damage_to_player(attacker, self.reactive_player)
+
+            # only one blocker, full damage assignment to blocking creature.
+            elif len(blocker) == 1:
+                if blocker[0] in self.reactive_player.creatures:
+                    self.deal_combat_damage_to_creature(attacker, blocker[0], self.active_player, self.reactive_player)
+                    self.deal_combat_damage_to_creature(blocker[0], attacker, self.reactive_player, self.active_player)
+            
+            # multiple blocker, damage needs to be assigned by the player.
+            elif len(blocker) > 1:
+                print("C")
+                self.assign_combat_damage(attacker, blocker)
+
+        self.state_based_actions()
+        self.priority(sorcery_speed=False)
+
+    def end_of_combat_step(self) -> None:
+        """Play end of combat step. See concepts/Turn.md for more info."""
+        print("[END OF COMBAT STEP]")
+
+        self.priority(sorcery_speed=False)
+
+    def combat_phase(self) -> None:
+        """Play a whole combat phase. See concepts/Turn.md for more info."""
+        self.beginning_of_combat_step()
+        attacker = self.declare_attacker_step()
+        attacker = self.declare_blocker_step(attacker)
+        self.damage_step(attacker)
+        self.end_of_combat_step()
         self.clear_player_mana()
 
 

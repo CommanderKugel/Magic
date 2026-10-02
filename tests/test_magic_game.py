@@ -93,6 +93,489 @@ class TestMainPhase:
         game.priority.assert_called_once_with(sorcery_speed=True)
 
 
+class TestCombatPhase:
+    """Test simulating the combat phase."""
+
+    # BEGINNING OF COMBAT
+
+    def test_beginning_of_combat_has_instant_speed_priority(self, game):
+        """Beginning of combat has one round of priority."""
+        game.priority = MagicMock()
+
+        game.beginning_of_combat_step()
+
+        game.priority.assert_called_once_with(sorcery_speed=False)
+
+    # HELPER: CAN ATTACK
+
+    def test_creature_can_attack(self, game, mock_bear):
+        """Creature can attack. Happypath."""
+        game.p1.creatures = [mock_bear]
+
+        can_attack = game.can_attack(mock_bear, game.p1)
+
+        assert can_attack
+
+    def test_tapped_creature_cannot_attack(self, game, mock_bear):
+        """Tapped creatures can not attack."""
+        mock_bear.tapped = True
+        game.p1.creatures = [mock_bear]
+
+        can_attack = game.can_attack(mock_bear, game.p1)
+
+        assert not can_attack
+
+    # HELPER: CAN BLOCK
+
+    def test_creature_can_block_attacker(self, game, mock_bear):
+        """Creature can block attacker. Happypath."""
+        game.p1.creatures = [mock_bear]
+        mock_bear.tapped = False
+
+        can_block = game.can_block(mock_bear, game.p2)
+
+        assert can_block
+
+    def test_tapped_creature_can_not_block(self, game, mock_bear):
+        """Tapped creature can not block attacker."""
+        game.p1.creatures = [mock_bear]
+        mock_bear.tapped = True
+
+        can_block = game.can_block(mock_bear, game.p2)
+
+        assert not can_block
+
+
+    # HELPER: CAN BE BLOCKED
+
+    def test_creature_can_block_attacker(self, game, mock_bear_factory):
+        """Bear is allowed to block a bear. Vanilly Happypath."""
+        bear_1 = mock_bear_factory()
+        bear_2 = mock_bear_factory()
+        game.p1.creatures = [bear_1]
+        game.p2.creatures = [bear_2]
+        bear_1.tapped = True
+
+        allowed_to_block = game.can_be_blocked(bear_1, bear_2)
+
+        assert allowed_to_block
+
+    # DECLARE ATTACKER
+
+    def test_declare_creature_can_and_should_attack(self, game, mock_bear):
+        """Attacker is declared successfully. Happypath."""
+        game.p1.creatures = [mock_bear]
+        game.can_attack = MagicMock(return_value=True)
+        game.wants_to_attack = MagicMock(return_value=True)
+        game.priority = MagicMock()
+
+        attacker = game.declare_attacker_step()
+
+        game.can_attack.assert_called_once_with(mock_bear, game.p1)
+        game.wants_to_attack.assert_called_once_with(mock_bear, game.p1)
+        assert len(attacker) == 1
+        creature = list(attacker.keys())[0]
+        assert creature == mock_bear
+        assert creature.tapped
+        game.priority.assert_called_once_with(sorcery_speed=False)
+
+    def test_declare_creature_can_but_should_not_attack(self, game, mock_bear):
+        """Attacker is not declared successfully."""
+        game.p1.creatures = [mock_bear]
+        game.can_attack = MagicMock(return_value=True)
+        game.wants_to_attack = MagicMock(return_value=False)
+        game.priority = MagicMock()
+
+        attacker = game.declare_attacker_step()
+
+        game.can_attack.assert_called_once_with(mock_bear, game.p1)
+        game.wants_to_attack.assert_called_once_with(mock_bear, game.p1)
+        assert len(attacker) == 0
+        game.priority.assert_called_once_with(sorcery_speed=False)
+
+    def test_declare_creature_can_not_but_should_attack(self, game, mock_bear):
+        """Attacker is not declared successfully."""
+        game.p1.creatures = [mock_bear]
+        game.can_attack = MagicMock(return_value=False)
+        game.wants_to_attack = MagicMock(return_value=True)
+        game.priority = MagicMock()
+
+        attacker = game.declare_attacker_step()
+
+        game.can_attack.assert_called_once_with(mock_bear, game.p1)
+        game.wants_to_attack.assert_not_called()
+        assert len(attacker) == 0
+        game.priority.assert_called_once_with(sorcery_speed=False)
+
+    def test_one_creature_should_and_one_should_not_attack(self, game, mock_bear_factory):
+        """Only one attacker is declared successfully."""
+        bear_1 = mock_bear_factory()
+        bear_2 = mock_bear_factory()
+        game.p1.creatures = [bear_1, bear_2]
+        game.can_attack = MagicMock(return_value=True)
+        game.wants_to_attack = MagicMock(side_effect=[True, False])
+        game.priority = MagicMock()
+
+        attacker = game.declare_attacker_step()
+
+        game.can_attack.assert_any_call(bear_1, game.p1)
+        game.can_attack.assert_any_call(bear_2, game.p1)
+        game.wants_to_attack.assert_any_call(bear_1, game.p1)
+        game.wants_to_attack.assert_any_call(bear_2, game.p1)
+        assert len(attacker) == 1
+        creature = list(attacker.keys())[0]
+        assert creature == bear_1
+        assert creature.tapped
+        game.priority.assert_called_once_with(sorcery_speed=False)
+
+    def test_two_creatures_should_but_one_can_attack(self, game, mock_bear_factory):
+        """Only one attacker is declared successfully."""
+        bear_1 = mock_bear_factory()
+        bear_2 = mock_bear_factory()
+        game.p1.creatures = [bear_1, bear_2]
+        game.can_attack = MagicMock(side_effect=[True, False])
+        game.wants_to_attack = MagicMock(return_value=True)
+        game.priority = MagicMock()
+
+        attacker = game.declare_attacker_step()
+
+        game.can_attack.assert_any_call(bear_1, game.p1)
+        game.can_attack.assert_any_call(bear_2, game.p1)
+        game.wants_to_attack.assert_called_once_with(bear_1, game.p1)
+        assert len(attacker) == 1
+        creature = list(attacker.keys())[0]
+        assert creature == bear_1
+        assert creature.tapped
+        game.priority.assert_called_once_with(sorcery_speed=False)
+
+    # DECLARE BLOCKER
+
+    def test_creature_blocks(self, game, mock_bear_factory):
+        """One creature can block another creature. Happypath."""
+        bear_1 = mock_bear_factory()
+        bear_2 = mock_bear_factory()
+        bear_1.tapped = True # attacker
+        game.p1.creatures = [bear_1]
+        game.p2.creatures = [bear_2]
+        game.p2.binary_choice = MagicMock(return_value=True)
+        game.can_block = MagicMock(return_value=True)
+        game.can_be_blocked = MagicMock(return_value=True)
+        game.priority = MagicMock()
+
+        attacker = {bear_1: []}
+        attacker = game.declare_blocker_step(attacker)
+
+        assert bear_1 in attacker.keys()
+        assert bear_2 in attacker[bear_1]
+        assert len(attacker[bear_1]) == 1
+        game.can_block.assert_called_once()
+        game.can_be_blocked.assert_called_once()
+        game.p2.binary_choice.assert_called_once()
+        game.priority.assert_called_once_with(sorcery_speed=False)     
+
+    def test_creature_can_only_block_first_attacker(self, game, mock_bear_factory):
+        """First attacker is blocked and then cannot block the second attacker."""
+        bear_1 = mock_bear_factory()
+        bear_2 = mock_bear_factory()
+        bear_3 = mock_bear_factory()
+        bear_1.tapped = True # attacker
+        bear_2.tapped = True # attacker
+        game.p1.creatures = [bear_1, bear_2]
+        game.p2.creatures = [bear_3]
+        game.p2.binary_choice = MagicMock(return_value=True)
+        game.can_block = MagicMock(return_value=True)
+        game.can_be_blocked = MagicMock(return_value=True)
+        game.priority = MagicMock()
+
+        attacker = {bear_1: [], bear_2: []}
+        attacker = game.declare_blocker_step(attacker)
+
+        assert bear_1 in attacker.keys()
+        assert bear_2 in attacker.keys()
+        assert bear_3 in attacker[bear_1]
+        assert bear_3 not in attacker[bear_2]
+        assert len(attacker[bear_1]) == 1
+        assert len(attacker[bear_2]) == 0
+        game.can_block.assert_called_once()
+        game.can_be_blocked.assert_called_once()
+        game.p2.binary_choice.assert_called_once()
+        game.priority.assert_called_once_with(sorcery_speed=False)
+
+    def test_creature_only_blocks_second_attacker(self, game, mock_bear_factory):
+        """Creature does not block first attacker and then blocks the second attacker."""
+        bear_1 = mock_bear_factory()
+        bear_2 = mock_bear_factory()
+        bear_3 = mock_bear_factory()
+        bear_1.tapped = True # attacker
+        bear_2.tapped = True # attacker
+        game.p1.creatures = [bear_1, bear_2]
+        game.p2.creatures = [bear_3]
+        game.p2.binary_choice = MagicMock(side_effect=[False, True])
+        game.can_block = MagicMock(return_value=True)
+        game.can_be_blocked = MagicMock(return_value=True)
+        game.priority = MagicMock()
+
+        attacker = {bear_1: [], bear_2: []}
+        attacker = game.declare_blocker_step(attacker)
+
+        assert bear_1 in attacker.keys()
+        assert bear_2 in attacker.keys()
+        assert bear_3 not in attacker[bear_1]
+        assert bear_3 in attacker[bear_2]
+        assert len(attacker[bear_1]) == 0
+        assert len(attacker[bear_2]) == 1
+        game.can_block.assert_called_once()
+        assert game.can_be_blocked.call_count == 2
+        assert game.p2.binary_choice.call_count == 2
+        game.priority.assert_called_once_with(sorcery_speed=False)
+
+    def test_creature_cannot_block(self, game, mock_bear_factory):
+        """Creature cannot block so the player cannot declare it as blocker."""
+        bear_1 = mock_bear_factory()
+        bear_2 = mock_bear_factory()
+        bear_1.tapped = True # attacker
+        game.p1.creatures = [bear_1]
+        game.p2.creatures = [bear_2]
+        game.p2.binary_choice = MagicMock()
+        game.can_block = MagicMock(return_value=False)
+        game.can_be_blocked = MagicMock()
+        game.priority = MagicMock()
+
+        attacker = {bear_1: [], bear_2: []}
+        attacker = game.declare_blocker_step(attacker)
+
+        assert bear_1 in attacker.keys()
+        assert bear_2 not in attacker[bear_1]
+        assert len(attacker[bear_1]) == 0
+        game.p2.binary_choice.assert_not_called()
+        game.can_block.assert_called_once()
+        game.can_be_blocked.assert_not_called()
+        game.priority.assert_called_once_with(sorcery_speed=False)
+
+    def test_one_creature_cannot_block_but_second_can(self, game, mock_bear_factory):
+        """Player can only declare one creature as blocker."""
+        bear_1 = mock_bear_factory()
+        bear_2 = mock_bear_factory()
+        bear_3 = mock_bear_factory()
+        bear_1.tapped = True # attacker
+        game.p1.creatures = [bear_1]
+        game.p2.creatures = [bear_2, bear_3]
+        game.p2.binary_choice = MagicMock(return_value=True)
+        game.can_block = MagicMock(side_effect=[True, False])
+        game.can_be_blocked = MagicMock(return_value=True)
+        game.priority = MagicMock()
+
+        attacker = {bear_1: []}
+        attacker = game.declare_blocker_step(attacker)
+
+        assert bear_1 in attacker.keys()
+        assert bear_2 in attacker[bear_1]
+        assert bear_3 not in attacker[bear_1]
+        assert len(attacker[bear_1]) == 1
+        game.p2.binary_choice.assert_called_once()
+        assert game.can_block.call_count == 2
+        game.can_be_blocked.assert_called_once()
+        game.can_be_blocked.assert_called_once()
+        game.priority.assert_called_once_with(sorcery_speed=False)
+
+    def test_one_creature_cannot_block_attacker_but_second_can(self, game, mock_bear_factory):
+        """Player can only declare one creature as blocker."""
+        bear_1 = mock_bear_factory()
+        bear_2 = mock_bear_factory()
+        bear_3 = mock_bear_factory()
+        bear_1.tapped = True # attacker
+        game.p1.creatures = [bear_1]
+        game.p2.creatures = [bear_2, bear_3]
+        game.p2.binary_choice = MagicMock(return_value=True)
+        game.can_block = MagicMock(return_value=True)
+        game.can_be_blocked = MagicMock(side_effect=[True, False])
+        game.priority = MagicMock()
+
+        attacker = {bear_1: []}
+        attacker = game.declare_blocker_step(attacker)
+
+        assert bear_1 in attacker.keys()
+        assert bear_2 in attacker[bear_1]
+        assert bear_3 not in attacker[bear_1]
+        assert len(attacker[bear_1]) == 1
+        game.p2.binary_choice.assert_called_once()
+        assert game.can_block.call_count == 2
+        assert game.can_be_blocked.call_count == 2
+        game.p2.binary_choice.assert_called_once()
+        game.priority.assert_called_once_with(sorcery_speed=False)
+
+    # HELPER: DEAL DAMAGE TO CREATURE
+
+    def test_creature_deals_damage_to_creature(self, game, mock_bear_factory):
+        """One creature damages another. Happypath."""
+        bear_1 = mock_bear_factory()
+        bear_2 = mock_bear_factory()
+        dmg = bear_1.get_power()
+        
+        game.deal_combat_damage_to_creature(bear_1, bear_2, game.p1, game.p2)
+
+        assert bear_2.damage_counter == dmg
+        assert bear_1.damage_counter == 0
+
+    def test_creature_deals_partial_damage_to_creature(self, game, mock_bear_factory):
+        """One creature damages another by different amount than its power."""
+        bear_1 = mock_bear_factory()
+        bear_2 = mock_bear_factory()
+        DMG = 1
+        
+        game.deal_combat_damage_to_creature(bear_1, bear_2, game.p1, game.p2, DMG)
+
+        assert bear_2.damage_counter == DMG
+        assert bear_1.damage_counter == 0
+
+    # HELPER: DEAL DAMAGE TO PLAYER
+
+    def test_creature_deals_damage_to_player(self, game, mock_bear):
+        """One creature damages a player. Happypath."""
+        dmg = mock_bear.get_power()
+        hp = game.p2.life
+
+        game.deal_combat_damage_to_player(mock_bear, game.p2)
+
+        assert game.p2.life == hp - dmg
+
+    def test_creature_deals_partial_damage_to_player(self, game, mock_bear):
+        """One creature damages a player by different amount than its power."""
+        hp = game.p2.life
+        DMG = 1
+
+        game.deal_combat_damage_to_player(mock_bear, game.p2, DMG)
+
+        assert game.p2.life == hp - DMG
+
+    # HELPER: ASSIGN COMBAT DAMAGE
+
+    def test_single_assignment_hits_first_of_two_blocker(self, game, mock_bear_factory):
+        """When double blocking, damage assignment should only go to first bear."""
+        bear_1 = mock_bear_factory()
+        bear_2 = mock_bear_factory()
+        bear_3 = mock_bear_factory()
+
+        game.assign_combat_damage(bear_1, [bear_2, bear_3])
+
+
+
+    # DAMAGE STEP
+
+    def test_no_blocker_goes_to_player(self, game, mock_bear):
+        """If no blocker is declared, the player takes combat damage."""
+        attacker = {mock_bear: []}
+        game.p1.creatures = [mock_bear]
+        game.state_based_actions = MagicMock()
+        game.priority = MagicMock()
+        game.deal_combat_damage_to_player = MagicMock()
+
+        game.damage_step(attacker)
+
+        game.deal_combat_damage_to_player.assert_called_once()
+        game.priority.assert_called_once_with(sorcery_speed=False)
+        game.state_based_actions.assert_called_once()
+
+    def test_one_blocker_damages_creature(self, game, mock_bear_factory):
+        """If one blocker is declared, the blocker takes all the damage."""
+        bear_1 = mock_bear_factory()
+        bear_2 = mock_bear_factory()
+        game.p1.creatures = [bear_1]
+        game.p2.creatures = [bear_2]
+        attacker = {bear_1: [bear_2]}
+        game.state_based_actions = MagicMock()
+        game.priority = MagicMock()
+        game.deal_combat_damage_to_creature = MagicMock()
+
+        game.damage_step(attacker)
+
+        assert game.deal_combat_damage_to_creature.call_count == 2
+        game.priority.assert_called_once_with(sorcery_speed=False)
+        game.state_based_actions.assert_called_once()
+
+    def test_two_blocker_share_damage(self, game, mock_bear_factory):
+        """If multiple blocker are declared, they share the damage."""
+        bear_1 = mock_bear_factory()
+        bear_2 = mock_bear_factory()
+        bear_3 = mock_bear_factory()
+        game.p1.creatures = [bear_1]
+        game.p2.creatures = [bear_2, bear_3]
+        attacker = {bear_1: [bear_2, bear_3]}
+        game.state_based_actions = MagicMock()
+        game.priority = MagicMock()
+        game.assign_combat_damage = MagicMock()
+
+        game.damage_step(attacker)
+
+        game.assign_combat_damage.assert_called_once()
+        game.priority.assert_called_once_with(sorcery_speed=False)
+        game.state_based_actions.assert_called_once()
+
+    def test_removed_attacker_skips_damage_distribution(self, game, mock_bear_factory):
+        """If an attacker is removed from play, it does not deal damage anymore."""
+        bear_1 = mock_bear_factory()
+        bear_2 = mock_bear_factory()
+        game.p2.creatures = [bear_2]
+        attacker = {bear_1: [bear_2]}
+        game.state_based_actions = MagicMock()
+        game.priority = MagicMock()
+        game.assign_combat_damage = MagicMock()
+
+        game.damage_step(attacker)
+
+        game.assign_combat_damage.assert_not_called()
+        game.priority.assert_called_once_with(sorcery_speed=False)
+        game.state_based_actions.assert_called_once()
+
+    def test_removed_blocker_skips_damage_alltogether(self, game, mock_bear_factory):
+        """If a blocker is removed from play, the attacker still does no damage at all."""
+        bear_1 = mock_bear_factory()
+        bear_2 = mock_bear_factory()
+        game.p1.creatures = [bear_1]
+        attacker = {bear_1: [bear_2]}
+        game.state_based_actions = MagicMock()
+        game.priority = MagicMock()
+        game.deal_combat_damage_to_creature = MagicMock()
+        game.assign_combat_damage = MagicMock()
+        game.deal_combat_damage_to_player = MagicMock()
+
+        game.damage_step(attacker)
+
+        game.deal_combat_damage_to_creature.assert_not_called()
+        game.deal_combat_damage_to_player.assert_not_called()
+        game.assign_combat_damage.assert_not_called()
+        game.priority.assert_called_once_with(sorcery_speed=False)
+        game.state_based_actions.assert_called_once()
+
+    # END OF COMBAT
+
+    def test_end_of_combat_has_priority(self, game):
+        """End of combat has a single instant speed priority."""
+        game.priority = MagicMock()
+
+        game.end_of_combat_step()
+
+        game.priority.assert_called_once_with(sorcery_speed=False)
+
+    # PUTTING IT ALL TOGETHER
+
+    def test_combat_phase_has_all_steps(self, game):
+        """Combat phase has beginning of C., declare attackers, declare blocker, damage, end of C."""
+        game.beginning_of_combat_step = MagicMock()
+        game.declare_attacker_step = MagicMock()
+        game.declare_blocker_step = MagicMock()
+        game.damage_step = MagicMock()
+        game.end_of_combat_step = MagicMock()
+
+        game.combat_phase()
+
+        game.beginning_of_combat_step.assert_called_once()
+        game.declare_attacker_step.assert_called_once()
+        game.declare_blocker_step.assert_called_once()
+        game.damage_step.assert_called_once()
+        game.end_of_combat_step.assert_called_once()
+
+
 class TestHelperMethods:
     """Test misc helper methods that are part of the game."""
 
