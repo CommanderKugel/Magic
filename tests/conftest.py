@@ -78,6 +78,14 @@ def mock_land() -> Land:
     return land
 
 @pytest.fixture
+def mock_trample_dino() -> Creature:
+    """Mock a trampling Dino."""
+    creature = get_card("Colossal_Dreadmaw")
+    creature.name = "Mock_Dino"
+    creature.summoning_sick = False
+    return creature
+
+@pytest.fixture
 def mock_bear(mock_ability) -> Creature:
     """Mock a vanilla creature."""
     creature = get_card("Balduvian_Bears")

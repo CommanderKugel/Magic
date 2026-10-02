@@ -47,6 +47,10 @@ class Creature(Spell):
     subtype: str = ""
 
     summoning_sick: bool = True
+
+    # Keywords
+    trample: bool = False
+
     buffs: list[Buff] | None = None
 
     def get_power(self) -> int:

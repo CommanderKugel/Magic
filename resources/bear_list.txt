@@ -1,3 +1,6 @@
-24 Balduvian_Bears
+10 Balduvian_Bears
 12 Forest
 4 Llanowar_Elves
+4 Colossal_Dreadmaw
+4 Horrific_Assault
+4 Giant_Growth

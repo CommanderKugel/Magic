@@ -56,6 +56,18 @@ _ALL_CARDS = {
         activated_ability=src.implementation.abilities.CreatureTapForGreen,
     ),
 
+    "Colossal_Dreadmaw": Creature(
+        name="Colossal Dreadmaw",
+        subtype="Dinsaur",
+        color=["Green"],
+        cost={"Green": 2, "None": 4},
+        base_power=6,
+        base_toughness=6,
+        tapped=False,
+        image="Colossal_Dreadmaw.png",
+        trample=True,
+    ),
+
     "Horrific_Assault": Sorcery(
         name="Horrific Assault",
         ability=src.implementation.abilities.Punch,

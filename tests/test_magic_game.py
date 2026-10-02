@@ -449,6 +449,53 @@ class TestCombatPhase:
         assert bear_2.damage_counter == DMG
         assert bear_1.damage_counter == 0
 
+    def test_trample_deals_excess_damage_to_player(self, game, mock_bear, mock_trample_dino):
+        """Trampling dino deals excess damage to player blocking with a bear."""
+        game.p1.creatures = [mock_trample_dino]
+        game.p2.creatures = [mock_bear]
+        game.deal_combat_damage_to_player = MagicMock()
+
+        game.deal_combat_damage_to_creature(mock_trample_dino, mock_bear, game.p1, game.p2)
+
+        assert mock_bear.damage_counter == mock_bear.get_toughness()
+        excess_dmg = mock_trample_dino.get_power() - mock_bear.get_toughness()
+        game.deal_combat_damage_to_player.assert_called_once_with(
+            mock_trample_dino, game.p2, amount=excess_dmg,
+        )
+
+    def test_trample_does_not_trigger_for_bigger_blocker(self, game, mock_bear, mock_trample_dino):
+        """Trampling dino deals excess damage to player when blocking a bear."""
+        game.p1.creatures = [mock_bear]
+        game.p2.creatures = [mock_trample_dino]
+        game.deal_combat_damage_to_player = MagicMock()
+
+        game.deal_combat_damage_to_creature(mock_bear, mock_trample_dino, game.p1, game.p2)
+
+        game.deal_combat_damage_to_player.assert_not_called()
+
+    def test_trample_does_not_trigger_for_smaller_attacker(self, game, mock_bear, mock_trample_dino):
+        """Trampling Bear deals no damage to player when blocked by bigger dino."""
+        game.p1.creatures = [mock_bear]
+        game.p2.creatures = [mock_trample_dino]
+        mock_bear.trample = True
+        game.deal_combat_damage_to_player = MagicMock()
+
+        game.deal_combat_damage_to_creature(mock_bear, mock_trample_dino, game.p1, game.p2)
+
+        game.deal_combat_damage_to_player.assert_not_called()
+
+    def test_trample_does_not_trigger_against_same_size_creature(self, game, mock_bear, mock_trample_dino):
+        """Trampling Bear deals no damage to player when blocked by bigger dino."""
+        game.p1.creatures = [mock_trample_dino]
+        game.p2.creatures = [mock_bear]
+        mock_bear.base_power = 6
+        mock_bear.base_toughness = 6
+        game.deal_combat_damage_to_player = MagicMock()
+
+        game.deal_combat_damage_to_creature(mock_trample_dino, mock_bear, game.p1, game.p2)
+
+        game.deal_combat_damage_to_player.assert_not_called()
+
     # HELPER: DEAL DAMAGE TO PLAYER
 
     def test_creature_deals_damage_to_player(self, game, mock_bear):

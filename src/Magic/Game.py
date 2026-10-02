@@ -250,14 +250,21 @@ class Game:
         """Attacker deals damage to the victim."""
 
         # ToDo: wither
-        # ToDo: trample (only if opponent == self.active_player)
-
-        if amount is None:
-            victim.damage_counter += attacker.get_power()
         
-        # amount is not None
-        else: 
-            victim.damage_counter += amount
+        dmg = amount if amount is not None else attacker.get_power()
+        toughness = victim.get_toughness()
+
+        # Trample
+        if (
+            attacker.trample 
+            and dmg > toughness
+            and attacking_player == self.active_player
+        ):
+            trample_dmg = dmg - toughness
+            dmg = toughness
+            self.deal_combat_damage_to_player(attacker, defending_player, amount=trample_dmg)
+
+        victim.damage_counter += dmg
 
         # ToDo: triggered abilities
 
