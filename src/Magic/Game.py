@@ -314,7 +314,6 @@ class Game:
 
             # no blocker: deal damage to opponent
             if len(blocker) == 0:
-                print("A")
                 self.deal_combat_damage_to_player(attacker, self.reactive_player)
 
             # only one blocker, full damage assignment to blocking creature.
@@ -325,7 +324,6 @@ class Game:
             
             # multiple blocker, damage needs to be assigned by the player.
             elif len(blocker) > 1:
-                print("C")
                 self.assign_combat_damage(attacker, blocker)
 
         self.state_based_actions()

@@ -21,5 +21,5 @@ for i in range(100):
     try:
         while True:
             game.play_turn()
-    except:
-        print(f"[{i}] - {game.turn} turns.")
+    except Exception as e:
+        print(f"[{i}] - {game.turn} turns. result={e}")
