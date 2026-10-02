@@ -110,11 +110,16 @@ def eot_p3p3(source: Card, owner: Player, opponent: Player) -> None:
 
 def add_g_for_number_of_elves(source: Card, owner: Player, opponent: Player) -> None:
     """Player gets X times {G} where X is the numer of elves on the battlefield."""
-    elf_count = 0
-    for c in owner.creatures + opponent.creatures:
-        if "Elf" in c.subtype:
-            elf_count += 1
+    elf_count = sum(1 for c in owner.creatures + opponent.creatures if "Elf" in c.subtype)
     owner.floating_mana["Green"] += elf_count
+
+def eot_add_p1p1_for_number_of_elves(source: Card, owner: Player, opponent: Player) -> None:
+    """Creature gets +X/+X where X is the numer of elves on the battlefield."""
+    x = sum(1 for c in owner.creatures + opponent.creatures if "Elf" in c.subtype)
+    target: Creature = source.targets[0]
+    buff = Buff(target=target, power=x, toughness=x)
+    owner.eot_effects.append(buff)
+    target.buffs.append(buff)
 
 # INSTANCES
 
@@ -173,4 +178,11 @@ PriestOfTitania = Ability(
     _choose_targets=no_targets,
     _pay_cost=tap_card,
     _activity=add_g_for_number_of_elves,
+)
+
+TimberwatchElf = Ability(
+    _can_activate=creature_can_tap_and_on_field,
+    _choose_targets=target_single_creature,
+    _pay_cost=tap_card,
+    _activity=eot_add_p1p1_for_number_of_elves,
 )

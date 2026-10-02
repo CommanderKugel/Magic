@@ -74,6 +74,17 @@ _ALL_CARDS = {
         activated_ability=src.implementation.abilities.CreatureTapForGreen,
     ),
 
+    "Timberwatch_Elf": Creature(
+        name="Timberwatch Elf",
+        subtype=["Elf"],
+        color=["Green"],
+        cost={"Green": 1, "None": 2},
+        base_power=1,
+        base_toughness=2,
+        image="Timberwatch_Elf.png",
+        activated_ability=src.implementation.abilities.TimberwatchElf,
+    ),
+
     "Colossal_Dreadmaw": Creature(
         name="Colossal Dreadmaw",
         subtype=["Dinsaur"],
