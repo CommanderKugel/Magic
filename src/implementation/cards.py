@@ -68,6 +68,18 @@ _ALL_CARDS = {
         trample=True,
     ),
 
+    "Storm_Crow": Creature(
+        name="Storm Crow",
+        subtype="Bird",
+        color=["Blue"],
+        cost={"Blue": 1, "None": 1},
+        base_power=1,
+        base_toughness=2,
+        tapped=False,
+        image="Storm_Crow.png",
+        flying=True,
+    ),
+
     "Horrific_Assault": Sorcery(
         name="Horrific Assault",
         ability=src.implementation.abilities.Punch,

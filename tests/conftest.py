@@ -86,6 +86,14 @@ def mock_trample_dino() -> Creature:
     return creature
 
 @pytest.fixture
+def mock_flying_birb() -> Creature:
+    """Mock a flying Bird."""
+    creature = get_card("Storm_Crow")
+    creature.name = "Mock Birb"
+    creature.summoning_sickness = False
+    return creature
+
+@pytest.fixture
 def mock_bear(mock_ability) -> Creature:
     """Mock a vanilla creature."""
     creature = get_card("Balduvian_Bears")

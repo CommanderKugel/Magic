@@ -181,6 +181,23 @@ class TestCombatPhase:
 
         assert allowed_to_block
 
+    def test_flyer_cannot_be_blocked_by_bear(self, game, mock_flying_birb, mock_bear):
+        """Bear is allowed to block a bear. Vanilly Happypath."""
+        allowed_to_block = game.can_be_blocked(mock_flying_birb, mock_bear)
+        assert not allowed_to_block
+
+    def test_flyer_can_be_blocked_by_flyer(self, game, mock_flying_birb, mock_bear):
+        """Bear is allowed to block a bear. Vanilly Happypath."""
+        mock_bear.flying = True
+        allowed_to_block = game.can_be_blocked(mock_flying_birb, mock_bear)
+        assert allowed_to_block
+
+    def test_flyer_can_be_blocked_by_reach(self, game, mock_flying_birb, mock_bear):
+        """Bear is allowed to block a bear. Vanilly Happypath."""
+        mock_bear.reach = True
+        allowed_to_block = game.can_be_blocked(mock_flying_birb, mock_bear)
+        assert allowed_to_block
+
     # DECLARE ATTACKER
 
     def test_declare_creature_can_and_should_attack(self, game, mock_bear):

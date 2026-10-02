@@ -188,7 +188,10 @@ class Game:
     def can_be_blocked(self, attacker: Creature, defender: Creature) -> bool:
         """Returns Ture if attacking creature can be blocked by blocker, False if not."""
 
-        # ToDo: flying
+        # Flying & Reach
+        if attacker.flying and not (defender.flying or defender.reach):
+            return False
+
         # ToDo: protection
         # ToDo: cant be blocked
 

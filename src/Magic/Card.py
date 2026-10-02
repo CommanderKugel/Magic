@@ -49,6 +49,8 @@ class Creature(Spell):
     summoning_sick: bool = True
 
     # Keywords
+    flying: bool = False
+    reach: bool = False
     trample: bool = False
 
     buffs: list[Buff] | None = None
