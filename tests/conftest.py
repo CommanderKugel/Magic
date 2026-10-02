@@ -114,6 +114,26 @@ def mock_bear_factory():
     return _mock_bear
 
 @pytest.fixture
+def mock_elf_dork(mock_mana_ability):
+    """Mock Elf that taps for {G}."""
+    creature = get_card("Llanowar Elves")
+    creature.name = "Mock Elf Dork"
+    creature.summoning_sick = False
+    creature.activated_ability = mock_mana_ability
+    return creature
+
+@pytest.fixture
+def mock_elf_dork_factory():
+    def _mock_elf_dork():
+        """Mock Elf that taps for {G}."""
+        creature = get_card("Llanowar_Elves")
+        creature.name = "Mock Elf Dork"
+        creature.summoning_sick = False
+        creature.activated_ability = MagicMock()
+        return creature
+    return _mock_elf_dork
+
+@pytest.fixture
 def mock_bolt(mock_ability) -> Instant:
     """Mock an instant spell."""
     instant: Instant = get_card("Lightning_Bolt")

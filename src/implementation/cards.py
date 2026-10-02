@@ -56,6 +56,30 @@ _ALL_CARDS = {
         activated_ability=src.implementation.abilities.CreatureTapForGreen,
     ),
 
+    "Priest_of_Titania": Creature(
+        name="Priest of Titania",
+        subtype=["Elf", "Druid"],
+        color=["Green"],
+        cost={"Green": 1, "None": 1},
+        base_power=1,
+        base_toughness=1,
+        tapped=False,
+        image="Priest_of_Titania.png",
+        activated_ability=src.implementation.abilities.PriestOfTitania,
+    ),
+
+    "Fyndhorn_Elves": Creature(
+        name="Fyndhorn Elves",
+        subtype=["Elf", "Druid"],
+        color=["Green"],
+        cost={"Green": 1},
+        base_power=1,
+        base_toughness=1,
+        tapped=False,
+        image="Fyndhorn_Elves.png",
+        activated_ability=src.implementation.abilities.CreatureTapForGreen,
+    ),
+
     "Colossal_Dreadmaw": Creature(
         name="Colossal Dreadmaw",
         subtype=["Dinsaur"],

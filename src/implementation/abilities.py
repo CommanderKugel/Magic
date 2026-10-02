@@ -108,6 +108,14 @@ def eot_p3p3(source: Card, owner: Player, opponent: Player) -> None:
     owner.eot_effects.append(buff)
     target.buffs.append(buff)
 
+def add_g_for_number_of_elves(source: Card, owner: Player, opponent: Player) -> None:
+    """Player gets X times {G} where X is the numer of elves on the battlefield."""
+    elf_count = 0
+    for c in owner.creatures + opponent.creatures:
+        if "Elf" in c.subtype:
+            elf_count += 1
+    owner.floating_mana["Green"] += elf_count
+
 # INSTANCES
 
 LandTapForGreen = Ability(
@@ -156,4 +164,13 @@ GiantGrowth = Ability(
     _choose_targets=target_single_creature,
     _pay_cost=no_cost,
     _activity=eot_p3p3,
+)
+
+PriestOfTitania = Ability(
+    is_mana_ability=True,
+    mana_color="Green",
+    _can_activate=creature_can_tap_and_on_field,
+    _choose_targets=no_targets,
+    _pay_cost=tap_card,
+    _activity=add_g_for_number_of_elves,
 )
