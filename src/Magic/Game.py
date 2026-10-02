@@ -15,7 +15,6 @@ class Game:
         self.active_player: Player
         self.reactive_player: Player
 
-        self.step: PriorityState
         self.hit_landdrop = False
 
         self.stack: list[StackObject] = []
@@ -74,7 +73,6 @@ class Game:
         # ToDo: day/night
         
         print("[UNTAP]")
-        self.step = "Untap"
 
         # untap all permanents active player controls
         # no priority in this step
@@ -88,7 +86,6 @@ class Game:
     def upkeep_step(self) -> None:
         """Play the Upkeep step. See concepts/Turn.md for more info."""
         print("[UPKEEP]")
-        self.step = "Upkeep"
 
         # ToDo: Triggered abilities
 
@@ -97,7 +94,6 @@ class Game:
     def draw_step(self) -> None:
         """Play the Draw step. See concepts/Turn.md for more info."""
         print("[DRAW]")
-        self.step = "Draw"
         self.active_player.draw(1)
         self.priority(sorcery_speed=False)
     
@@ -122,19 +118,20 @@ class Game:
 
         print("[MAIN PHASE]")
 
-        self.step = "Main"
         self.priority(sorcery_speed=True)
         self.clear_player_mana()
 
 
     # COMBAT PHASE
 
-        def beginning_of_combat() -> None:
-            """Play beginning of combat step."""
-            print("[BEGINNING OF COMBAT]")
-            self.step = "BeginningOfCombat"
-            # ToDo: triggered abilities
-            self.priority(sorcery_speed=False)
+
+    def beginning_of_combat_step(self) -> None:
+        """Play beginning of combat step. See concepts/Turn.md for more info."""
+        print("[BEGINNING OF COMBAT]")
+
+        # ToDo: triggered abilities
+
+        self.priority(sorcery_speed=False)
 
         def declare_attackers() -> dict[Creature, list[Creature]]:
             """Declare this turns attacker."""
@@ -215,27 +212,28 @@ class Game:
         def beginning_of_end_phase() -> None:
             """Play the beggning of the end phase."""
             print("[BEGINNING OF END PHASE]")
-            self.step = "BeginnningOfEndPhase"
+
             # ToDo: triggered abilities
+
             pass
 
         def end_phase() -> None:
             """Play the end phase of this turn."""
             print("[END STEP]")
-            self.step = "EndStep"
+
             self.priority(sorcery_speed=False)
-            pass
 
         def cleanup_step() -> None:
             """Play the cleanup step of this turn.
             - remove damage counter from creatures.
             """
             print("[CLEANUP STEP]")
-            self.step = "CleanupStep"
+
             # remove damage countes from creatures
             for p in [self.p1, self.p2]:
                 for creature in p.creatures:
                     creature.damage_counter = 0
+
                 # remove floating mana
                 p.clear_floating_mana()
                 for eot in p.eot_effects:
@@ -243,6 +241,7 @@ class Game:
                         eot.target.buffs.remove(eot)
                         p.eot_effects.remove(eot)
                         del eot
+
             # discard due to handsize
             while len(self.active_player.hand) > 7:
                 print("Discard due to handsize.")
