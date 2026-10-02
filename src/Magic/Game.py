@@ -254,7 +254,7 @@ class Game:
         if amount is None:
             victim.damage_counter += attacker.get_power()
         
-        # damage is not None
+        # amount is not None
         else: 
             victim.damage_counter += amount
 
@@ -340,6 +340,7 @@ class Game:
         self.beginning_of_combat_step()
         attacker = self.declare_attacker_step()
         attacker = self.declare_blocker_step(attacker)
+        # ToDo: first-strike
         self.damage_step(attacker)
         self.end_of_combat_step()
         self.clear_player_mana()
@@ -348,52 +349,55 @@ class Game:
     # END PHASE
 
 
+    def beginning_of_end_phase_step(self) -> None:
+        """Play the beggning of the end phase."""
+        print("[BEGINNING OF END PHASE]")
+
+        # ToDo: triggered abilities
+
+        pass
+
+    def end_step(self) -> None:
+        """Play the end phase of this turn."""
+        print("[END STEP]")
+
+        self.priority(sorcery_speed=False)
+
+    def cleanup_step(self) -> None:
+        """Play the cleanup step of this turn.
+        - remove damage counter from creatures.
+        """
+        print("[CLEANUP STEP]")
+
+        # remove damage countes from creatures
+        for p in [self.p1, self.p2]:
+            for creature in p.creatures:
+                creature.damage_counter = 0
+
+            # remove floating mana
+            p.clear_floating_mana()
+            for eot in p.eot_effects:
+                if isinstance(eot, Buff):
+                    eot.target.buffs.remove(eot)
+                    p.eot_effects.remove(eot)
+                    del eot
+
+        # discard due to handsize
+        while len(self.active_player.hand) > 7:
+            print("Discard due to handsize.")
+            card = self.active_player.target(own_hand=True)
+            self.active_player.discard(card)
+
     def end_phase(self) -> None:
         """Play a whole end phase."""
-
-        def beginning_of_end_phase() -> None:
-            """Play the beggning of the end phase."""
-            print("[BEGINNING OF END PHASE]")
-
-            # ToDo: triggered abilities
-
-            pass
-
-        def end_phase() -> None:
-            """Play the end phase of this turn."""
-            print("[END STEP]")
-
-            self.priority(sorcery_speed=False)
-
-        def cleanup_step() -> None:
-            """Play the cleanup step of this turn.
-            - remove damage counter from creatures.
-            """
-            print("[CLEANUP STEP]")
-
-            # remove damage countes from creatures
-            for p in [self.p1, self.p2]:
-                for creature in p.creatures:
-                    creature.damage_counter = 0
-
-                # remove floating mana
-                p.clear_floating_mana()
-                for eot in p.eot_effects:
-                    if isinstance(eot, Buff):
-                        eot.target.buffs.remove(eot)
-                        p.eot_effects.remove(eot)
-                        del eot
-
-            # discard due to handsize
-            while len(self.active_player.hand) > 7:
-                print("Discard due to handsize.")
-                card = self.active_player.target(own_hand=True)
-                self.active_player.discard(card)
-
-        beginning_of_end_phase()
-        end_phase()
-        cleanup_step()
+        self.beginning_of_end_phase_step()
+        self.end_step()
+        self.cleanup_step()
         self.clear_player_mana()
+
+
+    # HELPER FUNCTIONS
+    
 
     def state_based_actions(self) -> None:
         """Perform state based actions on this game. Only player life and creature dmg for now."""

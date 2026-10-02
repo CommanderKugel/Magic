@@ -12,7 +12,7 @@ from src.implementation.cards import get_card
 bear_list_path = Path(__file__).resolve().parent / "resources/bear_list.txt"
 bolt_list_path = Path(__file__).resolve().parent / "resources/bolt_list.txt"
 
-
+results = []
 for i in range(100):
     p1 = RandomPlayer("P1", 20, load_from_decklist(bear_list_path, get_card))
     p2 = RandomPlayer("P2", 20, load_from_decklist(bear_list_path, get_card))
@@ -23,3 +23,9 @@ for i in range(100):
             game.play_turn()
     except Exception as e:
         print(f"[{i}] - {game.turn} turns. result={e}")
+        results.append((e, game.turn))
+
+for r, t in results:
+    print(f"{r} - {t} turns")
+
+print(f"avg: {sum(t for _, t in results) / len(results)} turns")

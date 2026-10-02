@@ -9,6 +9,7 @@ from conftest import build_priority_data
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 from src.Magic.Game import Game
+from src.Magic.Buff import Buff
 from src.Magic.Library import load_from_decklist
 from src.Magic.Card import Card, Land, Spell, Creature, Instant, Sorcery
 from src.Magic.Stack import PriorityData
@@ -574,6 +575,65 @@ class TestCombatPhase:
         game.declare_blocker_step.assert_called_once()
         game.damage_step.assert_called_once()
         game.end_of_combat_step.assert_called_once()
+
+
+class TestEndPhase:
+    """Test simulating end phase."""
+
+    def test_beginning_of_end_phase_has_no_priority(self, game):
+        """Beginning of end phase only triggers abilities."""
+        game.priority = MagicMock()
+        game.beginning_of_end_phase_step()
+        game.priority.assert_not_called()
+
+    def test_end_phase_has_instant_speed_priority(self, game):
+        """End phase only has instant speed priority."""
+        game.priority = MagicMock()
+        game.end_step()
+        game.priority.assert_called_once_with(sorcery_speed=False)
+
+    def test_cleanup_removes_damage_counter(self, game, mock_bear_factory):
+        """Damaged bears loose all damage counter on them."""
+        bear_1 = mock_bear_factory()
+        bear_2 = mock_bear_factory()
+        bear_1.damage_counter = 2
+        bear_2.damage_counter = 1
+        game.p1.creatures = [bear_1]
+        game.p2.creatures = [bear_2]
+
+        game.cleanup_step()
+
+        assert bear_1.damage_counter == 0
+        assert bear_2.damage_counter == 0
+
+    def test_cleanup_removes_eot_effects(self, game, mock_bear):
+        """'Until end of turn' effect is removed."""
+        x = Buff(target=mock_bear, power=3, toughness=3)
+        mock_bear.buffs = [x]
+        game.p1.eot_effects = [x]
+
+        assert mock_bear.get_power() == 5
+        assert mock_bear.get_toughness() == 5
+
+        game.cleanup_step()
+
+        assert x not in mock_bear.buffs
+        assert len(mock_bear.buffs) == 0
+        assert x not in game.p1.eot_effects
+        assert len(game.p1.eot_effects) == 0
+
+    def test_cleanup_does_not_discard_at_seven_handcards(self, game, mock_bear_factory):
+        """Discard until 7 or less cards are in hand."""
+        game.p1.hand = [mock_bear_factory() for _ in range(7)]
+        game.cleanup_step()
+        assert len(game.p1.hand) == 7
+
+    def test_cleanup_does_not_discard_at_seven_handcards(self, game, mock_bear_factory):
+        """Discard until 7 or less cards are in hand."""
+        game.p1.target = MagicMock(return_value=0)
+        game.p1.hand = [mock_bear_factory() for _ in range(10)]
+        game.cleanup_step()
+        assert len(game.p1.hand) == 7
 
 
 class TestHelperMethods:
