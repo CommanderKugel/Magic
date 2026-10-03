@@ -47,6 +47,10 @@ class Spell(Card):
         self.targets = None
 
 @dataclass
+class Artifact(Spell):
+    subtype: list[str] | None = None
+
+@dataclass
 class Creature(Spell):
     base_power: int = 0
     base_toughness: int = 0

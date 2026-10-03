@@ -1,5 +1,5 @@
 from src.Magic.Ability import Ability
-from src.Magic.Card import Card, Land, Creature, Instant, Sorcery
+from src.Magic.Card import Card, Land, Artifact, Creature, Instant, Sorcery
 from src.Player.Player import Player
 from src.Magic.Modifier import Modifier, Buff, KeywordBuff
 
@@ -21,6 +21,13 @@ def creature_can_tap_and_on_field(source: Creature, owner: Player, opponent: Pla
 def creature_is_on_field(source: Creature, owner: Player, opponent: Player) -> bool:
     """Checks if the creature is on the board."""
     return source in owner.creatures
+
+def artifact_can_tap_own_creature(source: Artifact, owner: Player, opponent: Player) -> bool:
+    """Springleaf drum."""
+    return (
+        source in owner.nc_permanents
+        and any(c for c in owner.creatures if not c.tapped)
+    )
 
 def one_creature_exists(source: Card, owner: Player, opponent: Player) -> bool:
     """Check if at least one targettable Creature exists."""
@@ -45,6 +52,13 @@ def target_single_creature(source: Card, owner: Player, opponent: Player) -> lis
         own_creatures=True, 
         opp_creatures=True,
     )
+    return [target]
+
+def target_untapped_creature_from_owner(source: Card, owner: Player, opponent: Player) -> list[Card]:
+    """Choose one creature that the owner controls. Does not target that creature."""
+    def untapped_creatures(l: list[Creature]) -> list[Creature]:
+        return [c for c in l if isinstance(c, Creature) and not c.tapped]
+    target = owner.target(own_creatures=True, filter=untapped_creatures)
     return [target]
 
 def target_single_creature_or_player(source: Card, owner: Player, opponent: Player) -> list[Card | Player]:
@@ -74,6 +88,12 @@ def tap_card(source: Card, owner: Player, opponent: Player, targets: list[Creatu
     """Tap the source."""
     source.tapped = True
 
+def tap_card_and_chosen_creature(source: Card, owner: Player, opponent: Player, targets: list[Creature]) -> None:
+    """Tap the chosen creature."""
+    target = targets[0]
+    target.tapped = True
+    source.tapped = True
+
 # ACTIVITY
 
 def add_g_mana(source: Card, owner: Player, opponent: Player, targets: list[Creature | Player] | None) -> None:
@@ -83,6 +103,10 @@ def add_g_mana(source: Card, owner: Player, opponent: Player, targets: list[Crea
 def add_r_mana(source: Card, owner: Player, opponent: Player, targets: list[Creature | Player] | None) -> None:
     """Add one Green Mana to the owners Manapool."""
     owner.floating_mana["Red"] += 1
+
+def add_mana_of_any_color(source: Card, owner: Player, opponent: Player) -> None:
+    """Add one mana of any Color."""
+    color = owner.choose_color(["White", "Blue", "Black", "Red", "Green"])
 
 def punch(source: Instant | Sorcery, owner: Player, opponent: Player, targets: list[Creature | Player] | None) -> None:
     """Puncher deals dmg equal to its power to Bag."""
@@ -242,4 +266,13 @@ SpectralHuntCaller = Ability(
     _choose_targets=no_targets,
     _pay_cost=no_cost,
     _activity=eot_owners_creatures_gain_p1p1_and_trample,
+)
+
+SpringleafDrum = Ability(
+    is_mana_ability=True,
+    mana_color=["White", "Blue", "Black", "Red", "Green"],
+    _can_activate=artifact_can_tap_own_creature,
+    _choose_targets=target_untapped_creature_from_owner,
+    _pay_cost=tap_card_and_chosen_creature,
+    _activity=add_mana_of_any_color,
 )

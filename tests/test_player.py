@@ -156,6 +156,27 @@ class TestCollectLanddrops:
 class TestCollectCastingSpells:
     """Test function Player.collect_casting_spells"""
 
+    # ARTIFACTS
+
+    def test_collect_casting_artifact_at_sorcery_speed(self, mock_player, mock_artifact):
+        """Casting an artifact is collected."""
+        mock_player.hand = [mock_artifact]
+
+        casts = mock_player.collect_casting_spells(sorcery_speed=True)
+
+        assert len(casts) == 1
+        action, artifact = casts[0]
+        assert action == "Cast"
+        assert artifact == mock_artifact
+
+    def test_not_collect_casting_artifacts_at_instant_speed(self, mock_player, mock_artifact):
+        """Casting the bear is not collected at instant speed."""
+        mock_player.hand = [mock_artifact]
+
+        casts = mock_player.collect_casting_spells(sorcery_speed=False)
+
+        assert len(casts) == 0
+
     # CREATURES
 
     def test_collect_casting_creature_at_sorcery_speed(self, mock_player, mock_bear):
@@ -272,6 +293,19 @@ class TestCollectCastingSpells:
 class TestCollectActivatedAbilities:
     """Test function player.collect_activated_abilities"""
 
+    # CAN ACTIVATE - HAPPY PATH
+
+    def test_collect_ability_from_artifact_on_board(self, mock_player, mock_artifact):
+        """Artifact is on the field and its non-mana-ability is collected."""
+        mock_player.nc_permanents = [mock_artifact]
+
+        abilities = mock_player.collect_activated_abilities()
+
+        assert len(abilities) == 1
+        action, source = abilities[0]
+        assert action == "Ability"
+        assert source == mock_artifact
+
     def test_collect_ability_from_creature_on_board(self, mock_player, mock_bear):
         """Creature is on the field and its non-mana-ability is collected."""
         mock_player.creatures = [mock_bear]
@@ -295,6 +329,17 @@ class TestCollectActivatedAbilities:
         assert action == "Ability"
         assert source == mock_land
 
+    # CANNOT ACTIVATE
+
+    def test_not_collect_ability_from_creature_on_board_cannot_activate(self, mock_player, mock_artifact):
+        """Artifact is on the field and its non-mana-ability is not collected."""
+        mock_artifact.activated_ability.can_activate = MagicMock(return_value=False)
+        mock_player.nc_permanents = [mock_artifact]
+
+        abilities = mock_player.collect_activated_abilities()
+
+        assert len(abilities) == 0
+
     def test_not_collect_ability_from_creature_on_board_cannot_activate(self, mock_player, mock_bear):
         """Creature is on the field and its non-mana-ability is not collected."""
         mock_bear.activated_ability.can_activate = MagicMock(return_value=False)
@@ -309,6 +354,17 @@ class TestCollectActivatedAbilities:
         mock_land.activated_ability.is_mana_ability = False
         mock_land.activated_ability.can_activate = MagicMock(return_value=False)
         mock_player.lands = [mock_land]
+
+        abilities = mock_player.collect_activated_abilities()
+
+        assert len(abilities) == 0
+
+    # SKIP MANA ABILITIES
+
+    def test_not_collect_mana_ability_from_artifact_on_board(self, mock_player, mock_artifact):
+        """Artifact is on the field and its mana-ability is not collected."""
+        mock_artifact.activated_ability.is_mana_ability = True
+        mock_player.nc_permanents = [mock_artifact]
 
         abilities = mock_player.collect_activated_abilities()
 
@@ -330,6 +386,19 @@ class TestCollectActivatedAbilities:
         abilities = mock_player.collect_activated_abilities()
 
         assert len(abilities) == 0
+
+    # CAN ACTIVATE FROM HAND
+
+    def test_collect_ability_from_artifact_in_hand(self, mock_player, mock_artifact):
+        """Creature is in owners hand and its non-mana-ability is collected."""
+        mock_player.hand = [mock_artifact]
+
+        abilities = mock_player.collect_activated_abilities()
+
+        assert len(abilities) == 1
+        action, source = abilities[0]
+        assert action == "Ability"
+        assert source == mock_artifact
 
     def test_collect_ability_from_creature_in_hand(self, mock_player, mock_bear):
         """Creature is in owners hand and its non-mana-ability is collected."""
@@ -357,6 +426,23 @@ class TestCollectActivatedAbilities:
 
 class TestCollectManaAbilities:
     """Test player.collect_mana_abilities"""
+
+    # CAN ACTIVATE
+
+    def test_collect_mana_ability_from_artifact_on_board(self, mock_player, mock_artifact):
+        """Artifact is on the field and its mana-ability is collected."""
+        mock_artifact.activated_ability.is_mana_ability = True
+        mock_player.nc_permanents = [mock_artifact]
+
+        abilities = mock_player.collect_mana_abilities()
+
+        assert len(abilities) == 1
+        action, source = abilities[0]
+        assert action == "Ability"
+        assert source == mock_artifact
+        mock_artifact.activated_ability.can_activate.assert_called_once_with(
+            mock_artifact, mock_player, None,
+        )
 
     def test_collect_mana_ability_from_creature_on_board(self, mock_player, mock_bear):
         """Creature is on the field and its mana-ability is collected."""
@@ -387,6 +473,18 @@ class TestCollectManaAbilities:
             mock_land, mock_player, None,
         )
 
+    # CANNOT ACTIVATE
+
+    def test_not_collect_mana_ability_from_creature_on_board_cannot_activate(self, mock_player, mock_artifact):
+        """Artifact is on the field and its non-mana-ability is not collected."""
+        mock_artifact.activated_ability.is_mana_ability = True
+        mock_artifact.activated_ability.can_activate = MagicMock(return_value=False)
+        mock_player.nc_permanents = [mock_artifact]
+
+        abilities = mock_player.collect_mana_abilities()
+
+        assert len(abilities) == 0
+
     def test_not_collect_mana_ability_from_creature_on_board_cannot_activate(self, mock_player, mock_bear):
         """Creature is on the field and its non-mana-ability is not collected."""
         mock_bear.activated_ability.is_mana_ability = True
@@ -401,6 +499,17 @@ class TestCollectManaAbilities:
         """Land is on the field and its non-mana-ability is not collected."""
         mock_land.activated_ability.can_activate = MagicMock(return_value=False)
         mock_player.lands = [mock_land]
+
+        abilities = mock_player.collect_mana_abilities()
+
+        assert len(abilities) == 0
+
+    # NON MANA ABILITIES
+
+    def test_not_collect_ability_from_creature_on_board(self, mock_player, mock_artifact):
+        """Artifact is on the field and its non-mana-ability is not collected."""
+        mock_artifact.activated_ability.is_mana_ability = False
+        mock_player.nc_permanents = [mock_artifact]
 
         abilities = mock_player.collect_mana_abilities()
 

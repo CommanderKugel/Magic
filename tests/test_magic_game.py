@@ -947,6 +947,35 @@ class TestHelperMethods:
         game.put_action_on_stack.assert_not_called()
 
 
+    # CASTING ARTIFACTS
+
+    def test_cast_artifact_successfully(self, game, mock_artifact):
+        """Creature is cast and put on the stack."""
+        game.p1.hand = [mock_artifact]
+        data = build_priority_data(game)
+        game.put_action_on_stack = MagicMock()
+        game.p1.pay_for_manacost = MagicMock(return_value=True)
+
+        game.cast_spell(data, mock_artifact)
+
+        game.p1.pay_for_manacost.assert_called_once_with(mock_artifact.cost, data.non_priority_player)
+        assert mock_artifact not in game.p1.hand, "Card was played, it should leave the hand."
+        assert mock_artifact not in game.p1.nc_permanents, "Card was played, it should be on the stack."
+        game.put_action_on_stack.assert_called_once_with(data, "Cast", mock_artifact, None)
+
+    def text_cast_artifact_not_enough_mana(self, game, mock_artifact):
+        """Casting creature is attempted and failed."""
+        game.p1.hand = [mock_artifact]
+        data = build_priority_data(game)
+        game.put_action_on_stack = MagicMock()
+        game.p1.pay_for_manacost = MagicMock(return_value=False)
+        game.cast_spell(data, mock_artifact)
+        game.p1.pay_for_manacost.assert_called_once_with(mock_artifact.cost, data.non_priority_player)
+        assert mock_artifact in game.p1.hand, "Card was not played, it should stay in hand."
+        assert mock_artifact not in game.p1.nc_permanents, "Card was not played, should not etb."
+        game.put_action_on_stack.assert_called_once_with(data, "Cast", mock_artifact, None)
+
+
     # CASTING CREATURES
 
     def test_cast_creature_successfully(self, game, mock_bear):

@@ -7,7 +7,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 from src.Magic.Game import Game
 from src.Magic.Library import load_from_decklist
-from src.Magic.Card import Card, Land, Spell, Creature, Instant, Sorcery
+from src.Magic.Card import Card, Land, Artifact, Spell, Creature, Instant, Sorcery
 from src.Magic.Stack import PriorityData
 from src.Magic.Ability import Ability
 from src.Magic.Stack import StackObject
@@ -76,6 +76,14 @@ def mock_land() -> Land:
     land.activated_ability.pay_cost=MagicMock()
     land.activated_ability.activity=MagicMock()
     return land
+
+@pytest.fixture
+def mock_artifact() -> Artifact:
+    """Mock an artifact."""
+    artifact = get_card("Springleaf_Drum")
+    artifact.activated_ability = MagicMock()
+    artifact.activated_ability.is_mana_ability = False
+    return artifact
 
 @pytest.fixture
 def mock_trample_dino() -> Creature:

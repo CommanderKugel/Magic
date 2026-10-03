@@ -2,7 +2,7 @@ import copy
 import uuid
 import src.implementation.abilities
 
-from src.Magic.Card import Card, Land, Creature, Sorcery, Instant
+from src.Magic.Card import Card, Land, Artifact, Creature, Sorcery, Instant
 
 
 def get_card(name: str) -> Card:
@@ -145,6 +145,13 @@ _ALL_CARDS = {
         base_power=4,
         base_toughness=4,
         activated_ability=src.implementation.abilities.SpectralHuntCaller,
+    ),
+
+    "Springleaf_Drum": Artifact(
+        name="Springleaf Drum",
+        activated_ability=src.implementation.abilities.SpringleafDrum,
+        color=["None"],
+        cost={"None": 1},
     )
 }
 

@@ -1,5 +1,5 @@
 from src.Player.Player import Player
-from src.Magic.Card import Card, Creature, Land, Sorcery, Instant
+from src.Magic.Card import Card, Artifact, Creature, Land, Sorcery, Instant
 from src.Magic.Stack import StackObject, PriorityData, PriorityState
 from src.Magic.Library import shuffle_library
 from src.Magic.Modifier import Modifier
@@ -633,6 +633,11 @@ class Game:
             # Creature -> put it on the field
             if isinstance(card, Creature):
                 owner.creatures.append(card)
+                # ToDo: etb
+
+            # Artifact -> put it onto the field
+            if isinstance(card, Artifact):
+                owner.nc_permanents.append(card)
                 # ToDo: etb
                 
             # Sorceries or Instants -> resolve abilities

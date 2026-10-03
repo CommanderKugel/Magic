@@ -1,7 +1,7 @@
 import random
 from typing import Any
 
-from src.Magic.Card import Card, Spell, Land, Creature, Color
+from src.Magic.Card import Card, Spell, Land, Artifact, Creature, Color
 from src.Magic.Library import draw_card
 from src.Magic.Literals import Action
 from src.Magic.Ability import Ability
@@ -21,6 +21,7 @@ class Player:
 
         self.hand: list[Card] = []
         self.creatures: list[Creature] = []
+        self.nc_permanents: list[Artifact] = []
         self.lands: list[Land] = []
 
         self.eot_effects: list[Modifier] = []
@@ -79,6 +80,12 @@ class Player:
         self.graveyard.append(land)
 
         # ToDo: triggered abilities
+
+    def send_artifact_from_field_to_graveyard(self, artifact: Artifact) -> None:
+        """Reset an artifact, remove it from the filed and put it into the graveyard."""
+        artifact.reset()
+        self.nc_permanents.remove(artifact)
+        self.graveyard.append(artifact)
 
     # ==================================================================================
     # API FOR PLAYER- AND BOT-CLASSES
@@ -231,7 +238,7 @@ class Player:
         """Generate a list of all activated abilities that can be activated."""
         return [
             ("Ability", card)
-            for card in self.hand + self.creatures + self.lands
+            for card in self.hand + self.creatures + self.lands + self.nc_permanents
             if card.activated_ability is not None
             and not card.activated_ability.is_mana_ability
             and card.activated_ability.can_activate(card, self, None)
@@ -241,7 +248,7 @@ class Player:
         """Generate a list of all mana-ability actions."""
         return [
             ("Ability", card)
-            for card in self.lands + self.creatures + self.hand
+            for card in self.lands + self.creatures + self.hand + self.nc_permanents
             if card.activated_ability is not None
             and card.activated_ability.is_mana_ability
             and card.activated_ability.can_activate(card, self, None)
