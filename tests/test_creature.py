@@ -58,3 +58,30 @@ class TestCreatureKeywords:
         assert mock_bear.has_reach()
         assert not mock_bear.is_flying()
         assert not mock_bear.has_trample()
+
+class TestCreatureReset:
+
+    def test_reset_removes_creature_from_buff_targets(self, mock_bear):
+        """A resetted creature can not be the target of a buff that targeted it before."""
+        buff = Buff(target=mock_bear)
+        mock_bear.modifiers = [buff]
+
+        mock_bear.reset()
+
+        assert mock_bear != buff.target
+        assert buff not in mock_bear.modifiers
+
+    def test_reset_removes_creature_from_buff_target_list(self, mock_bear_factory):
+        """A resetted creature can not be the target of a buff that targeted it before."""
+        bear_1 = mock_bear_factory()
+        bear_2 = mock_bear_factory()
+        buff = Buff(target=[bear_1, bear_2])
+        bear_1.modifiers = [buff]
+        bear_2.modifiers = [buff]
+
+        bear_1.reset()
+
+        assert bear_1 not in buff.target
+        assert bear_2 in buff.target
+        assert buff not in bear_1.modifiers
+        assert buff in bear_2.modifiers

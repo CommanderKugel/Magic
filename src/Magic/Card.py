@@ -69,6 +69,16 @@ class Creature(Spell):
         self.targets = None
         self.damage_counter = 0
         self.summoning_sick = True
+
+        # remove self from modifiers
+        for mod in self.modifiers:
+            if isinstance(mod.target, Creature):
+                mod.target = None
+            if isinstance(mod.target, list):
+                if self in mod.target:
+                    mod.target.remove(self)
+
+        # remove modifiers from self        
         self.modifiers = []
 
     def get_power(self) -> int:

@@ -746,9 +746,7 @@ class TestEndPhase:
     def test_cleanup_handles_creature_that_enter_after_multi_target_buff(self, game, mock_bear_factory):
         """Multi target effect that affects only some creatures is cleaned up correctly."""
         early_bear = mock_bear_factory()
-        early_bear.name = "early"
         later_bear = mock_bear_factory()
-        later_bear.name = "late"
         game.p1.creatures = [early_bear, later_bear]
         # only targets a list of one single bear
         multi_buff = Buff(target=[early_bear]) 
@@ -759,6 +757,26 @@ class TestEndPhase:
 
         assert len(early_bear.modifiers) == 0
         assert len(later_bear.modifiers) == 0
+        assert len(game.p1.eot_effects) == 0
+
+    def test_cleanup_handles_creature_that_resetted_after_multi_target_buff(self, game, mock_bear_factory):
+        """Multi target effect that affects only some creatures is cleaned up correctly."""
+        bear_1 = mock_bear_factory()
+        bear_2 = mock_bear_factory()
+        game.p1.creatures = [bear_1, bear_2]
+        # only targets a list of one single bear
+        multi_buff = Buff(target=[bear_1, bear_2]) 
+        bear_1.modifiers = [multi_buff]
+        bear_2.modifiers = [multi_buff]
+        game.p1.eot_effects = [multi_buff]
+
+        bear_2.reset()
+        game.cleanup_step()
+
+        assert len(bear_1.modifiers) == 0
+        assert len(bear_2.modifiers) == 0
+        assert multi_buff.target is None
+        assert multi_buff.target is None
         assert len(game.p1.eot_effects) == 0
 
     def test_cleanup_does_not_discard_at_seven_handcards(self, game, mock_bear_factory):

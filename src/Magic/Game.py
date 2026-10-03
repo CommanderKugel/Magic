@@ -400,9 +400,9 @@ class Game:
                     if isinstance(eot.target, list):
                         for target in eot.target:
                             target.modifiers.remove(eot)
+                        eot.target = None
                     
                     p.eot_effects.remove(eot)
-                    del eot
 
         # discard due to handsize
         while len(self.active_player.hand) > 7:
