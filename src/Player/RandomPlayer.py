@@ -53,3 +53,7 @@ class RandomPlayer(Player):
     def binary_choice(self, question: str) -> bool:
         """Decide binary choice at random."""
         return bool(random.getrandbits(1))
+
+    def choose_color(self, colors: list[Color]) -> Color:
+        """Choose one color from the available list randomly."""
+        return random.choice(colors)

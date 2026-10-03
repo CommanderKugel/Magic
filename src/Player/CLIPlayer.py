@@ -1,6 +1,7 @@
 import random
 from typing import Any
 
+from src.Magic.Literals import Color
 from src.Magic.Card import Card, Land, Spell, Creature, Instant
 from src.Player.Player import Player, Action, PASS
 
@@ -108,3 +109,14 @@ class CLIPlayer(Player):
             .lower()
             .strip()
         ) == "y"
+
+    def choose_color(self, colors: list[Color]) -> Color:
+        """Choose one color from the list of available colors."""
+        for idx, c in enumerate(colors):
+            print(f"{idx} - {c}")
+
+        i = input("C")
+        if not _is_valid_action(i, len(colors)):
+            return random.choice(colors)
+        return colors[int(i)]
+    

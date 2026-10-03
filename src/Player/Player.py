@@ -110,6 +110,10 @@ class Player:
         """To be implemented by child class."""
         raise NotImplementedError()
 
+    def choose_color(self, colors: list[Color]) -> Color:
+        """To be implemented by child class."""
+        raise NotImplementedError()
+
 
     # ==================================================================================
     # AUTOMATIC MANA PAYMENT
@@ -130,7 +134,6 @@ class Player:
             or len(cost) == 2 and "None" in cost.keys()
         )
         color = list(cost.keys())[0]
-        assert color != "None"
 
         # 1. determine mana cost
         colored_cost = cost.get(color, 0)
