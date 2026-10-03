@@ -1,7 +1,7 @@
 from src.Magic.Ability import Ability
 from src.Magic.Card import Card, Land, Creature, Instant, Sorcery
 from src.Player.Player import Player
-from src.Magic.Modifier import Modifier, Buff
+from src.Magic.Modifier import Modifier, Buff, KeywordBuff
 
 
 # CAN ACTIVATE
@@ -108,6 +108,16 @@ def eot_p3p3(source: Card, owner: Player, opponent: Player) -> None:
     owner.eot_effects.append(buff)
     target.modifiers.append(buff)
 
+def eot_p3p3_and_trample(source: Card, owner: Player, opponent: Player) -> None:
+    """Target Creature gets +3/+3 and trample until end of turn."""
+    target: Creature = source.targets[0]
+    buff = Buff(target=target, power=3, toughness=3)
+    trample = KeywordBuff(target=target, trample=True)
+    owner.eot_effects.append(buff)
+    owner.eot_effects.append(trample)
+    target.modifiers.append(buff)
+    target.modifiers.append(trample)
+
 def add_g_for_number_of_elves(source: Card, owner: Player, opponent: Player) -> None:
     """Player gets X times {G} where X is the numer of elves on the battlefield."""
     elf_count = sum(1 for c in owner.creatures + opponent.creatures if "Elf" in c.subtype)
@@ -169,6 +179,13 @@ GiantGrowth = Ability(
     _choose_targets=target_single_creature,
     _pay_cost=no_cost,
     _activity=eot_p3p3,
+)
+
+BlitzBallShot = Ability(
+    _can_activate=one_creature_exists,
+    _choose_targets=target_single_creature,
+    _pay_cost=no_cost,
+    _activity=eot_p3p3_and_trample,
 )
 
 PriestOfTitania = Ability(

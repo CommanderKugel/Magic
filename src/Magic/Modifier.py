@@ -21,3 +21,9 @@ class Buff(Modifier):
     
     def get_toughness_mod(self) -> int:
         return self.toughness
+
+@dataclass
+class KeywordBuff(Modifier):
+    flying: bool = False
+    trample: bool = False
+    reach: bool = False

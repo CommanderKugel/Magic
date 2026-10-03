@@ -85,7 +85,7 @@ _ALL_CARDS = {
         cost={"Green": 2, "None": 4},
         base_power=6,
         base_toughness=6,
-        trample=True,
+        _trample=True,
     ),
 
     "Storm_Crow": Creature(
@@ -95,7 +95,7 @@ _ALL_CARDS = {
         cost={"Blue": 1, "None": 1},
         base_power=1,
         base_toughness=2,
-        flying=True,
+        _flying=True,
     ),
 
     "Horrific_Assault": Sorcery(
@@ -110,6 +110,13 @@ _ALL_CARDS = {
         ability=src.implementation.abilities.Bolt,
         color=["Red"],
         cost={"Red": 1},
+    ),
+
+    "Blitzball_Shot": Instant(
+        name="Blitzball Shot",
+        ability=src.implementation.abilities.BlitzBallShot,
+        color=["Green"],
+        cost={"Green": 1, "None": 1},
     ),
 
     "Giant_Growth": Instant(

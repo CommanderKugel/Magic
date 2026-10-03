@@ -189,7 +189,7 @@ class Game:
         """Returns Ture if attacking creature can be blocked by blocker, False if not."""
 
         # Flying & Reach
-        if attacker.flying and not (defender.flying or defender.reach):
+        if attacker.is_flying() and not (defender.is_flying() or defender.has_reach()):
             return False
 
         # ToDo: protection
@@ -259,7 +259,7 @@ class Game:
 
         # Trample
         if (
-            attacker.trample 
+            attacker.has_trample() 
             and dmg > toughness
             and attacking_player == self.active_player
         ):
@@ -391,7 +391,16 @@ class Game:
             # remove until-end-of-turn effects
             for eot in p.eot_effects:
                 if isinstance(eot, Modifier):
-                    eot.target.modifiers.remove(eot)
+
+                    # only one target
+                    if isinstance(eot.target, Card):
+                        eot.target.modifiers.remove(eot)
+
+                    # multiple targets
+                    elif isinstance(eot, list):
+                        for target in eot.target:
+                            target.modifiers.remove(eot)
+                    
                     p.eot_effects.remove(eot)
                     del eot
 

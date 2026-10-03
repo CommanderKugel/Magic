@@ -188,13 +188,13 @@ class TestCombatPhase:
 
     def test_flyer_can_be_blocked_by_flyer(self, game, mock_flying_birb, mock_bear):
         """Bear is allowed to block a bear. Vanilly Happypath."""
-        mock_bear.flying = True
+        mock_bear.is_flying = MagicMock(return_value=True)
         allowed_to_block = game.can_be_blocked(mock_flying_birb, mock_bear)
         assert allowed_to_block
 
     def test_flyer_can_be_blocked_by_reach(self, game, mock_flying_birb, mock_bear):
         """Bear is allowed to block a bear. Vanilly Happypath."""
-        mock_bear.reach = True
+        mock_bear.has_reach = MagicMock(return_value=True)
         allowed_to_block = game.can_be_blocked(mock_flying_birb, mock_bear)
         assert allowed_to_block
 
@@ -494,7 +494,7 @@ class TestCombatPhase:
         """Trampling Bear deals no damage to player when blocked by bigger dino."""
         game.p1.creatures = [mock_bear]
         game.p2.creatures = [mock_trample_dino]
-        mock_bear.trample = True
+        mock_bear.has_trample = MagicMock(return_value=True)
         game.deal_combat_damage_to_player = MagicMock()
 
         game.deal_combat_damage_to_creature(mock_bear, mock_trample_dino, game.p1, game.p2)
