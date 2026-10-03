@@ -78,6 +78,17 @@ _ALL_CARDS = {
         activated_ability=src.implementation.abilities.TimberwatchElf,
     ),
 
+    "Almighty_Brushwagg": Creature(
+        name="Almighty Brushwagg",
+        subtype=["Brushwagg"],
+        color=["Green"],
+        cost={"Green": 1},
+        base_power=1,
+        base_toughness=1,
+        _trample=True,
+        activated_ability=src.implementation.abilities.AlmightyBrushwagg,
+    ),
+
     "Colossal_Dreadmaw": Creature(
         name="Colossal Dreadmaw",
         subtype=["Dinsaur"],

@@ -487,33 +487,37 @@ class Game:
 
         # 5. Legality check
         # Move to front to avoid having to revert and debug ridiculous boardstates
-        # ToDo: add quick check if enough mana exists to pay for cost
 
         if not card.activated_ability.can_activate(
             card, data.priority_player, data.non_priority_player
         ):
             return
 
-        # 3. Choosing targets
-
-        card.activated_ability.choose_targets(card, data.priority_player, data.non_priority_player)
-
-        # 4. Determine distribution
-
         # 6. Determine total cost
-        # ToDo: Activated abilities that cost mana
+        
+        cost = card.activated_ability.mana_cost
 
         # 7. Use mana-abilities
         # 8. Pay the cost
+        # Move to fron to avoid having to revert and debug ridiculous boardstates
+
+        # ToDo: add check if enough mana can be produced to pay for this Ability
         # ToDo: split creating mana and paying mana in 2 functions
+        # ToDo: make make mana payment more efficient
 
         if (
-            False 
+            cost is not None
             and not data.priority_player.pay_for_manacost(cost, data.non_priority_player)
         ):
             return
 
         card.activated_ability.pay_cost(card, data.priority_player, data.non_priority_player)
+
+            # 3. Choosing targets
+
+        card.activated_ability.choose_targets(card, data.priority_player, data.non_priority_player)
+
+        # 4. Determine distribution
         
         # 1. again - put ability on the stack
         # excep mana abilities: resolve them instantly.

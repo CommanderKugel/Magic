@@ -108,6 +108,13 @@ def eot_p3p3(source: Card, owner: Player, opponent: Player) -> None:
     owner.eot_effects.append(buff)
     target.modifiers.append(buff)
 
+def eot_p3p3_for_source(source: Card, owner: Player, opponent: Player) -> None:
+    """Target creature gets +3/+3 until end of turn."""
+    target: Creature = source
+    buff = Buff(target=target, power=3, toughness=3)
+    owner.eot_effects.append(buff)
+    target.modifiers.append(buff)
+
 def eot_p3p3_and_trample(source: Card, owner: Player, opponent: Player) -> None:
     """Target Creature gets +3/+3 and trample until end of turn."""
     target: Creature = source.targets[0]
@@ -186,6 +193,14 @@ BlitzBallShot = Ability(
     _choose_targets=target_single_creature,
     _pay_cost=no_cost,
     _activity=eot_p3p3_and_trample,
+)
+
+AlmightyBrushwagg = Ability(
+    _can_activate=always_castable,
+    _choose_targets=no_targets,
+    _pay_cost=no_cost,
+    _activity=eot_p3p3_for_source,
+    mana_cost={"Green": 1, "None": 3}
 )
 
 PriestOfTitania = Ability(

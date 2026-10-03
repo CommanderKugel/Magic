@@ -8,6 +8,8 @@ class Ability:
     is_mana_ability: bool = False
     mana_color: Color | None = None
 
+    mana_cost: dict[Color, int] | None = None
+
     _can_activate: Callable[[Any, Any, Any], bool] | None = None
     _choose_targets: Callable[[Any, Any, Any], None] | None = None
     _pay_cost: Callable[[Any, Any, Any], None] | None = None

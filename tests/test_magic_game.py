@@ -755,7 +755,6 @@ class TestHelperMethods:
         mock_bear.activated_ability.choose_targets.assert_called_once_with(
             mock_bear, data.priority_player, data.non_priority_player,
         )
-        # ToDo: mana cost for abilities
         data.priority_player.pay_for_manacost.assert_not_called()
         mock_bear.activated_ability.pay_cost.assert_called_once_with(
             mock_bear, data.priority_player, data.non_priority_player,
@@ -778,7 +777,6 @@ class TestHelperMethods:
             mock_bear, data.priority_player, data.non_priority_player,
         )
         mock_bear.activated_ability.choose_targets.assert_not_called()
-        # ToDo: mana cost for abilities
         data.priority_player.pay_for_manacost.assert_not_called()
         mock_bear.activated_ability.pay_cost.assert_not_called()
         mock_bear.activated_ability.activity.assert_not_called()
@@ -798,7 +796,6 @@ class TestHelperMethods:
         mock_land.activated_ability.choose_targets.assert_called_once_with(
             mock_land, data.priority_player, data.non_priority_player,
         )
-        # ToDo: mana cost for abilities
         data.priority_player.pay_for_manacost.assert_not_called()
         mock_land.activated_ability.pay_cost.assert_called_once_with(
             mock_land, data.priority_player, data.non_priority_player,
@@ -821,10 +818,57 @@ class TestHelperMethods:
             mock_land, data.priority_player, data.non_priority_player,
         )
         mock_land.activated_ability.choose_targets.assert_not_called()
-        # ToDo: mana cost for abilities
         data.priority_player.pay_for_manacost.assert_not_called()
         mock_land.activated_ability.pay_cost.assert_not_called()
         mock_land.activated_ability.activity.assert_not_called()
+        game.put_action_on_stack.assert_not_called()
+
+    def test_activate_ability_can_activate_and_pay_for_manacost(self, game, mock_bear):
+        """Activating an ability puts it on the stack and pays for the mana cost."""
+        data = build_priority_data(game)
+        mock_bear.activated_ability.mana_cost = {"None": 1}
+        game.put_action_on_stack = MagicMock()
+        game.p1.pay_for_manacost = MagicMock(return_value=True)
+
+        game.activate_ability(data, mock_bear)
+
+        mock_bear.activated_ability.can_activate.assert_called_once_with(
+            mock_bear, data.priority_player, data.non_priority_player,
+        )
+        mock_bear.activated_ability.choose_targets.assert_called_once_with(
+            mock_bear, data.priority_player, data.non_priority_player,
+        )
+        # ToDo: mana cost for abilities
+        game.p1.pay_for_manacost.assert_called_once_with(
+            mock_bear.activated_ability.mana_cost, game.p2,
+        )
+        mock_bear.activated_ability.pay_cost.assert_called_once_with(
+            mock_bear, data.priority_player, data.non_priority_player,
+        )
+        mock_bear.activated_ability.activity.assert_not_called()
+        game.put_action_on_stack.assert_called_once_with(
+            data, "Ability", mock_bear,
+        )
+
+    def test_activate_ability_can_activate_but_not_pay_for_manacost(self, game, mock_bear):
+        """Cannot pay manacost, can not activate and is not put on the stack."""
+        data = build_priority_data(game)
+        mock_bear.activated_ability.mana_cost = {"None": 1}
+        game.put_action_on_stack = MagicMock()
+        game.p1.pay_for_manacost = MagicMock(return_value=False)
+
+        game.activate_ability(data, mock_bear)
+
+        mock_bear.activated_ability.can_activate.assert_called_once_with(
+            mock_bear, data.priority_player, data.non_priority_player,
+        )
+        mock_bear.activated_ability.choose_targets.assert_not_called()
+        # ToDo: mana cost for abilities
+        game.p1.pay_for_manacost.assert_called_once_with(
+            mock_bear.activated_ability.mana_cost, game.p2,
+        )
+        mock_bear.activated_ability.pay_cost.assert_not_called()
+        mock_bear.activated_ability.activity.assert_not_called()
         game.put_action_on_stack.assert_not_called()
 
 
