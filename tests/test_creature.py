@@ -39,22 +39,22 @@ class TestCreatureKeywords:
         assert mock_bear.has_reach()
 
     def test_keyword_buff_gives_flying(self, mock_bear):
-        flying = KeywordBuff(target=mock_bear, flying=True)
-        mock_bear.modifiers = [flying]
+        flying = KeywordBuff(target=[], flying=True)
+        mock_bear.connect_modifier(flying)
         assert mock_bear.is_flying()
         assert not mock_bear.has_trample()
         assert not mock_bear.has_reach()
 
     def test_keyword_buff_gives_trample(self, mock_bear):
-        trample = KeywordBuff(target=mock_bear, trample=True)
-        mock_bear.modifiers = [trample]
+        trample = KeywordBuff(target=[], trample=True)
+        mock_bear.connect_modifier(trample)
         assert mock_bear.has_trample()
         assert not mock_bear.is_flying()
         assert not mock_bear.has_reach()
 
     def test_keyword_buff_gives_reach(self, mock_bear):
-        reach = KeywordBuff(target=mock_bear, reach=True)
-        mock_bear.modifiers = [reach]
+        reach = KeywordBuff(target=[], reach=True)
+        mock_bear.connect_modifier(reach)
         assert mock_bear.has_reach()
         assert not mock_bear.is_flying()
         assert not mock_bear.has_trample()
@@ -63,21 +63,21 @@ class TestCreatureReset:
 
     def test_reset_removes_creature_from_buff_targets(self, mock_bear):
         """A resetted creature can not be the target of a buff that targeted it before."""
-        buff = Buff(target=mock_bear)
-        mock_bear.modifiers = [buff]
+        buff = Buff(target=[])
+        mock_bear.connect_modifier(buff)
 
         mock_bear.reset()
 
-        assert mock_bear != buff.target
+        assert mock_bear not in buff.target
         assert buff not in mock_bear.modifiers
 
     def test_reset_removes_creature_from_buff_target_list(self, mock_bear_factory):
         """A resetted creature can not be the target of a buff that targeted it before."""
         bear_1 = mock_bear_factory()
         bear_2 = mock_bear_factory()
-        buff = Buff(target=[bear_1, bear_2])
-        bear_1.modifiers = [buff]
-        bear_2.modifiers = [buff]
+        buff = Buff(target=[])
+        bear_1.connect_modifier(buff)
+        bear_2.connect_modifier(buff)
 
         bear_1.reset()
 
@@ -85,3 +85,16 @@ class TestCreatureReset:
         assert bear_2 in buff.target
         assert buff not in bear_1.modifiers
         assert buff in bear_2.modifiers
+
+    def test_disconnect_removes_correct_mod_incase_of_duplicate_values(self, mock_bear):
+        mod_1 = Buff(target=[], power=3, toughness=3)
+        mod_2 = Buff(target=[], power=3, toughness=3)
+        mock_bear.connect_modifier(mod_1)
+        mock_bear.connect_modifier(mod_2)
+
+        mock_bear.disconnect_modifier(mod_2)
+
+        assert mod_1 in mock_bear.modifiers
+        assert mod_2 not in mock_bear.modifiers
+        assert mock_bear in mod_1.target
+        assert mock_bear not in mod_2.target

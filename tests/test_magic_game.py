@@ -692,8 +692,8 @@ class TestEndPhase:
 
     def test_cleanup_removes_eot_effects(self, game, mock_bear):
         """'Until end of turn' effect is removed."""
-        x = Buff(target=mock_bear, power=3, toughness=3)
-        mock_bear.modifiers = [x]
+        x = Buff(target=[], power=3, toughness=3)
+        mock_bear.connect_modifier(x)
         game.p1.eot_effects = [x]
 
         assert mock_bear.get_power() == 5
@@ -702,14 +702,13 @@ class TestEndPhase:
         game.cleanup_step()
 
         assert x not in mock_bear.modifiers
-        assert len(mock_bear.modifiers) == 0
         assert x not in game.p1.eot_effects
-        assert len(game.p1.eot_effects) == 0
+        assert mock_bear not in x.target
 
     def test_cleanup_removes_eot_keyword_buffs(self, game, mock_bear):
         """'Gains trample until end of turn' effect is removed."""
-        x = KeywordBuff(target=mock_bear, trample=True)
-        mock_bear.modifiers = [x]
+        x = KeywordBuff(target=[], trample=True)
+        mock_bear.connect_modifier(x)
         game.p1.eot_effects = [x]
 
         assert mock_bear.has_trample()
@@ -717,29 +716,28 @@ class TestEndPhase:
         game.cleanup_step()
 
         assert x not in mock_bear.modifiers
-        assert len(mock_bear.modifiers) == 0
         assert x not in game.p1.eot_effects
-        assert len(game.p1.eot_effects) == 0
+        assert mock_bear not in x.target
 
     def test_cleanup_removes_eot_multi_target_keyword_buffs(self, game, mock_bear_factory):
         """Multi target 'Gains trample until end of turn' effect is removed."""
         bear_1 = mock_bear_factory()
         bear_2 = mock_bear_factory()
-        game.p1.creatures = [bear_1, bear_2]
-        x = KeywordBuff(target=[bear_1, bear_2], trample=True)
-        bear_1.modifiers = [x]
-        bear_2.modifiers = [x]
+        x = KeywordBuff(target=[], trample=True)
+
+        bear_1.connect_modifier(x)
+        bear_2.connect_modifier(x)
         game.p1.eot_effects = [x]
+        game.p1.creatures = [bear_1, bear_2]
 
         assert bear_1.has_trample()
         assert bear_2.has_trample()
 
         game.cleanup_step()
 
-        assert x not in bear_1.modifiers
-        assert len(bear_1.modifiers) == 0
-        assert x not in bear_2.modifiers
-        assert len(bear_2.modifiers) == 0
+        for b in [bear_1, bear_2]:
+            assert x not in b.modifiers
+            assert len(b.modifiers) == 0
         assert x not in game.p1.eot_effects
         assert len(game.p1.eot_effects) == 0
 
@@ -749,8 +747,8 @@ class TestEndPhase:
         later_bear = mock_bear_factory()
         game.p1.creatures = [early_bear, later_bear]
         # only targets a list of one single bear
-        multi_buff = Buff(target=[early_bear]) 
-        early_bear.modifiers = [multi_buff]
+        multi_buff = Buff(target=[]) 
+        early_bear.connect_modifier(multi_buff)
         game.p1.eot_effects = [multi_buff]
 
         game.cleanup_step()
@@ -764,20 +762,20 @@ class TestEndPhase:
         bear_1 = mock_bear_factory()
         bear_2 = mock_bear_factory()
         game.p1.creatures = [bear_1, bear_2]
-        # only targets a list of one single bear
-        multi_buff = Buff(target=[bear_1, bear_2]) 
-        bear_1.modifiers = [multi_buff]
-        bear_2.modifiers = [multi_buff]
+        multi_buff = Buff(target=[]) 
+        bear_1.connect_modifier(multi_buff)
+        bear_2.connect_modifier(multi_buff)
         game.p1.eot_effects = [multi_buff]
 
         bear_2.reset()
         game.cleanup_step()
 
-        assert len(bear_1.modifiers) == 0
-        assert len(bear_2.modifiers) == 0
-        assert multi_buff.target is None
-        assert multi_buff.target is None
-        assert len(game.p1.eot_effects) == 0
+        for b in [bear_1, bear_2]:
+            assert multi_buff not in b.modifiers
+            assert b not in multi_buff.target
+            assert b.modifiers == []
+        assert multi_buff.target == []
+        assert game.p1.eot_effects == []
 
     def test_cleanup_does_not_discard_at_seven_handcards(self, game, mock_bear_factory):
         """Discard until 7 or less cards are in hand."""

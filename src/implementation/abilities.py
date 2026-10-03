@@ -132,26 +132,26 @@ def bolt(source: Card, owner: Player, opponent: Player, targets: list[Creature |
 def eot_p3p3(source: Card, owner: Player, opponent: Player, targets: list[Creature | Player] | None) -> None:
     """Target creature gets +3/+3 until end of turn."""
     target: Creature = targets[0]
-    buff = Buff(target=target, power=3, toughness=3)
+    buff = Buff(target=[], power=3, toughness=3)
+    target.connect_modifier(buff)
     owner.eot_effects.append(buff)
-    target.modifiers.append(buff)
 
 def eot_p3p3_for_source(source: Card, owner: Player, opponent: Player, targets: list[Creature | Player] | None) -> None:
     """Target creature gets +3/+3 until end of turn."""
     target: Creature = source
-    buff = Buff(target=target, power=3, toughness=3)
+    buff = Buff(target=[], power=3, toughness=3)
+    target.connect_modifier(buff)
     owner.eot_effects.append(buff)
-    target.modifiers.append(buff)
 
 def eot_p3p3_and_trample(source: Card, owner: Player, opponent: Player, targets: list[Creature | Player] | None) -> None:
     """Target Creature gets +3/+3 and trample until end of turn."""
     target: Creature = targets[0]
-    buff = Buff(target=target, power=3, toughness=3)
-    trample = KeywordBuff(target=target, trample=True)
+    buff = Buff(target=[], power=3, toughness=3)
+    trample = KeywordBuff(target=[], trample=True)
+    target.connect_modifier(buff)
+    target.connect_modifier(trample)
     owner.eot_effects.append(buff)
     owner.eot_effects.append(trample)
-    target.modifiers.append(buff)
-    target.modifiers.append(trample)
 
 def add_g_for_number_of_elves(source: Card, owner: Player, opponent: Player, targets: list[Creature | Player] | None) -> None:
     """Player gets X times {G} where X is the numer of elves on the battlefield."""
@@ -161,23 +161,20 @@ def add_g_for_number_of_elves(source: Card, owner: Player, opponent: Player, tar
 def eot_add_p1p1_for_number_of_elves(source: Card, owner: Player, opponent: Player, targets: list[Creature | Player] | None) -> None:
     """Creature gets +X/+X where X is the numer of elves on the battlefield."""
     x = sum(1 for c in owner.creatures + opponent.creatures if "Elf" in c.subtype)
-    target: Creature = targets[0]
-    buff = Buff(target=target, power=x, toughness=x)
+    buff = Buff(target=[], power=x, toughness=x)
+    target = targets[0]
+    target.connect_modifier(buff)
     owner.eot_effects.append(buff)
-    target.modifiers.append(buff)
 
 def eot_owners_creatures_gain_p1p1_and_trample(source: Card, owner: Player, opponent: Player, targets: list[Creature | Player] | None) -> None:
     """All Creatures owner controls get +1/+1 and trample until end of turn."""
-    targets = owner.creatures.copy()
-    p1p1 = Buff(target=targets, power=1, toughness=1)
-    trample = KeywordBuff(target=targets, trample=True)
-
+    p1p1 = Buff(target=[], power=1, toughness=1)
+    trample = KeywordBuff(target=[], trample=True)
     owner.eot_effects.append(p1p1)
     owner.eot_effects.append(trample)
-
-    for creature in targets:
-        creature.modifiers.append(p1p1)
-        creature.modifiers.append(trample)
+    for t in owner.creatures:
+        t.connect_modifier(p1p1)
+        t.connect_modifier(trample)
 
 # INSTANCES
 

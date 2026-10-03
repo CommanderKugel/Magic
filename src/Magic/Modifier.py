@@ -1,9 +1,9 @@
 from dataclasses import dataclass
 from typing import Any
 
-@dataclass
+@dataclass(eq=False)
 class Modifier:
-    target: Any | None = None
+    target: list[Any] | None = None
     
     def get_power_mod(self) -> int:
         return 0
@@ -11,7 +11,7 @@ class Modifier:
     def get_toughness_mod(self) -> int:
         return 0
 
-@dataclass
+@dataclass(eq=False)
 class Buff(Modifier):
     power: int = 0
     toughness: int = 0
@@ -22,7 +22,7 @@ class Buff(Modifier):
     def get_toughness_mod(self) -> int:
         return self.toughness
 
-@dataclass
+@dataclass(eq=False)
 class KeywordBuff(Modifier):
     flying: bool = False
     trample: bool = False

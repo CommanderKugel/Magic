@@ -84,13 +84,15 @@ def test_two_twe_buffs_are_cleared_correctly(game, mock_bear):
     buff_2 = game.p1.eot_effects[1]
     assert buff_1 in mock_bear.modifiers
     assert buff_2 in mock_bear.modifiers
+    assert mock_bear in buff_1.target
+    assert mock_bear in buff_2.target
 
     mock_bear.reset()
 
     assert buff_1 not in mock_bear.modifiers
     assert buff_2 not in mock_bear.modifiers
-    assert mock_bear != buff_1.target
-    assert mock_bear != buff_2.target
+    assert mock_bear not in buff_1.target
+    assert mock_bear not in buff_2.target
 
 
 # SPECTRAL HUNT CALLER
@@ -151,6 +153,8 @@ def test_shc_buffs_is_resetted_correctly(game, mock_bear_factory):
 
     bear_1.reset()
 
+    assert buff not in bear_1.modifiers
+    assert trample not in bear_1.modifiers
     assert not bear_1.has_trample()
     assert len(bear_1.modifiers) == 0
     assert buff not in bear_1.modifiers
@@ -180,11 +184,13 @@ def test_shc_buffs_is_cleaned_up_correctly(game, mock_bear_factory):
 
     game.cleanup_step()
 
-    assert trample.target is None
-    assert buff.target is None
+    assert trample.target == []
+    assert buff.target == []
 
     for c in game.p1.creatures:
         assert not c.has_trample()
         assert len(c.modifiers) == 0
         assert buff not in c.modifiers
         assert trample not in c.modifiers
+        assert c not in trample.target
+        assert c not in buff.target

@@ -74,15 +74,18 @@ class Creature(Spell):
         self.summoning_sick = True
 
         # remove self from modifiers
-        for mod in self.modifiers:
-            if isinstance(mod.target, Creature):
-                mod.target = None
-            if isinstance(mod.target, list):
-                if self in mod.target:
-                    mod.target.remove(self)
+        for mod in self.modifiers[:]:
+            self.disconnect_modifier(mod)
 
-        # remove modifiers from self        
-        self.modifiers = []
+    def connect_modifier(self, mod: Modifier) -> None:
+        """Set references both ways."""
+        self.modifiers.append(mod)
+        mod.target.append(self)
+
+    def disconnect_modifier(self, mod: Modifier) -> None:
+        """Remove references both ways."""
+        self.modifiers.remove(mod)
+        mod.target.remove(self)
 
     def get_power(self) -> int:
         """Fetch this creatures power."""

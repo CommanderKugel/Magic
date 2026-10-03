@@ -391,17 +391,8 @@ class Game:
             # remove until-end-of-turn effects
             for eot in p.eot_effects:
                 if isinstance(eot, Modifier):
-
-                    # remove eot effect from single target
-                    if isinstance(eot.target, Card):
-                        eot.target.modifiers.remove(eot)
-
-                    # remove eot effect from all targets
-                    if isinstance(eot.target, list):
-                        for target in eot.target:
-                            target.modifiers.remove(eot)
-
-                    eot.target = None
+                    for target in eot.target[:]:
+                        target.disconnect_modifier(eot)
                     
             p.eot_effects = []
 
