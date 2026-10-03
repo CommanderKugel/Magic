@@ -41,13 +41,6 @@ class Player:
             if c is None:
                 raise Exception(f"not {self.name}")
             self.hand.append(c)
-
-    def discard(self, card: Card | None) -> None:
-        """Discard a card to graveyard. Choose a random one if no card is provided."""
-        if card is not None:
-            card = random.choice(self.hand)
-        self.graveyard.append(card)
-        self.hand.remove(card)
         
     def clear_floating_mana(self) -> None:
         """Set all floating mana to zero."""
@@ -60,6 +53,32 @@ class Player:
             "None": 0,
         }
 
+    def discard_one_card(self, card: Card) -> None:
+        """Discard a card to graveyard. Choose a random one if no card is provided.
+        ONLY CALL THIS IF ITS SURE THAT THE CARD IS STILL IN THIS PLAYERS HAND!
+        """
+        card.reset()
+        self.graveyard.append(card)
+        self.hand.remove(card)
+
+        # ToDo: madness
+        # ToDo: triggered abilities
+
+    def send_creature_from_field_to_graveyard(self, creature: Creature) -> None:
+        """Reset a crature, remove it from the field and put it into the graveyard."""
+        creature.reset()
+        self.creatures.remove(creature)
+        self.graveyard.append(creature)
+
+        # ToDo: triggered abilities
+
+    def send_land_from_field_to_graveyard(self, land: Land) -> None:
+        """Reset a land, remove it from the field and put it into the graveyard."""
+        land.reset()
+        self.lands.remove(land)
+        self.graveyard.append(land)
+
+        # ToDo: triggered abilities
 
     # ==================================================================================
     # API FOR PLAYER- AND BOT-CLASSES

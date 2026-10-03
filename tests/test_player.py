@@ -15,6 +15,43 @@ from src.Player.Player import Player, PASS
 from src.implementation.cards import get_card
 
 
+class TestHelper:
+    """Test helper methods from Player class"""
+
+    def test_player_moves_creature_from_field_to_grave(self, mock_player, mock_bear):
+        """Card disappears from field and appears in the graveyard. Happypath."""
+        mock_bear.reset = MagicMock()
+        mock_player.creatures = [mock_bear]
+
+        mock_player.send_creature_from_field_to_graveyard(mock_bear)
+
+        assert mock_bear not in mock_player.creatures
+        assert mock_bear in mock_player.graveyard
+        mock_bear.reset.assert_called_once()
+
+    def test_player_moves_land_from_field_to_grave(self, mock_player, mock_land):
+        """Card disappears from field and appears in the graveyard. Happypath."""
+        mock_land.reset = MagicMock()
+        mock_player.lands = [mock_land]
+
+        mock_player.send_land_from_field_to_graveyard(mock_land)
+
+        assert mock_land not in mock_player.lands
+        assert mock_land in mock_player.graveyard
+        mock_land.reset.assert_called_once()
+
+    def test_player_discards_a_card_to_graveyard(self, mock_player, mock_bear):
+        """Card is removed from hand and is added to the graveyard. Happypath."""
+        mock_bear.reset = MagicMock()
+        mock_player.hand = [mock_bear]
+
+        mock_player.discard_one_card(mock_bear)
+
+        assert mock_bear not in mock_player.hand
+        assert len(mock_player.hand) == 0
+        assert mock_bear in mock_player.graveyard
+
+
 class TestCollectActions:
     """Test player.collect_actions, but logic to call player.collect_landdrops is only really tested."""
     

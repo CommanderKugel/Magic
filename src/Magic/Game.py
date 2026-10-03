@@ -408,7 +408,7 @@ class Game:
         while len(self.active_player.hand) > 7:
             print("Discard due to handsize.")
             card = self.active_player.target(own_hand=True)
-            self.active_player.discard(card)
+            self.active_player.discard_one_card(card)
 
     def end_phase(self) -> None:
         """Play a whole end phase."""
@@ -425,13 +425,18 @@ class Game:
         """Perform state based actions on this game. Only player life and creature dmg for now."""
         loosers = []
         for player in [self.p1, self.p2]:
+
+            # player lost
             if player.life <= 0:
                 loosers.append(player)
+
+            # damage counter
             for creature in player.creatures:
                 if creature.damage_counter >= creature.get_toughness():
                     print(f"[STATE BASED ACTIONS] {creature.name} dies due to damage.")
-                    player.graveyard.append(creature)
-                    player.creatures.remove(creature)
+                    player.send_creature_from_field_to_graveyard(creature)
+
+        # end game
         if len(loosers) == 1:
             winner = self.p1 if self.p1 not in loosers else self.p2
             raise Exception(winner.name)

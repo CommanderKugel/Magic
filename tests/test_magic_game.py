@@ -769,8 +769,10 @@ class TestEndPhase:
 
     def test_cleanup_does_not_discard_at_seven_handcards(self, game, mock_bear_factory):
         """Discard until 7 or less cards are in hand."""
-        game.p1.target = MagicMock(return_value=0)
-        game.p1.hand = [mock_bear_factory() for _ in range(10)]
+        bear_1 = mock_bear_factory()
+        bear_2 = mock_bear_factory()
+        game.p1.hand = [mock_bear_factory() for _ in range(7)] + [bear_1, bear_2]
+        game.p1.target = MagicMock(side_effect=[bear_1, bear_2])
         game.cleanup_step()
         assert len(game.p1.hand) == 7
 
