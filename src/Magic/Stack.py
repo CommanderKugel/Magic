@@ -11,6 +11,7 @@ class StackObject:
     action: Action
     source: Card
     owner: Player
+    targets: list[Card | Player] | None = None
 
 @dataclass
 class PriorityData:

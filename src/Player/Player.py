@@ -169,8 +169,9 @@ class Player:
 
             # only activate abilities that are useful to us
             if color_needed or generic_needed:
-                card.activated_ability.pay_cost(card, self, opponent)
-                card.activated_ability.activity(card, self, opponent)
+                targets = card.activated_ability.choose_targets(card, self, opponent)
+                card.activated_ability.pay_cost(card, self, opponent, targets)
+                card.activated_ability.activity(card, self, opponent, targets)
 
                 if color_needed:
                     self.floating_mana[color] -= 1

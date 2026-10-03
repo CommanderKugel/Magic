@@ -832,11 +832,11 @@ class TestHelperMethods:
         )
         data.priority_player.pay_for_manacost.assert_not_called()
         mock_bear.activated_ability.pay_cost.assert_called_once_with(
-            mock_bear, data.priority_player, data.non_priority_player,
+            mock_bear, data.priority_player, data.non_priority_player, []
         )
         mock_bear.activated_ability.activity.assert_not_called()
         game.put_action_on_stack.assert_called_once_with(
-            data, "Ability", mock_bear,
+            data, "Ability", mock_bear, [],
         )
 
     def test_activate_ability_can_not_activate(self, game, mock_bear):
@@ -873,10 +873,10 @@ class TestHelperMethods:
         )
         data.priority_player.pay_for_manacost.assert_not_called()
         mock_land.activated_ability.pay_cost.assert_called_once_with(
-            mock_land, data.priority_player, data.non_priority_player,
+            mock_land, data.priority_player, data.non_priority_player, []
         )
         mock_land.activated_ability.activity.assert_called_with(
-            mock_land, data.priority_player, data.non_priority_player,
+            mock_land, data.priority_player, data.non_priority_player, []
         )
         game.put_action_on_stack.assert_not_called()
 
@@ -911,18 +911,17 @@ class TestHelperMethods:
             mock_bear, data.priority_player, data.non_priority_player,
         )
         mock_bear.activated_ability.choose_targets.assert_called_once_with(
-            mock_bear, data.priority_player, data.non_priority_player,
+            mock_bear, data.priority_player, data.non_priority_player
         )
-        # ToDo: mana cost for abilities
         game.p1.pay_for_manacost.assert_called_once_with(
             mock_bear.activated_ability.mana_cost, game.p2,
         )
         mock_bear.activated_ability.pay_cost.assert_called_once_with(
-            mock_bear, data.priority_player, data.non_priority_player,
+            mock_bear, data.priority_player, data.non_priority_player, [],
         )
         mock_bear.activated_ability.activity.assert_not_called()
         game.put_action_on_stack.assert_called_once_with(
-            data, "Ability", mock_bear,
+            data, "Ability", mock_bear, []
         )
 
     def test_activate_ability_can_activate_but_not_pay_for_manacost(self, game, mock_bear):
@@ -937,8 +936,9 @@ class TestHelperMethods:
         mock_bear.activated_ability.can_activate.assert_called_once_with(
             mock_bear, data.priority_player, data.non_priority_player,
         )
-        mock_bear.activated_ability.choose_targets.assert_not_called()
-        # ToDo: mana cost for abilities
+        mock_bear.activated_ability.choose_targets.assert_called_once_with(
+            mock_bear, game.p1, game.p2,
+        )
         game.p1.pay_for_manacost.assert_called_once_with(
             mock_bear.activated_ability.mana_cost, game.p2,
         )
@@ -961,7 +961,7 @@ class TestHelperMethods:
         game.p1.pay_for_manacost.assert_called_once_with(mock_bear.cost, data.non_priority_player)
         assert mock_bear not in game.p1.hand, "Card was played, it should leave the hand."
         assert mock_bear not in game.p1.creatures, "Card was played, it should be on the stack."
-        game.put_action_on_stack.assert_called_once_with(data, "Cast", mock_bear)
+        game.put_action_on_stack.assert_called_once_with(data, "Cast", mock_bear, None)
 
     def text_cast_creature_not_enough_mana(self, game, mock_bear):
         """Casting creature is attempted and failed."""
@@ -973,7 +973,7 @@ class TestHelperMethods:
         game.p1.pay_for_manacost.assert_called_once_with(mock_bear.cost, data.non_priority_player)
         assert mock_bear in game.p1.hand, "Card was not played, it should stay in hand."
         assert mock_bear not in game.p1.creatures, "Card was not played, should not etb."
-        game.put_action_on_stack.assert_called_once_with(data, "Cast", mock_bear)
+        game.put_action_on_stack.assert_called_once_with(data, "Cast", mock_bear, None)
 
 
     # CASTING INSTANTS
@@ -997,11 +997,11 @@ class TestHelperMethods:
             mock_bolt.cost, data.non_priority_player
         )      
         mock_bolt.ability.pay_cost.assert_called_once_with(
-            mock_bolt, data.priority_player, data.non_priority_player,
+            mock_bolt, data.priority_player, data.non_priority_player, [],
         )
         assert mock_bolt not in game.p1.hand, "Card was played, it should leave the hand."
         assert mock_bolt not in game.p1.graveyard, "Card was played, it should be on the stack."
-        game.put_action_on_stack.assert_called_once_with(data, "Cast", mock_bolt)
+        game.put_action_on_stack.assert_called_once_with(data, "Cast", mock_bolt, [])
 
     def test_cast_instant_cannot_pay_mana(self, game, mock_bolt):
         """Instant mana cost cannot be payed and it is not cast."""
@@ -1068,11 +1068,11 @@ class TestHelperMethods:
             mock_sorcery.cost, data.non_priority_player
         )      
         mock_sorcery.ability.pay_cost.assert_called_once_with(
-            mock_sorcery, data.priority_player, data.non_priority_player,
+            mock_sorcery, data.priority_player, data.non_priority_player, [],
         )
         assert mock_sorcery not in game.p1.hand, "Card was played, it should leave the hand."
         assert mock_sorcery not in game.p1.graveyard, "Card was played, it should be on the stack."
-        game.put_action_on_stack.assert_called_once_with(data, "Cast", mock_sorcery)
+        game.put_action_on_stack.assert_called_once_with(data, "Cast", mock_sorcery, [])
 
     def test_cast_sorcery_cannot_pay_mana(self, game, mock_sorcery):
         """Sorcery mana cost cannot be payed and it is not cast."""

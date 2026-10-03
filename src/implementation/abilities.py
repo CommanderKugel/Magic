@@ -34,20 +34,20 @@ def fight_has_targets(source: Card, owner: Player, opponent: Player) -> bool:
 
 # SELECT TARAGETS
 
-def no_targets(source: Card, owner: Player, opponent: Player) -> None:
+def no_targets(source: Card, owner: Player, opponent: Player) -> list[Card | Player] | None:
     """Card does not target anything."""
     return None
 
-def target_single_creature(source: Card, owner: Player, opponent: Player) -> None:
+def target_single_creature(source: Card, owner: Player, opponent: Player) -> list[Card | Player]:
     """Choose a target creature."""
     target = owner.target(
         opp=opponent, 
         own_creatures=True, 
         opp_creatures=True,
     )
-    source.targets = [target]
+    return [target]
 
-def target_single_creature_or_player(source: Card, owner: Player, opponent: Player) -> None:
+def target_single_creature_or_player(source: Card, owner: Player, opponent: Player) -> list[Card | Player]:
     """Choose any target that can take damage."""
     target = owner.target(
         opp=opponent,
@@ -56,46 +56,46 @@ def target_single_creature_or_player(source: Card, owner: Player, opponent: Play
         opp_player=True,
         opp_creatures=True,    
     )
-    source.targets = [target]
+    return [target]
 
-def target_two_creatures_to_fight(source: Card, owner: Player, opponent: Player) -> None:
+def target_two_creatures_to_fight(source: Card, owner: Player, opponent: Player) -> list[Card | Player]:
     """Target one creature the owner controls and one creature the opponent controls."""
     puncher = owner.target(own_creatures=True)
     bag = owner.target(opp=opponent, opp_creatures=True)
-    source.targets = [puncher, bag]
+    return [puncher, bag]
 
 # PAY COST
 
-def no_cost(source: Card, owner: Player, opponent: Player) -> None:
+def no_cost(source: Card, owner: Player, opponent: Player, targets: list[Creature | Player] | None) -> None:
     """Ability does not require an additional cost."""
     return None
 
-def tap_card(source: Card, owner: Player, opponent: Player) -> None:
+def tap_card(source: Card, owner: Player, opponent: Player, targets: list[Creature | Player] | None) -> None:
     """Tap the source."""
     source.tapped = True
 
 # ACTIVITY
 
-def add_g_mana(source: Card, owner: Player, opponent: Player) -> None:
+def add_g_mana(source: Card, owner: Player, opponent: Player, targets: list[Creature | Player] | None) -> None:
     """Add one Green Mana to the owners Manapool."""
     owner.floating_mana["Green"] += 1
 
-def add_r_mana(source: Card, owner: Player, opponent: Player) -> None:
+def add_r_mana(source: Card, owner: Player, opponent: Player, targets: list[Creature | Player] | None) -> None:
     """Add one Green Mana to the owners Manapool."""
     owner.floating_mana["Red"] += 1
 
-def punch(source: Instant | Sorcery, owner: Player, opponent: Player) -> None:
+def punch(source: Instant | Sorcery, owner: Player, opponent: Player, targets: list[Creature | Player] | None) -> None:
     """Puncher deals dmg equal to its power to Bag."""
     assert isinstance(source, (Instant, Sorcery))
-    assert len(source.targets) == 2
-    puncher: Creature = source.targets[0]
-    bag: Creature = source.targets[1]
+    assert len(targets) == 2
+    puncher: Creature = targets[0]
+    bag: Creature = targets[1]
     if puncher in owner.creatures and bag in opponent.creatures:
         bag.damage_counter += puncher.get_power()
 
-def bolt(source: Card, owner: Player, opponent: Player) -> None:
+def bolt(source: Card, owner: Player, opponent: Player, targets: list[Creature | Player] | None) -> None:
     """Deal 3 damage to the sources target."""
-    target = source.targets[0]
+    target = targets[0]
     if isinstance(target, Player):
         target.life -= 3
     elif isinstance(target, Creature):
@@ -105,23 +105,23 @@ def bolt(source: Card, owner: Player, opponent: Player) -> None:
         ):
             target.damage_counter += 3
     
-def eot_p3p3(source: Card, owner: Player, opponent: Player) -> None:
+def eot_p3p3(source: Card, owner: Player, opponent: Player, targets: list[Creature | Player] | None) -> None:
     """Target creature gets +3/+3 until end of turn."""
-    target: Creature = source.targets[0]
+    target: Creature = targets[0]
     buff = Buff(target=target, power=3, toughness=3)
     owner.eot_effects.append(buff)
     target.modifiers.append(buff)
 
-def eot_p3p3_for_source(source: Card, owner: Player, opponent: Player) -> None:
+def eot_p3p3_for_source(source: Card, owner: Player, opponent: Player, targets: list[Creature | Player] | None) -> None:
     """Target creature gets +3/+3 until end of turn."""
     target: Creature = source
     buff = Buff(target=target, power=3, toughness=3)
     owner.eot_effects.append(buff)
     target.modifiers.append(buff)
 
-def eot_p3p3_and_trample(source: Card, owner: Player, opponent: Player) -> None:
+def eot_p3p3_and_trample(source: Card, owner: Player, opponent: Player, targets: list[Creature | Player] | None) -> None:
     """Target Creature gets +3/+3 and trample until end of turn."""
-    target: Creature = source.targets[0]
+    target: Creature = targets[0]
     buff = Buff(target=target, power=3, toughness=3)
     trample = KeywordBuff(target=target, trample=True)
     owner.eot_effects.append(buff)
@@ -129,20 +129,20 @@ def eot_p3p3_and_trample(source: Card, owner: Player, opponent: Player) -> None:
     target.modifiers.append(buff)
     target.modifiers.append(trample)
 
-def add_g_for_number_of_elves(source: Card, owner: Player, opponent: Player) -> None:
+def add_g_for_number_of_elves(source: Card, owner: Player, opponent: Player, targets: list[Creature | Player] | None) -> None:
     """Player gets X times {G} where X is the numer of elves on the battlefield."""
     elf_count = sum(1 for c in owner.creatures + opponent.creatures if "Elf" in c.subtype)
     owner.floating_mana["Green"] += elf_count
 
-def eot_add_p1p1_for_number_of_elves(source: Card, owner: Player, opponent: Player) -> None:
+def eot_add_p1p1_for_number_of_elves(source: Card, owner: Player, opponent: Player, targets: list[Creature | Player] | None) -> None:
     """Creature gets +X/+X where X is the numer of elves on the battlefield."""
     x = sum(1 for c in owner.creatures + opponent.creatures if "Elf" in c.subtype)
-    target: Creature = source.targets[0]
+    target: Creature = targets[0]
     buff = Buff(target=target, power=x, toughness=x)
     owner.eot_effects.append(buff)
     target.modifiers.append(buff)
 
-def eot_owners_creatures_gain_p1p1_and_trample(source: Card, owner: Player, opponent: Player) -> None:
+def eot_owners_creatures_gain_p1p1_and_trample(source: Card, owner: Player, opponent: Player, targets: list[Creature | Player] | None) -> None:
     """All Creatures owner controls get +1/+1 and trample until end of turn."""
     targets = owner.creatures.copy()
     p1p1 = Buff(target=targets, power=1, toughness=1)

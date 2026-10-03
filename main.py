@@ -1,5 +1,6 @@
 from pathlib import Path
 from copy import deepcopy
+import traceback
 
 from src.Magic.Game import Game
 from src.Player.CLIPlayer import CLIPlayer
@@ -25,7 +26,8 @@ for i in range(100):
         print(f"[{i}] - {game.turn} turns. result={e}")
         results.append((e, game.turn))
 
-for r, t in results:
-    print(f"{r} - {t} turns")
+        if e.args[0] not in [p1.name, p2.name]:
+            traceback.print_exc()
+            break
 
-print(f"avg: {sum(t for _, t in results) / len(results)} turns")
+print(f"total games: {len(results)} avg: {sum(t for _, t in results) / len(results)} turns")

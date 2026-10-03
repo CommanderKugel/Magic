@@ -392,17 +392,18 @@ class Game:
             for eot in p.eot_effects:
                 if isinstance(eot, Modifier):
 
-                    # only one target
+                    # remove eot effect from single target
                     if isinstance(eot.target, Card):
                         eot.target.modifiers.remove(eot)
 
-                    # multiple targets
+                    # remove eot effect from all targets
                     if isinstance(eot.target, list):
                         for target in eot.target:
                             target.modifiers.remove(eot)
-                        eot.target = None
+
+                    eot.target = None
                     
-                    p.eot_effects.remove(eot)
+            p.eot_effects = []
 
         # discard due to handsize
         while len(self.active_player.hand) > 7:
@@ -431,7 +432,7 @@ class Game:
                 loosers.append(player)
 
             # damage counter
-            for creature in player.creatures:
+            for creature in player.creatures[:]:
                 if creature.damage_counter >= creature.get_toughness():
                     print(f"[STATE BASED ACTIONS] {creature.name} dies due to damage.")
                     player.send_creature_from_field_to_graveyard(creature)
@@ -469,13 +470,14 @@ class Game:
         data.state = "Passing"
         print(f"[PASSING] {data.priority_player.name} passes")
 
-    def put_action_on_stack(self, data: PriorityData, action: Action, card: Card) -> None:
+    def put_action_on_stack(self, data: PriorityData, action: Action, card: Card, targets: list[Card | Player]) -> None:
         """Put an Ability or Cast of a spell on the stack. Reset the pass counter. State is 'Action'."""
         print(f"[{"ABILITY" if action == "Ability" else "CAST"}] {data.priority_player.name} plays {card.name}")
         stack_object = StackObject(
             action=action,
             source=card,
             owner=data.priority_player,
+            targets=targets,
         )
         self.stack.append(stack_object)
         data.pass_counter = 0
@@ -483,6 +485,8 @@ class Game:
 
     def activate_ability(self, data: PriorityData, card: Card) -> None:
         """Activate an ability. For more info, look at 'concepts/Cast_or_Activate.md'."""
+
+        ability = card.activated_ability
 
         # 1. Announce activating an ability.
         # ToDo: cards with multiple activated abilities
@@ -493,14 +497,18 @@ class Game:
         # 5. Legality check
         # Move to front to avoid having to revert and debug ridiculous boardstates
 
-        if not card.activated_ability.can_activate(
+        if not ability.can_activate(
             card, data.priority_player, data.non_priority_player
         ):
             return
 
+        # 3. Choosing targets
+        
+        targets = card.activated_ability.choose_targets(card, data.priority_player, data.non_priority_player)
+
         # 6. Determine total cost
         
-        cost = card.activated_ability.mana_cost
+        cost = ability.mana_cost
 
         # 7. Use mana-abilities
         # 8. Pay the cost
@@ -516,11 +524,7 @@ class Game:
         ):
             return
 
-        card.activated_ability.pay_cost(card, data.priority_player, data.non_priority_player)
-
-            # 3. Choosing targets
-
-        card.activated_ability.choose_targets(card, data.priority_player, data.non_priority_player)
+        ability.pay_cost(card, data.priority_player, data.non_priority_player, targets)
 
         # 4. Determine distribution
         
@@ -530,11 +534,11 @@ class Game:
         
         if card.activated_ability.is_mana_ability:
             card.activated_ability.activity(
-                card, data.priority_player, data.non_priority_player,
+                card, data.priority_player, data.non_priority_player, targets,
             )
         # non-mana ability
         else:
-            self.put_action_on_stack(data, "Ability", card)
+            self.put_action_on_stack(data, "Ability", card, targets)
 
         # 9. Ability was activated successfully
         # ToDo: triggered abilities        
@@ -570,8 +574,9 @@ class Game:
         # ToDo: creatures that target on cast
         # ToDo: keywords (Aura)
 
+        targets = None
         if isinstance(card, (Instant, Sorcery)):
-            card.ability.choose_targets(card, data.priority_player, data.non_priority_player)
+            targets = card.ability.choose_targets(card, data.priority_player, data.non_priority_player)
 
         # 4. Determine distribution
 
@@ -588,13 +593,13 @@ class Game:
             return
 
         if isinstance(card, (Instant, Sorcery)):
-            card.ability.pay_cost(card, data.priority_player, data.non_priority_player)
+            card.ability.pay_cost(card, data.priority_player, data.non_priority_player, targets)
 
         # 1. again - put spell on the stack
         # Move to end to avoid having to revert and debug ridiculous boardstates
 
         data.priority_player.hand.remove(card)
-        self.put_action_on_stack(data, "Cast", card)
+        self.put_action_on_stack(data, "Cast", card, targets)
 
         # 9. spell is cast successfully
         # ToDo: triggered abilities
@@ -614,17 +619,17 @@ class Game:
     
     def resolve_top_object_from_stack(self, data: PriorityData) -> None:
         """Pop and resolve the top item from the stack. Perform statebased actions. active player receives priority."""
-        assert len(self.stack) > 0
-        # remove Card from stack
+
+        # remove top object from stack
         stack_object = self.stack.pop(-1)
         action = stack_object.action
         card = stack_object.source
         owner = stack_object.owner
         opponent = self.p2 if owner is self.p1 else self.p1
-        #print(f"[RESOLVE] resolving {"Ability" if action == "Ability" else "Cast"} of {card.name}")
+        targets = stack_object.targets
 
         # resolve Casting Spells
-        if stack_object.action == "Cast":
+        if action == "Cast":
             # Creature -> put it on the field
             if isinstance(card, Creature):
                 owner.creatures.append(card)
@@ -632,12 +637,12 @@ class Game:
                 
             # Sorceries or Instants -> resolve abilities
             if isinstance(card, (Instant, Sorcery)):
-                card.ability.activity(card, owner, opponent)
+                card.ability.activity(card, owner, opponent, targets)
                 owner.graveyard.append(card)
         
         # resolve Activated or Triggered Abilities
-        if stack_object.action == "Ability":
-            card.activated_ability.activity(card, owner, opponent)
+        if action == "Ability":
+            card.activated_ability.activity(card, owner, opponent, targets)
 
         self.state_based_actions()
 
