@@ -21,6 +21,10 @@ class Card:
     def __hash__(self) -> int:
         return hash(self.id)
 
+    def reset(self) -> None:
+        """Resets cards fields default values."""
+        self.tapped = False
+
 @dataclass
 class Land(Card):
     mana_color: Color = "None"
@@ -38,6 +42,11 @@ class Spell(Card):
     def __hash__(self):
         return super().__hash__(self)
 
+    def reset(self):
+        """Resets cards fields default values."""
+        self.tapped = False
+        self.targets = None
+
 @dataclass
 class Creature(Spell):
     base_power: int = 0
@@ -53,6 +62,14 @@ class Creature(Spell):
     _trample: bool = False
 
     modifiers: list[Modifier] | None = None
+
+    def reset(self) -> None:
+        """Resets cards fields default values."""
+        self.tapped = False
+        self.targets = None
+        self.damage_counter = 0
+        self.summoning_sick = True
+        self.modifiers = []
 
     def get_power(self) -> int:
         """Fetch this creatures power."""
