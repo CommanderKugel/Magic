@@ -3,7 +3,7 @@ from typing import Literal, Callable
 
 from src.Magic.Ability import Ability
 from src.Magic.Literals import Color
-from src.Magic.Buff import Buff
+from src.Magic.Modifier import Modifier
 
 
 @dataclass
@@ -53,18 +53,18 @@ class Creature(Spell):
     reach: bool = False
     trample: bool = False
 
-    buffs: list[Buff] | None = None
+    modifiers: list[Modifier] | None = None
 
     def get_power(self) -> int:
         """Fetch this creatures power."""
-        if len(self.buffs) > 0:
-            return self.base_power + sum(b.power for b in self.buffs)
+        if len(self.modifiers) > 0:
+            return self.base_power + sum(b.get_power_mod() for b in self.modifiers)
         return self.base_power
 
     def get_toughness(self) -> int:
         """Fetch this creatures toughness."""
-        if len(self.buffs) > 0:
-            return self.base_toughness + sum(b.toughness for b in self.buffs)
+        if len(self.modifiers) > 0:
+            return self.base_toughness + sum(b.get_toughness_mod() for b in self.modifiers)
         return self.base_toughness
 
     def __hash__(self) -> int:

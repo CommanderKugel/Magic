@@ -9,7 +9,7 @@ from conftest import build_priority_data
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 from src.Magic.Game import Game
-from src.Magic.Buff import Buff
+from src.Magic.Modifier import Modifier
 from src.Magic.Library import load_from_decklist
 from src.Magic.Card import Card, Land, Spell, Creature, Instant, Sorcery
 from src.Magic.Stack import PriorityData
@@ -43,19 +43,19 @@ def test_priest_of_titania_counts_opponents_elves(game, mock_elf_dork_factory):
 
 # TIMBERWATCH ELF
 
-def test_timberwatch_elf_buffs_some_creature(game, mock_bear):
+def test_timberwatch_elf_modifies_some_creature(game, mock_bear):
     twe = get_card("Timberwatch_Elf")
     game.p1.creatures = [twe, mock_bear]
     twe.targets = [mock_bear]
 
     twe.activated_ability.activity(twe, game.p1, game.p2)
 
-    assert len(mock_bear.buffs) == 1
+    assert len(mock_bear.modifiers) == 1
     assert len(game.p1.eot_effects) == 1
     assert mock_bear.get_power() == mock_bear.base_power + 1
     assert mock_bear.get_toughness() == mock_bear.base_toughness + 1
 
-def test_timberwatch_elf_buffs_proportional_to_elves(game, mock_bear, mock_elf_dork_factory):
+def test_timberwatch_elf_modifies_proportional_to_elves(game, mock_bear, mock_elf_dork_factory):
     twe = get_card("Timberwatch_Elf")
     game.p1.creatures = [twe, mock_bear, mock_elf_dork_factory(), mock_elf_dork_factory()]
     game.p2.creatures = [mock_elf_dork_factory(), mock_elf_dork_factory()]
@@ -63,9 +63,9 @@ def test_timberwatch_elf_buffs_proportional_to_elves(game, mock_bear, mock_elf_d
 
     twe.activated_ability.activity(twe, game.p1, game.p2)
 
-    assert len(mock_bear.buffs) == 1
+    assert len(mock_bear.modifiers) == 1
     assert len(game.p1.eot_effects) == 1
     assert mock_bear.get_power() == mock_bear.base_power + 5
     assert mock_bear.get_toughness() == mock_bear.base_toughness + 5
-    assert mock_bear.buffs[0].power == 5
-    assert mock_bear.buffs[0].toughness == 5
+    assert mock_bear.modifiers[0].power == 5
+    assert mock_bear.modifiers[0].toughness == 5

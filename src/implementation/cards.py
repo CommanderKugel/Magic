@@ -134,4 +134,4 @@ _ALL_CARDS = {
 
 for key, card in _ALL_CARDS.items():
     if isinstance(card, Creature):
-        card.buffs = []
+        card.modifiers = []

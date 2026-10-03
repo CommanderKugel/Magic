@@ -2,7 +2,7 @@ from src.Player.Player import Player
 from src.Magic.Card import Card, Creature, Land, Sorcery, Instant
 from src.Magic.Stack import StackObject, PriorityData, PriorityState
 from src.Magic.Library import shuffle_library
-from src.Magic.Buff import Buff
+from src.Magic.Modifier import Modifier
 from src.Magic.Literals import PriorityState, Action
 
 class Game:
@@ -387,9 +387,11 @@ class Game:
 
             # remove floating mana
             p.clear_floating_mana()
+
+            # remove until-end-of-turn effects
             for eot in p.eot_effects:
-                if isinstance(eot, Buff):
-                    eot.target.buffs.remove(eot)
+                if isinstance(eot, Modifier):
+                    eot.target.modifiers.remove(eot)
                     p.eot_effects.remove(eot)
                     del eot
 

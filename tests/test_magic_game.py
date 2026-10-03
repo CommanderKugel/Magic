@@ -9,7 +9,7 @@ from conftest import build_priority_data
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 from src.Magic.Game import Game
-from src.Magic.Buff import Buff
+from src.Magic.Modifier import Modifier, Buff
 from src.Magic.Library import load_from_decklist
 from src.Magic.Card import Card, Land, Spell, Creature, Instant, Sorcery
 from src.Magic.Stack import PriorityData
@@ -693,7 +693,7 @@ class TestEndPhase:
     def test_cleanup_removes_eot_effects(self, game, mock_bear):
         """'Until end of turn' effect is removed."""
         x = Buff(target=mock_bear, power=3, toughness=3)
-        mock_bear.buffs = [x]
+        mock_bear.modifiers = [x]
         game.p1.eot_effects = [x]
 
         assert mock_bear.get_power() == 5
@@ -701,8 +701,8 @@ class TestEndPhase:
 
         game.cleanup_step()
 
-        assert x not in mock_bear.buffs
-        assert len(mock_bear.buffs) == 0
+        assert x not in mock_bear.modifiers
+        assert len(mock_bear.modifiers) == 0
         assert x not in game.p1.eot_effects
         assert len(game.p1.eot_effects) == 0
 

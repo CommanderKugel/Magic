@@ -1,7 +1,7 @@
 from src.Magic.Ability import Ability
 from src.Magic.Card import Card, Land, Creature, Instant, Sorcery
 from src.Player.Player import Player
-from src.Magic.Buff import Buff
+from src.Magic.Modifier import Modifier, Buff
 
 
 # CAN ACTIVATE
@@ -106,7 +106,7 @@ def eot_p3p3(source: Card, owner: Player, opponent: Player) -> None:
     target: Creature = source.targets[0]
     buff = Buff(target=target, power=3, toughness=3)
     owner.eot_effects.append(buff)
-    target.buffs.append(buff)
+    target.modifiers.append(buff)
 
 def add_g_for_number_of_elves(source: Card, owner: Player, opponent: Player) -> None:
     """Player gets X times {G} where X is the numer of elves on the battlefield."""
@@ -119,7 +119,7 @@ def eot_add_p1p1_for_number_of_elves(source: Card, owner: Player, opponent: Play
     target: Creature = source.targets[0]
     buff = Buff(target=target, power=x, toughness=x)
     owner.eot_effects.append(buff)
-    target.buffs.append(buff)
+    target.modifiers.append(buff)
 
 # INSTANCES
 

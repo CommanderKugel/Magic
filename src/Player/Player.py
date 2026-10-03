@@ -1,12 +1,11 @@
 import random
-import uuid
-from typing import Literal, Any
+from typing import Any
 
 from src.Magic.Card import Card, Spell, Land, Creature, Color
 from src.Magic.Library import draw_card
 from src.Magic.Literals import Action
 from src.Magic.Ability import Ability
-from src.Magic.Buff import Buff
+from src.Magic.Modifier import Modifier
 
 
 PASS: tuple[Action, None] = ("Pass", None)
@@ -24,7 +23,7 @@ class Player:
         self.creatures: list[Creature] = []
         self.lands: list[Land] = []
 
-        self.eot_effects: list[Buff] = []
+        self.eot_effects: list[Modifier] = []
 
         self.floating_mana: dict[Color, int] = {
             "White": 0,
