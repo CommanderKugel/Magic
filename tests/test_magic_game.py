@@ -9,7 +9,7 @@ from conftest import build_priority_data
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 from src.Magic.Game import Game
-from src.Magic.Modifier import Modifier, Buff
+from src.Magic.Modifier import Modifier, Buff, KeywordBuff
 from src.Magic.Library import load_from_decklist
 from src.Magic.Card import Card, Land, Spell, Creature, Instant, Sorcery
 from src.Magic.Stack import PriorityData
@@ -704,6 +704,61 @@ class TestEndPhase:
         assert x not in mock_bear.modifiers
         assert len(mock_bear.modifiers) == 0
         assert x not in game.p1.eot_effects
+        assert len(game.p1.eot_effects) == 0
+
+    def test_cleanup_removes_eot_keyword_buffs(self, game, mock_bear):
+        """'Gains trample until end of turn' effect is removed."""
+        x = KeywordBuff(target=mock_bear, trample=True)
+        mock_bear.modifiers = [x]
+        game.p1.eot_effects = [x]
+
+        assert mock_bear.has_trample()
+
+        game.cleanup_step()
+
+        assert x not in mock_bear.modifiers
+        assert len(mock_bear.modifiers) == 0
+        assert x not in game.p1.eot_effects
+        assert len(game.p1.eot_effects) == 0
+
+    def test_cleanup_removes_eot_multi_target_keyword_buffs(self, game, mock_bear_factory):
+        """Multi target 'Gains trample until end of turn' effect is removed."""
+        bear_1 = mock_bear_factory()
+        bear_2 = mock_bear_factory()
+        game.p1.creatures = [bear_1, bear_2]
+        x = KeywordBuff(target=[bear_1, bear_2], trample=True)
+        bear_1.modifiers = [x]
+        bear_2.modifiers = [x]
+        game.p1.eot_effects = [x]
+
+        assert bear_1.has_trample()
+        assert bear_2.has_trample()
+
+        game.cleanup_step()
+
+        assert x not in bear_1.modifiers
+        assert len(bear_1.modifiers) == 0
+        assert x not in bear_2.modifiers
+        assert len(bear_2.modifiers) == 0
+        assert x not in game.p1.eot_effects
+        assert len(game.p1.eot_effects) == 0
+
+    def test_cleanup_handles_creature_that_enter_after_multi_target_buff(self, game, mock_bear_factory):
+        """Multi target effect that affects only some creatures is cleaned up correctly."""
+        early_bear = mock_bear_factory()
+        early_bear.name = "early"
+        later_bear = mock_bear_factory()
+        later_bear.name = "late"
+        game.p1.creatures = [early_bear, later_bear]
+        # only targets a list of one single bear
+        multi_buff = Buff(target=[early_bear]) 
+        early_bear.modifiers = [multi_buff]
+        game.p1.eot_effects = [multi_buff]
+
+        game.cleanup_step()
+
+        assert len(early_bear.modifiers) == 0
+        assert len(later_bear.modifiers) == 0
         assert len(game.p1.eot_effects) == 0
 
     def test_cleanup_does_not_discard_at_seven_handcards(self, game, mock_bear_factory):

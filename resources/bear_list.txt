@@ -4,5 +4,5 @@
 4 Priest_of_Titania
 4 Timberwatch_Elf
 4 Colossal_Dreadmaw
-4 Horrific_Assault
-4 Giant_Growth
+4 Blitzball_Shot
+4 Spectral_Hunt-Caller

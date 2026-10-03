@@ -18,6 +18,10 @@ def creature_can_tap_and_on_field(source: Creature, owner: Player, opponent: Pla
     """Check if the card is untapped and on the field."""
     return not source.tapped and not source.summoning_sick and source in owner.creatures
 
+def creature_is_on_field(source: Creature, owner: Player, opponent: Player) -> bool:
+    """Checks if the creature is on the board."""
+    return source in owner.creatures
+
 def one_creature_exists(source: Card, owner: Player, opponent: Player) -> bool:
     """Check if at least one targettable Creature exists."""
     # ToDo: shroud & hexproof
@@ -138,6 +142,19 @@ def eot_add_p1p1_for_number_of_elves(source: Card, owner: Player, opponent: Play
     owner.eot_effects.append(buff)
     target.modifiers.append(buff)
 
+def eot_owners_creatures_gain_p1p1_and_trample(source: Card, owner: Player, opponent: Player) -> None:
+    """All Creatures owner controls get +1/+1 and trample until end of turn."""
+    targets = owner.creatures.copy()
+    p1p1 = Buff(target=targets, power=1, toughness=1)
+    trample = KeywordBuff(target=targets, trample=True)
+
+    owner.eot_effects.append(p1p1)
+    owner.eot_effects.append(trample)
+
+    for creature in targets:
+        creature.modifiers.append(p1p1)
+        creature.modifiers.append(trample)
+
 # INSTANCES
 
 LandTapForGreen = Ability(
@@ -217,4 +234,12 @@ TimberwatchElf = Ability(
     _choose_targets=target_single_creature,
     _pay_cost=tap_card,
     _activity=eot_add_p1p1_for_number_of_elves,
+)
+
+SpectralHuntCaller = Ability(
+    mana_cost={"Green": 1, "None": 5},
+    _can_activate=creature_is_on_field,
+    _choose_targets=no_targets,
+    _pay_cost=no_cost,
+    _activity=eot_owners_creatures_gain_p1p1_and_trample,
 )

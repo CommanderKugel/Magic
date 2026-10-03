@@ -397,7 +397,7 @@ class Game:
                         eot.target.modifiers.remove(eot)
 
                     # multiple targets
-                    elif isinstance(eot, list):
+                    if isinstance(eot.target, list):
                         for target in eot.target:
                             target.modifiers.remove(eot)
                     

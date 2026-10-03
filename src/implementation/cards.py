@@ -135,6 +135,16 @@ _ALL_CARDS = {
         ability=src.implementation.abilities.GiantGrowth,
         color=["Green"],
         cost={"Green": 1},
+    ),
+
+    "Spectral_Hunt-Caller": Creature(
+        name="Spectral Hunt-Caller",
+        subtype=["Wolf", "Spirit"],
+        color=["Green"],
+        cost={"Green": 1, "None": 4},
+        base_power=4,
+        base_toughness=4,
+        activated_ability=src.implementation.abilities.SpectralHuntCaller,
     )
 }
 

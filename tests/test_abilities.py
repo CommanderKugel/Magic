@@ -69,3 +69,36 @@ def test_timberwatch_elf_modifies_proportional_to_elves(game, mock_bear, mock_el
     assert mock_bear.get_toughness() == mock_bear.base_toughness + 5
     assert mock_bear.modifiers[0].power == 5
     assert mock_bear.modifiers[0].toughness == 5
+
+# SPECTRAL HUNT CALLER
+
+def test_shc_buffs_all_owners_creatures(game, mock_bear_factory):
+    shc = get_card("Spectral_Hunt-Caller")
+    bear_1 = mock_bear_factory()
+    bear_2 = mock_bear_factory()
+    game.p1.creatures = [shc, bear_1, bear_2]
+
+    shc.activated_ability.activity(shc, game.p1, game.p2)
+
+    assert shc.has_trample()
+    assert bear_1.has_trample()
+    assert bear_2.has_trample()
+    assert len(bear_1.modifiers) == 2
+    assert len(bear_2.modifiers) == 2
+    assert len(shc.modifiers) == 2
+    assert bear_1.modifiers[0] == bear_2.modifiers[0]
+    assert len(game.p1.eot_effects) == 2
+
+def test_shc_does_not_buff_creatures_entered_later(game, mock_bear_factory):
+    shc = get_card("Spectral_Hunt-Caller")
+    early_bear = mock_bear_factory()
+    game.p1.creatures = [shc, early_bear]
+
+    shc.targets = game.p1.creatures.copy()
+    shc.activated_ability.activity(shc, game.p1, game.p2)
+
+    late_bear = mock_bear_factory()
+    game.p1.creatures.append(late_bear)
+
+    assert len(late_bear.modifiers) == 0
+    assert late_bear not in shc.targets
