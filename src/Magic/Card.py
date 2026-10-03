@@ -12,7 +12,6 @@ class Card:
     name: str = ""
     color: list[Color] = None
     tapped: bool = False
-    image: str = ""
 
     activated_ability: Ability = None
 

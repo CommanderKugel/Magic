@@ -19,7 +19,6 @@ _ALL_CARDS = {
         name="Forest", 
         color=["None"], 
         mana_color="Green",
-        image="Forest.png",
         activated_ability=src.implementation.abilities.LandTapForGreen,
     ),
 
@@ -27,7 +26,6 @@ _ALL_CARDS = {
         name="Mountain", 
         color=["None"], 
         mana_color="Red",
-        image="Mountain.png",
         activated_ability=src.implementation.abilities.LandTapForRed,
     ),
 
@@ -38,7 +36,6 @@ _ALL_CARDS = {
         cost={"Green": 1, "None": 1},
         base_power=2,
         base_toughness=2,
-        image="Balduvian_Bears.png",
     ),
 
     "Llanowar_Elves": Creature(
@@ -48,7 +45,6 @@ _ALL_CARDS = {
         cost={"Green": 1},
         base_power=1,
         base_toughness=1,
-        image="Llanowar_Elves.png",
         activated_ability=src.implementation.abilities.CreatureTapForGreen,
     ),
 
@@ -59,7 +55,6 @@ _ALL_CARDS = {
         cost={"Green": 1, "None": 1},
         base_power=1,
         base_toughness=1,
-        image="Priest_of_Titania.png",
         activated_ability=src.implementation.abilities.PriestOfTitania,
     ),
 
@@ -70,7 +65,6 @@ _ALL_CARDS = {
         cost={"Green": 1},
         base_power=1,
         base_toughness=1,
-        image="Fyndhorn_Elves.png",
         activated_ability=src.implementation.abilities.CreatureTapForGreen,
     ),
 
@@ -81,7 +75,6 @@ _ALL_CARDS = {
         cost={"Green": 1, "None": 2},
         base_power=1,
         base_toughness=2,
-        image="Timberwatch_Elf.png",
         activated_ability=src.implementation.abilities.TimberwatchElf,
     ),
 
@@ -92,7 +85,6 @@ _ALL_CARDS = {
         cost={"Green": 2, "None": 4},
         base_power=6,
         base_toughness=6,
-        image="Colossal_Dreadmaw.png",
         trample=True,
     ),
 
@@ -103,7 +95,6 @@ _ALL_CARDS = {
         cost={"Blue": 1, "None": 1},
         base_power=1,
         base_toughness=2,
-        image="Storm_Crow.png",
         flying=True,
     ),
 
@@ -112,7 +103,6 @@ _ALL_CARDS = {
         ability=src.implementation.abilities.Punch,
         color=["Green"],
         cost={"Green": 1},
-        image="Horrific_Assault.png",
     ),
 
     "Lightning_Bolt": Instant(
@@ -120,7 +110,6 @@ _ALL_CARDS = {
         ability=src.implementation.abilities.Bolt,
         color=["Red"],
         cost={"Red": 1},
-        image="Lightning_Bolt.png",
     ),
 
     "Giant_Growth": Instant(
@@ -128,7 +117,6 @@ _ALL_CARDS = {
         ability=src.implementation.abilities.GiantGrowth,
         color=["Green"],
         cost={"Green": 1},
-        image="",
     )
 }
 
