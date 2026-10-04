@@ -194,3 +194,32 @@ def test_shc_buffs_is_cleaned_up_correctly(game, mock_bear_factory):
         assert trample not in c.modifiers
         assert c not in trample.target
         assert c not in buff.target
+
+    # GENEROUS ENT
+
+def test_ent_creates_food(game):
+    ent = get_card("Generous_Ent")
+    game.stack = [StackObject("Cast", ent, game.p1)]
+    data = build_priority_data(game)
+
+    game.resolve_top_object_from_stack(data)
+
+    assert len(game.stack) == 1
+    so = game.stack[0]
+    assert so.action == "EtbAbility"
+    assert so.source == ent
+
+    game.resolve_top_object_from_stack(data)
+
+    assert len(game.stack) == 0
+    assert len(game.p1.nc_permanents) == 1, "Food should have been created"
+
+def test_ent_cycling_is_generated(mock_player):
+    ent = get_card("Generous_Ent")
+    mock_player.hand = [ent]
+    actions = mock_player.collect_activated_abilities()
+
+    assert len(actions) == 1
+    action, source = actions[0]
+    assert action == "Ability"
+    assert source == ent

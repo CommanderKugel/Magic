@@ -6,6 +6,7 @@ Action = Literal[
     "Play",
     "Cast",
     "Ability",
+    "EtbAbility",
 ]
 
 Color = Literal[

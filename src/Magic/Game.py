@@ -453,6 +453,8 @@ class Game:
         self.hit_landdrop = True
 
         # 4. Land was played successfully
+
+        # ETB abilities
         # ToDo: Landfall
 
     def priority_pass(self, data: PriorityData) -> None:
@@ -635,10 +637,19 @@ class Game:
             if isinstance(card, (Instant, Sorcery)):
                 card.ability.activity(card, owner, opponent, targets)
                 owner.graveyard.append(card)
+
+            # trigger ETB Abilities
+            if card.etb_ability is not None:
+                targets = card.etb_ability.choose_targets(card, owner, opponent)
+                self.put_action_on_stack(data, "EtbAbility", card, targets)
         
-        # resolve Activated or Triggered Abilities
+        # resolve Activated Abilities
         if action == "Ability":
             card.activated_ability.activity(card, owner, opponent, targets)
+
+        # resolve ETB Abilities
+        if action == "EtbAbility":
+            card.etb_ability.activity(card, owner, opponent, targets)
 
         self.state_based_actions()
 

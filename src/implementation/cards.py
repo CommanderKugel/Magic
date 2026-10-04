@@ -152,7 +152,19 @@ _ALL_CARDS = {
         activated_ability=src.implementation.abilities.SpringleafDrum,
         color=["None"],
         cost={"None": 1},
-    )
+    ),
+
+    "Generous_Ent": Creature(
+        name="Generous Ent",
+        subtype=["Treefolk"],
+        color=["Green"],
+        cost={"Green": 1, "None": 5},
+        base_power=5,
+        base_toughness=7,
+        _reach=True,
+        activated_ability=src.implementation.abilities.ForestCycling,
+        etb_ability=src.implementation.abilities.CreateFood,
+    ),
 }
 
 for key, card in _ALL_CARDS.items():

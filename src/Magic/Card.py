@@ -14,6 +14,7 @@ class Card:
     tapped: bool = False
 
     activated_ability: Ability = None
+    etb_ability: Ability = None
 
     def __eq__(self, value):
         return self.id == value.id

@@ -27,6 +27,14 @@ def draw_card(lib: list[Card]) -> Card | None:
         return None
     return lib.pop(0)
 
+def tutor_card(name: str, lib: list[Card]) -> Card | None:
+    """Tutors card from the library. Returns None when failed to find."""
+    for card in lib:
+        if card.name == name:
+            lib.remove(card)
+            return card
+    return None
+
 def load_from_decklist(decklist: str | Path, get_card: Callable) -> list[Card]:
     """Load deck from a decklist."""
     deck: list[Card] = []

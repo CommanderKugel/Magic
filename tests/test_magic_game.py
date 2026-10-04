@@ -1165,27 +1165,53 @@ class TestHelperMethods:
     
 
     # RESOLVING THE STACK
+
+    def test_resolve_artifact_from_stack(self, game, mock_artifact):
+        """Happy path for resolving a creature from the stack."""
+        game.stack = [StackObject("Cast", mock_artifact, game.p1)]
+        game.state_based_actions = MagicMock()
+        data: PriorityData = MagicMock()
+
+        game.resolve_top_object_from_stack(data)
+
+        assert len(game.stack) == 0
+        assert mock_artifact in game.p1.nc_permanents
+        game.state_based_actions.assert_called_once()
     
     def test_resolve_creature_from_stack(self, game, mock_bear):
         """Happy path for resolving a creature from the stack."""
-        game.stack = [
-            StackObject(action="Cast", source=mock_bear, owner=game.p1)
-        ]
+        game.stack = [StackObject("Cast", mock_bear, game.p1)]
         game.state_based_actions = MagicMock()
         data: PriorityData = MagicMock()
+
         game.resolve_top_object_from_stack(data)
+
         assert len(game.stack) == 0
         assert mock_bear in game.p1.creatures
         game.state_based_actions.assert_called_once()
 
     def test_resolve_instant_from_stack(self, game, mock_bolt):
         """Happy path for resolving an instant from the stack."""
-        game.stack = [
-            StackObject(action="Cast", source=mock_bolt, owner=game.p1)
-        ]
+        game.stack = [StackObject("Cast", mock_bolt, game.p1)]
         game.state_based_actions = MagicMock()
         data: PriorityData = MagicMock()
+
         game.resolve_top_object_from_stack(data)
+
         assert len(game.stack) == 0
         assert mock_bolt in game.p1.graveyard
+        game.state_based_actions.assert_called_once()
+
+    def test_etb_ability_is_put_on_stack(self, game, mock_bear, mock_ability):
+        """Bears ETB ability is put on the stack when it resolved."""
+        mock_bear.etb_ability = mock_ability
+        game.stack = [StackObject("Cast", mock_bear, game.p1)]
+        game.state_based_actions = MagicMock()
+        data: PriorityData = MagicMock()
+
+        game.resolve_top_object_from_stack(data)
+
+        assert len(game.stack) == 1
+        assert game.stack[0].action == "EtbAbility"
+        assert mock_bear in game.p1.creatures
         game.state_based_actions.assert_called_once()

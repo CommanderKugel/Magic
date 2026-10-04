@@ -1,14 +1,21 @@
+import uuid
+
 from src.Magic.Ability import Ability
 from src.Magic.Card import Card, Land, Artifact, Creature, Instant, Sorcery
 from src.Player.Player import Player
 from src.Magic.Modifier import Modifier, Buff, KeywordBuff
+from src.Magic.Library import shuffle_library, tutor_card
 
 
 # CAN ACTIVATE
 
-def always_castable(source: Card, owner: Player, opponent: Player) -> bool:
+def always(source: Card, owner: Player, opponent: Player) -> bool:
     """Card can always be cast."""
     return True
+
+def source_in_hand(source: Card, owner: Player, opponent: Player) -> bool:
+    """Checks if the source is in owners hand."""
+    return source in owner.hand
 
 def land_is_untapped_and_on_field(source: Land, owner: Player, opponent: Player) -> bool:
     """Check if the land is untapped and on the field."""
@@ -94,6 +101,14 @@ def tap_card_and_chosen_creature(source: Card, owner: Player, opponent: Player, 
     target.tapped = True
     source.tapped = True
 
+def discard_source(source: Card, owner: Player, opponent: Player, targets: list[Creature]) -> None:
+    """Check if the source card is in Hand."""
+    owner.discard_one_card(source)
+
+def sacrifice_source_artifact(source: Artifact, owner: Player, opponent: Player, targets) -> None:
+    """Sacrifice the source artifact."""
+    owner.send_artifact_from_field_to_graveyard(source)
+
 # ACTIVITY
 
 def add_g_mana(source: Card, owner: Player, opponent: Player, targets: list[Creature | Player] | None) -> None:
@@ -104,9 +119,34 @@ def add_r_mana(source: Card, owner: Player, opponent: Player, targets: list[Crea
     """Add one Green Mana to the owners Manapool."""
     owner.floating_mana["Red"] += 1
 
-def add_mana_of_any_color(source: Card, owner: Player, opponent: Player) -> None:
+def add_mana_of_any_color(source: Card, owner: Player, opponent: Player, targets: list[Creature | Player]) -> None:
     """Add one mana of any Color."""
     color = owner.choose_color(["White", "Blue", "Black", "Red", "Green"])
+    owner.floating_mana[color] += 1
+
+def tutor_forest(source: Card, owner: Player, opponent: Player, targets: list[Creature | Player]) -> None:
+    """Discards the source and tutors a Forest from owners lib."""
+    forest = tutor_card("Forest", owner.library)
+    shuffle_library(owner.library)
+    if forest is not None:
+        owner.hand.append(forest)
+
+def create_food(source: Card, owner: Player, opponent: Player, targets: list[Creature | Player]) -> None:
+    """Owner creates a Food."""
+    food = Artifact(
+        id=str(uuid.uuid1()),
+        name="Food",
+        subtype="Food",
+        activated_ability=CrackFood,
+        color=["None"],
+    )
+    # ToDo: triggered abilities
+    # ToDo: replacement effects
+    owner.nc_permanents.append(food)
+
+def gain_3_life(souce: Card, owner: Player, opponent, targets) -> None:
+    """Owner gains 3 life."""
+    owner.life += 3
 
 def punch(source: Instant | Sorcery, owner: Player, opponent: Player, targets: list[Creature | Player] | None) -> None:
     """Puncher deals dmg equal to its power to Bag."""
@@ -196,6 +236,28 @@ LandTapForRed = Ability(
     _activity=add_r_mana,
 )
 
+ForestCycling = Ability(
+    _can_activate=source_in_hand,
+    _choose_targets=no_targets,
+    _pay_cost=discard_source,
+    _activity=tutor_forest,
+)
+
+CreateFood = Ability(
+    _can_activate=always,
+    _choose_targets=no_targets,
+    _pay_cost=no_cost,
+    _activity=create_food,
+)
+
+CrackFood = Ability(
+    _can_activate=always,
+    _choose_targets=no_targets,
+    _pay_cost=sacrifice_source_artifact,
+    _activity=gain_3_life,
+    mana_color={"None": 2},
+)
+
 CreatureTapForGreen = Ability(
     is_mana_ability=True,
     mana_color="Green",
@@ -213,7 +275,7 @@ Punch = Ability(
 )
 
 Bolt = Ability(
-    _can_activate=always_castable, # ToDo: hexproof & shroud
+    _can_activate=always, # ToDo: hexproof & shroud
     _choose_targets=target_single_creature_or_player,
     _pay_cost=no_cost,
     _activity=bolt,
@@ -234,7 +296,7 @@ BlitzBallShot = Ability(
 )
 
 AlmightyBrushwagg = Ability(
-    _can_activate=always_castable,
+    _can_activate=always,
     _choose_targets=no_targets,
     _pay_cost=no_cost,
     _activity=eot_p3p3_for_source,
