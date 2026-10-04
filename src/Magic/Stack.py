@@ -6,14 +6,14 @@ from src.Magic.Literals import Action, PriorityState
 from src.Player.Player import Player
 
 
-@dataclass
+@dataclass(eq=False)
 class StackObject:
     action: Action
     source: Card
     owner: Player
     targets: list[Card | Player] | None = None
 
-@dataclass
+@dataclass(eq=False)
 class PriorityData:
     state: PriorityState
     priority_player: Player

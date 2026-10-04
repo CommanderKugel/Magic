@@ -6,7 +6,7 @@ from src.Magic.Literals import Color
 from src.Magic.Modifier import Modifier, KeywordBuff
 
 
-@dataclass
+@dataclass(eq=False)
 class Card:
     id: str = ""
     name: str = ""
@@ -25,14 +25,14 @@ class Card:
         """Resets cards fields default values."""
         self.tapped = False
 
-@dataclass
+@dataclass(eq=False)
 class Land(Card):
     mana_color: Color = "None"
 
     def __hash__(self) -> int:
         return super.__hash__(self)
     
-@dataclass
+@dataclass(eq=False)
 class Spell(Card):
     """Parent Class for Creature, Sorcery and Instant."""
     cost: dict[Color, int] = None
@@ -46,11 +46,11 @@ class Spell(Card):
         self.tapped = False
         self.targets = None
 
-@dataclass
+@dataclass(eq=False)
 class Artifact(Spell):
     subtype: list[str] | None = None
 
-@dataclass
+@dataclass(eq=False)
 class Creature(Spell):
     base_power: int = 0
     base_toughness: int = 0
@@ -123,11 +123,11 @@ class Creature(Spell):
     def __hash__(self) -> int:
         return super.__hash__(self)
 
-@dataclass
+@dataclass(eq=False)
 class Sorcery(Spell):
     ability: Ability | None = None
 
-@dataclass
+@dataclass(eq=False)
 class Instant(Spell):
     sorcery_speed: bool = False
     ability: Ability | None = None

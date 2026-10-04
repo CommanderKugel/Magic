@@ -3,7 +3,7 @@ from typing import Callable, Any
 
 from src.Magic.Literals import Color
 
-@dataclass
+@dataclass(eq=False)
 class Ability:
     is_mana_ability: bool = False
     mana_color: Color | None = None
