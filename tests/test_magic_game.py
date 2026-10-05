@@ -146,6 +146,36 @@ class TestCombatPhase:
 
         assert not can_attack
 
+    def test_hasty_summoningsick_creature_can_attack(self, game, mock_bear):
+        """Tapped creatures can not attack."""
+        mock_bear._haste = True
+        mock_bear.summoning_sick = True
+        game.p1.creatures = [mock_bear]
+
+        can_attack = game.can_attack(mock_bear, game.p1)
+
+        assert can_attack
+
+    def test_hasty_creature_can_attack(self, game, mock_bear):
+        """Tapped creatures can not attack."""
+        mock_bear._haste = True
+        game.p1.creatures = [mock_bear]
+
+        can_attack = game.can_attack(mock_bear, game.p1)
+
+        assert can_attack
+
+    def test_eot_hasty_summoningsick_creature_can_attack(self, game, mock_bear):
+        """Tapped creatures can not attack."""
+        haste = KeywordBuff(target=[], haste=True)
+        mock_bear.connect_modifier(haste)
+        mock_bear.summoning_sick = True
+        game.p1.creatures = [mock_bear]
+
+        can_attack = game.can_attack(mock_bear, game.p1)
+
+        assert can_attack
+
     # HELPER: CAN BLOCK
 
     def test_creature_can_block_attacker(self, game, mock_bear):

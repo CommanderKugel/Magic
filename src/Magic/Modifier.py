@@ -27,3 +27,4 @@ class KeywordBuff(Modifier):
     flying: bool = False
     trample: bool = False
     reach: bool = False
+    haste: bool = False

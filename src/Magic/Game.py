@@ -141,7 +141,7 @@ class Game:
         # ToDo: defender
         # ToDo: cant attack
 
-        return not creature.tapped and not creature.summoning_sick
+        return not creature.tapped and creature.not_summoning_sick()
 
     def wants_to_attack(self, creature: Creature, owner: Player) -> bool:
         """Binary choice if the creature should attack."""

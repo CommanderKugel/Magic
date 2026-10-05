@@ -60,10 +60,15 @@ class Creature(Spell):
 
     summoning_sick: bool = True
 
+    def not_summoning_sick(self) -> bool:
+        """Returns True if the creature is summoning sick, False if not."""
+        return not self.summoning_sick or self.has_haste()
+
     # Keywords
     _flying: bool = False
     _reach: bool = False
     _trample: bool = False
+    _haste: bool = False
 
     modifiers: list[Modifier] | None = None
 
@@ -119,6 +124,13 @@ class Creature(Spell):
         return (
             self._reach 
             or any(x for x in self.modifiers if isinstance(x, KeywordBuff) and x.reach)
+        )
+    
+    def has_haste(self) -> bool:
+        """Returns True if this creature has haste, False if not."""
+        return (
+            self._haste
+            or any(x for x in self.modifiers if isinstance(x, KeywordBuff) and x.haste)
         )
 
     def __hash__(self) -> int:
