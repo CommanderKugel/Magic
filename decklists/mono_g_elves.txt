@@ -1,14 +1,14 @@
-11 Forest
-1 Gingerbread_Cabin
-4 Elvish_Mystic
-4 Fyndhorn_Elves
-4 Quirion_Ranger
-4 Priest_of_Titania
-4 Timberwatch_Elf
-4 Nyxborn_Hydra
-4 Masked_Vandal
-4 Avenging_Hunter
-4 Sagu_Wildling
-4 Generous_Ent
-4 Winding_Way
-4 Lead_the_Stampede
+✅ 11 Forest
+❌ 1 Gingerbread_Cabin
+✅ 4 Elvish_Mystic
+✅ 4 Fyndhorn_Elves
+❌ 4 Quirion_Ranger
+✅ 4 Priest_of_Titania
+✅ 4 Timberwatch_Elf
+❌ 4 Nyxborn_Hydra
+❌ 4 Masked_Vandal
+❌ 4 Avenging_Hunter
+❌ 4 Sagu_Wildling
+✅ 4 Generous_Ent
+❌ 4 Winding_Way
+❌ 4 Lead_the_Stampede

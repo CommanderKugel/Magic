@@ -8,10 +8,9 @@ from src.Player.RandomPlayer import RandomPlayer
 from src.Magic.Library import load_from_decklist, shuffle, seed_players_cards
 from src.implementation.cards import get_card
 
-# "Balduvian_Bears"
+ROOT_DIR = Path(__file__).resolve().parent
 
-bear_list_path = Path(__file__).resolve().parent / "resources/bear_list.txt"
-bolt_list_path = Path(__file__).resolve().parent / "resources/bolt_list.txt"
+bear_list_path = ROOT_DIR / "decklists/bear_list.txt"
 
 results = []
 for i in range(100):

@@ -1,15 +1,15 @@
-14 Island
-4 Lorien_Revealed
-4 Tolarian_Terror
-4 Cryptic_Serpent
-2 Dispel
-2 Spell_Pierce
-4 Force_Spike
-4 Counterspell
-2 Sleep_of_the_Dead
-2 Deem_Inferior
-4 Brainstorm
-4 Mental_Node
-4 Thought_Scour
-4 Ponder
-2 Deep_Analysis
+❌ 14 Island
+❌ 4 Lorien_Revealed
+❌ 4 Tolarian_Terror
+❌ 4 Cryptic_Serpent
+❌ 2 Dispel
+❌ 2 Spell_Pierce
+❌ 4 Force_Spike
+❌ 4 Counterspell
+❌ 2 Sleep_of_the_Dead
+❌ 2 Deem_Inferior
+❌ 4 Brainstorm
+❌ 4 Mental_Node
+❌ 4 Thought_Scour
+❌ 4 Ponder
+❌ 2 Deep_Analysis
