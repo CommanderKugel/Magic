@@ -223,3 +223,53 @@ def test_ent_cycling_is_generated(mock_player):
     action, source = actions[0]
     assert action == "Ability"
     assert source == ent
+
+# LEAD THE STAMPEDE
+
+def test_lts_only_bears(mock_player, mock_bear_factory):
+    lts = get_card("Lead_the_Stampede")
+    mock_player.library = [mock_bear_factory() for _ in range(5)]
+    mock_player.hand = []
+
+    assert len(mock_player.library) == 5
+
+    lts.ability.activity(lts, mock_player, None, None)
+
+    print(mock_player.hand)
+    assert len(mock_player.hand) == 5
+    assert len(mock_player.library) == 0
+
+    for c in mock_player.hand:
+        assert isinstance(c, Creature)
+
+def test_lts_mixed(mock_player, mock_land, mock_bolt, mock_sorcery, mock_artifact, mock_bear):
+    lts = get_card("Lead_the_Stampede")
+    mock_player.library = [mock_land, mock_bolt, mock_sorcery, mock_artifact, mock_bear]
+    mock_player.hand = []
+
+    assert len(mock_player.library) == 5
+
+    lts.ability.activity(lts, mock_player, None, None)
+
+    print(mock_player.hand)
+    assert len(mock_player.hand) == 1
+    assert len(mock_player.library) == 4
+
+    for c in mock_player.hand:
+        assert isinstance(c, Creature)
+
+def test_lts_lib_size(mock_player, mock_bear_factory):
+    lts = get_card("Lead_the_Stampede")
+    mock_player.library = [mock_bear_factory() for _ in range(40)]
+    mock_player.hand = []
+
+    assert len(mock_player.library) == 40
+
+    lts.ability.activity(lts, mock_player, None, None)
+
+    print(mock_player.hand)
+    assert len(mock_player.hand) == 5
+    assert len(mock_player.library) == 35
+
+    for c in mock_player.hand:
+        assert isinstance(c, Creature)

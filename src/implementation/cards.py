@@ -178,6 +178,13 @@ _ALL_CARDS = {
         etb_ability=abilities.CreateFood,
     ),
 
+    "Lead_the_Stampede": Sorcery(
+        name="Lead the Stampede",
+        ability=abilities.LeadTheStampede,
+        color=["Green"],
+        cost={"Green": 1, "None": 2},
+    ),
+
     # MADNESS
 
     "Voldaren_Epicure": Creature(

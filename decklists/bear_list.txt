@@ -1,5 +1,6 @@
 10 Forest
 4 Springleaf_Drum
+2 Lead_the_Stampede
 4 Fyndhorn_Elves
 4 Priest_of_Titania
 4 Timberwatch_Elf

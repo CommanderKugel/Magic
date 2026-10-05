@@ -4,7 +4,12 @@ from src.Magic.Ability import Ability
 from src.Magic.Card import Card, Land, Artifact, Creature, Instant, Sorcery
 from src.Player.Player import Player
 from src.Magic.Modifier import Modifier, Buff, KeywordBuff
-from src.Magic.Library import shuffle_library, tutor_card
+from src.Magic.Library import (
+    shuffle_library, 
+    tutor_card, 
+    get_top_n_cards, 
+    put_under_library_in_random_order,
+)
 
 
 # CAN ACTIVATE
@@ -255,6 +260,14 @@ def eot_owners_creatures_gain_p1p1_and_trample(source: Card, owner: Player, oppo
         t.connect_modifier(p1p1)
         t.connect_modifier(trample)
 
+def lead_the_stampede(source: Card, owner: Player, opponent, targets):
+    """Look at top 5 cards, reveal creatures and add them to owners hand."""
+    bunch = get_top_n_cards(5, owner.library)
+    creatures = [c for c in bunch if isinstance(c, Creature)]
+    rest = [r for r in bunch if not isinstance(r, Creature)]
+    owner.hand.extend(creatures)
+    put_under_library_in_random_order(rest, owner.library)
+
 # INSTANCES
 
 LandTapForGreen = Ability(
@@ -395,4 +408,11 @@ SpringleafDrum = Ability(
     _choose_targets=target_untapped_creature_from_owner,
     _pay_cost=tap_card_and_chosen_creature,
     _activity=add_mana_of_any_color,
+)
+
+LeadTheStampede = Ability(
+    _can_activate=always,
+    _choose_targets=no_targets,
+    _pay_cost=no_cost,
+    _activity=lead_the_stampede,
 )
