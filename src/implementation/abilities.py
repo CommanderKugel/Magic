@@ -36,6 +36,14 @@ def artifact_can_tap_own_creature(source: Artifact, owner: Player, opponent: Pla
         and any(c for c in owner.creatures if not c.tapped)
     )
 
+def blood_can_tap_and_discard(source: Artifact, owner: Player, opponent: Player) -> bool:
+    """Return True if the blood can be cracked."""
+    return (
+        source in owner.nc_permanents
+        and not source.tapped
+        and len(owner.hand) >= 1
+    )
+
 def one_creature_exists(source: Card, owner: Player, opponent: Player) -> bool:
     """Check if at least one targettable Creature exists."""
     # ToDo: shroud & hexproof
@@ -59,6 +67,11 @@ def target_single_creature(source: Card, owner: Player, opponent: Player) -> lis
         own_creatures=True, 
         opp_creatures=True,
     )
+    return [target]
+
+def target_single_handcard(source: Card, owner: Player, opponent: Player) -> list[Card | Player]:
+    """Choose one handcard."""
+    target = owner.target(own_hand=True)
     return [target]
 
 def target_untapped_creature_from_owner(source: Card, owner: Player, opponent: Player) -> list[Card]:
@@ -109,6 +122,12 @@ def sacrifice_source_artifact(source: Artifact, owner: Player, opponent: Player,
     """Sacrifice the source artifact."""
     owner.send_artifact_from_field_to_graveyard(source)
 
+def sac_artifact_and_discard_a_card(source: Artifact, owner: Player, opponent: Player, targets: list[Card]) -> None:
+    """Sacrifice the source and discard a card."""
+    target = targets[0]
+    owner.discard_one_card(target)
+    owner.nc_permanents.remove(source)
+
 # ACTIVITY
 
 def add_g_mana(source: Card, owner: Player, opponent: Player, targets: list[Creature | Player] | None) -> None:
@@ -136,7 +155,7 @@ def create_food(source: Card, owner: Player, opponent: Player, targets: list[Cre
     food = Artifact(
         id=str(uuid.uuid1()),
         name="Food",
-        subtype="Food",
+        subtype=["Food", "Token"],
         activated_ability=CrackFood,
         color=["None"],
     )
@@ -144,9 +163,29 @@ def create_food(source: Card, owner: Player, opponent: Player, targets: list[Cre
     # ToDo: replacement effects
     owner.nc_permanents.append(food)
 
+def create_blood(source: Card, owner: Player, opponent: Player, targets: list[Creature | Player]) -> None:
+    """Create a blood token."""
+    blood = Artifact(
+        id=str(uuid.uuid1()),
+        name="Blood",
+        subtype=["Token"],
+        activated_ability=CrackBlood,
+        color=["None"],
+    )
+    owner.nc_permanents.append(blood)
+
+def create_blood_and_ping(source: Card, owner: Player, opponent: Player, targets) -> None:
+    """Owner gets a blood, Opponent takes one damage."""
+    create_blood(source, owner, opponent, targets)
+    opponent.life -= 1
+
 def gain_3_life(souce: Card, owner: Player, opponent, targets) -> None:
     """Owner gains 3 life."""
     owner.life += 3
+
+def draw_a_card(source: Card, owner: Player, opponen, target) -> None:
+    """Owner draws a card."""
+    owner.discard_one_card()
 
 def punch(source: Instant | Sorcery, owner: Player, opponent: Player, targets: list[Creature | Player] | None) -> None:
     """Puncher deals dmg equal to its power to Bag."""
@@ -255,7 +294,29 @@ CrackFood = Ability(
     _choose_targets=no_targets,
     _pay_cost=sacrifice_source_artifact,
     _activity=gain_3_life,
-    mana_color={"None": 2},
+    mana_cost={"None": 2},
+)
+
+CreateBlood = Ability(
+    _can_activate=always,
+    _choose_targets=no_targets,
+    _pay_cost=no_cost,
+    _activity=create_blood,
+)
+
+CrackBlood = Ability(
+    _can_activate=blood_can_tap_and_discard,
+    _choose_targets=no_targets,
+    _pay_cost=sac_artifact_and_discard_a_card,
+    _activity=draw_a_card,
+    mana_cost={"None": 1},
+)
+
+VoldarenEpicure = Ability(
+    _can_activate=always,
+    _choose_targets=no_targets,
+    _pay_cost=no_cost,
+    _activity=create_blood_and_ping,
 )
 
 CreatureTapForGreen = Ability(
