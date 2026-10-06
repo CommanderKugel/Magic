@@ -445,7 +445,7 @@ class Game:
         # 2. Immediate ETB
         # ToDo: replacement effects (e.g. enters tapped)
 
-        data.priority_player.lands.append(card)
+        data.priority_player.put_land_onto_field(card)
         data.priority_player.hand.remove(card)
 
         # 3. Increment played lands counter
@@ -598,6 +598,13 @@ class Game:
         # ToDo: triggered abilities
         # ToDo: Cascade
 
+        for c in self.p1.triggered_abilities + self.p2.triggered_abilities:
+            if c.triggered_ability.can_activate(
+                self.stack[-1], c, data.priority_player, data.non_priority_player,
+            ):
+                self.put_action_on_stack(data, "TriggeredAbility", c, None)
+
+
     def swap_priority(self, data: PriorityData) -> None:
         """On 2 or less passes, non_active_player receives priority. Otherwise, resolve the next item on the stack."""
         self.state_based_actions()
@@ -625,12 +632,12 @@ class Game:
         if action == "Cast":
             # Creature -> put it on the field
             if isinstance(card, Creature):
-                owner.creatures.append(card)
+                owner.put_creature_onto_field(card)
                 # ToDo: etb
 
             # Artifact -> put it onto the field
             if isinstance(card, Artifact):
-                owner.nc_permanents.append(card)
+                owner.put_artifact_onto_field(card)
                 # ToDo: etb
                 
             # Sorceries or Instants -> resolve abilities
@@ -650,6 +657,9 @@ class Game:
         # resolve ETB Abilities
         if action == "EtbAbility":
             card.etb_ability.activity(card, owner, opponent, targets)
+
+        if action == "TriggeredAbility":
+            card.triggered_ability.activity(card, owner, opponent, None)
 
         self.state_based_actions()
 

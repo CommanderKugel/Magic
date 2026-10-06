@@ -14,3 +14,9 @@ class Ability:
     choose_targets: Callable[[Any, Any, Any], list[Any]] = None
     pay_cost: Callable[[Any, Any, Any, list], None] = None
     activity: Callable[[Any, Any, Any, list], None] = None
+
+
+@dataclass(eq=False)
+class TriggeredAbility:
+    can_activate: Callable[[Any, Any, Any, Any], bool] = None
+    activity: Callable[[Any, Any, Any], Any] = None

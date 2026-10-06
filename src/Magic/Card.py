@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 from typing import Literal, Callable
 
-from src.Magic.Ability import Ability
+from src.Magic.Ability import Ability, TriggeredAbility
 from src.Magic.Literals import Color
 from src.Magic.Modifier import Modifier, KeywordBuff
 
@@ -15,6 +15,7 @@ class Card:
 
     activated_ability: Ability = None
     etb_ability: Ability = None
+    triggered_ability: TriggeredAbility = None
 
     def __eq__(self, value):
         return self.id == value.id

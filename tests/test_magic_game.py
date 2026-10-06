@@ -1174,6 +1174,52 @@ class TestHelperMethods:
         assert mock_sorcery not in game.p1.graveyard, "Card was not played, it should not be on stack."
         game.put_action_on_stack.assert_not_called()
 
+    
+    # TRIGGERED ABILITIES
+
+    def test_cast_creature_activates_triggered_ability(self, game, mock_bear_factory, mock_triggered_ability):
+        """Creature is cast and put on the stack."""
+        early_bear = mock_bear_factory()
+        later_bear = mock_bear_factory()
+        early_bear.triggered_ability = mock_triggered_ability
+        game.stack = [None]
+        game.p1.put_creature_onto_field(early_bear)
+        game.p1.hand = [later_bear]
+        data = build_priority_data(game)
+        game.put_action_on_stack = MagicMock()
+        game.p1.pay_for_manacost = MagicMock(retur_value=True)
+
+        assert early_bear in game.p1.triggered_abilities
+
+        game.cast_spell(data, later_bear)
+
+        early_bear.triggered_ability.can_activate.assert_called_once_with(
+            None, early_bear, game.p1, game.p2,
+        )
+        early_bear.triggered_ability.activity.assert_not_called()
+
+    def test_cast_creature_does_not_activates_triggered_ability(self, game, mock_bear_factory, mock_triggered_ability):
+        """Creature is cast and put on the stack."""
+        early_bear = mock_bear_factory()
+        later_bear = mock_bear_factory()
+        early_bear.triggered_ability = mock_triggered_ability
+        early_bear.triggered_ability.can_activate = MagicMock(return_value=False)
+        game.stack = [None]
+        game.p1.put_creature_onto_field(early_bear)
+        game.p1.hand = [later_bear]
+        data = build_priority_data(game)
+        game.put_action_on_stack = MagicMock()
+        game.p1.pay_for_manacost = MagicMock(retur_value=True)
+
+        assert early_bear in game.p1.triggered_abilities
+
+        game.cast_spell(data, later_bear)
+
+        early_bear.triggered_ability.can_activate.assert_called_once_with(
+            None, early_bear, game.p1, game.p2,
+        )
+        game.put_action_on_stack.assert_called_once()
+
 
     # PASSING
 

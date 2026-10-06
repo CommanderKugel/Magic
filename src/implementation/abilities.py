@@ -1,6 +1,7 @@
 import uuid
 
-from src.Magic.Ability import Ability
+from src.Magic.Stack import StackObject
+from src.Magic.Ability import Ability, TriggeredAbility
 from src.Magic.Card import Card, Land, Artifact, Creature, Instant, Sorcery
 from src.Player.Player import Player
 from src.Magic.Modifier import Modifier, Buff, KeywordBuff
@@ -58,6 +59,14 @@ def fight_has_targets(source: Card, owner: Player, opponent: Player) -> bool:
     """Check if the player and opponent both control at least one Creature."""
     # ToDo: hexproof & shroud
     return len(owner.creatures) > 0 and len(opponent.creatures) > 0
+
+# TRIGGERED ABILITY CAN A CTIVATE
+
+def non_creature_spell_is_cast(stack_object: StackObject, source: Card, owner: Player, opponent: Player) -> bool:
+    """Returns true if trigger=='Cast' and trigger_card is not a creature"""
+    print("Action:", stack_object.action)
+    print("Type:", type(stack_object.source))
+    return stack_object.action == "Cast" and not isinstance(stack_object.source, Creature)
 
 # SELECT TARAGETS
 
@@ -268,6 +277,10 @@ def lead_the_stampede(source: Card, owner: Player, opponent, targets):
     owner.hand.extend(creatures)
     put_under_library_in_random_order(rest, owner.library)
 
+def ping_opponent(source: Card, owner: Player, opponent: Player, targets):
+    """Deal 1 damage to the opponent."""
+    opponent.life -= 1
+
 # INSTANCES
 
 LandTapForGreen = Ability(
@@ -330,6 +343,11 @@ VoldarenEpicure = Ability(
     choose_targets=no_targets,
     pay_cost=no_cost,
     activity=create_blood_and_ping,
+)
+
+KessigFlamebreather = TriggeredAbility(
+    can_activate=non_creature_spell_is_cast,
+    activity=ping_opponent,
 )
 
 CreatureTapForGreen = Ability(

@@ -52,6 +52,25 @@ class TestHelper:
         assert mock_bear in mock_player.graveyard
 
 
+    def test_put_creature_onto_field_saves_triggered_ability(self, mock_player, mock_bear):
+        """Bears triggered ability is saved on etb."""
+        mock_bear.triggered_ability = MagicMock()
+        
+        mock_player.put_creature_onto_field(mock_bear)
+
+        assert mock_bear in mock_player.creatures
+        assert mock_bear in mock_player.triggered_abilities
+
+    def test_put_creature_onto_field_saves_no_empty_triggered_ability(self, mock_player, mock_bear):
+        """None abilities are not saved."""
+        mock_bear.triggered_ability = None
+
+        mock_player.put_creature_onto_field(mock_bear)
+
+        assert mock_bear in mock_player.creatures
+        assert mock_bear not in mock_player.triggered_abilities
+
+
 class TestCollectActions:
     """Test player.collect_actions, but logic to call player.collect_landdrops is only really tested."""
     

@@ -24,6 +24,8 @@ class Player:
         self.nc_permanents: list[Artifact] = []
         self.lands: list[Land] = []
 
+        self.triggered_abilities: list[Card] = []
+
         self.eot_effects: list[Modifier] = []
 
         self.floating_mana: dict[Color, int] = {
@@ -65,11 +67,46 @@ class Player:
         # ToDo: madness
         # ToDo: triggered abilities
 
+
+    def put_artifact_onto_field(self, artifact: Artifact) -> None:
+        """Put an artifact on the field."""
+        self.nc_permanents.append(artifact)
+
+        if artifact.triggered_ability is not None:
+            self.triggered_abilities.append(artifact)
+
+    def put_creature_onto_field(self, creature: Creature) -> None:
+        """Put an artifact on the field."""
+        self.creatures.append(creature)
+
+        if creature.triggered_ability is not None:
+            self.triggered_abilities.append(creature)
+
+    def put_land_onto_field(self, land: Land) -> None:
+        """Put an artifact on the field."""
+        self.lands.append(land)
+
+        if land.triggered_ability is not None:
+            self.triggered_abilities.append(land)
+            
+    
+    def send_artifact_from_field_to_graveyard(self, artifact: Artifact) -> None:
+        """Reset an artifact, remove it from the field and put it into the graveyard."""
+        artifact.reset()
+        self.nc_permanents.remove(artifact)
+        self.graveyard.append(artifact)
+
+        if artifact.triggered_ability is not None:
+            self.triggered_abilities.remove(artifact)
+
     def send_creature_from_field_to_graveyard(self, creature: Creature) -> None:
         """Reset a crature, remove it from the field and put it into the graveyard."""
         creature.reset()
         self.creatures.remove(creature)
         self.graveyard.append(creature)
+
+        if creature.triggered_ability is not None:
+            self.triggered_abilities.remove(creature)
 
         # ToDo: triggered abilities
 
@@ -79,13 +116,11 @@ class Player:
         self.lands.remove(land)
         self.graveyard.append(land)
 
+        if land.triggered_ability is not None:
+            self.triggered_abilities.remove(land)
+
         # ToDo: triggered abilities
 
-    def send_artifact_from_field_to_graveyard(self, artifact: Artifact) -> None:
-        """Reset an artifact, remove it from the filed and put it into the graveyard."""
-        artifact.reset()
-        self.nc_permanents.remove(artifact)
-        self.graveyard.append(artifact)
 
     # ==================================================================================
     # API FOR PLAYER- AND BOT-CLASSES

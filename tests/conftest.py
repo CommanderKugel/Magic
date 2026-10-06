@@ -9,7 +9,7 @@ from src.Magic.Game import Game
 from src.Magic.Library import load_from_decklist
 from src.Magic.Card import Card, Land, Artifact, Spell, Creature, Instant, Sorcery
 from src.Magic.Stack import PriorityData
-from src.Magic.Ability import Ability
+from src.Magic.Ability import Ability, TriggeredAbility
 from src.Magic.Stack import StackObject
 from src.Player.Player import Player
 from src.implementation.cards import get_card
@@ -62,6 +62,14 @@ def mock_ability() -> Ability:
     a.can_activate = MagicMock(return_value=True)
     a.choose_targets = MagicMock(return_value=[])
     a.pay_cost = MagicMock()
+    a.activity = MagicMock()
+    return a
+
+@pytest.fixture
+def mock_triggered_ability() -> TriggeredAbility:
+    """Mock a triggered ability."""
+    a = TriggeredAbility()
+    a.can_activate = MagicMock(return_value=True)
     a.activity = MagicMock()
     return a
 

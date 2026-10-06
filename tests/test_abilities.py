@@ -273,3 +273,42 @@ def test_lts_lib_size(mock_player, mock_bear_factory):
 
     for c in mock_player.hand:
         assert isinstance(c, Creature)
+
+
+    # KESSIG FLAMEBREATHER
+
+def test_bolt_triggers_kessig(game):
+    kf = get_card("Kessig_Flamebreather")
+    bolt = get_card("Lightning_Bolt")
+    game.p1.target = MagicMock(return_value=[])
+    game.p1.put_creature_onto_field(kf)
+    game.p1.hand = [bolt]
+    data = build_priority_data(game)
+    game.p1.pay_for_manacost = MagicMock(retur_value=True)
+
+    assert kf in game.p1.triggered_abilities
+
+    game.cast_spell(data, bolt)
+
+    print(game.stack)
+
+    assert len(game.stack) == 2
+    assert game.stack[0].source == bolt
+    assert game.stack[1].source == kf
+
+def test_bear_triggers_kessig(game, mock_bear):
+    kf = get_card("Kessig_Flamebreather")
+    game.p1.target = MagicMock(return_value=[])
+    game.p1.put_creature_onto_field(kf)
+    game.p1.hand = [mock_bear]
+    data = build_priority_data(game)
+    game.p1.pay_for_manacost = MagicMock(retur_value=True)
+
+    assert kf in game.p1.triggered_abilities
+
+    game.cast_spell(data, mock_bear)
+
+    print(game.stack)
+
+    assert len(game.stack) == 1
+    assert game.stack[0].source == mock_bear

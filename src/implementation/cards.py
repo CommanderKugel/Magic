@@ -204,6 +204,16 @@ _ALL_CARDS = {
         cost={"Red": 1},
     ),
 
+    "Kessig_Flamebreather": Creature(
+        name="Kessig Flamebreather",
+        subtype=["Human", "Shaman"],
+        color=["Red"],
+        cost={"Red": 1, "None": 1},
+        base_power=1,
+        base_toughness=3,
+        triggered_ability=abilities.KessigFlamebreather,
+    ),
+
 }
 
 for key, card in _ALL_CARDS.items():
