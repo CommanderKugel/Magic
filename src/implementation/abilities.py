@@ -273,146 +273,146 @@ def lead_the_stampede(source: Card, owner: Player, opponent, targets):
 LandTapForGreen = Ability(
     is_mana_ability=True,
     mana_color="Green",
-    _can_activate=land_is_untapped_and_on_field,
-    _choose_targets=no_targets,
-    _pay_cost=tap_card,
-    _activity=add_g_mana,
+    can_activate=land_is_untapped_and_on_field,
+    choose_targets=no_targets,
+    pay_cost=tap_card,
+    activity=add_g_mana,
 )
 
 LandTapForRed = Ability(
     is_mana_ability=True,
     mana_color="Red",
-    _can_activate=land_is_untapped_and_on_field,
-    _choose_targets=no_targets,
-    _pay_cost=tap_card,
-    _activity=add_r_mana,
+    can_activate=land_is_untapped_and_on_field,
+    choose_targets=no_targets,
+    pay_cost=tap_card,
+    activity=add_r_mana,
 )
 
 ForestCycling = Ability(
-    _can_activate=source_in_hand,
-    _choose_targets=no_targets,
-    _pay_cost=discard_source,
-    _activity=tutor_forest,
+    can_activate=source_in_hand,
+    choose_targets=no_targets,
+    pay_cost=discard_source,
+    activity=tutor_forest,
 )
 
 CreateFood = Ability(
-    _can_activate=always,
-    _choose_targets=no_targets,
-    _pay_cost=no_cost,
-    _activity=create_food,
+    can_activate=always,
+    choose_targets=no_targets,
+    pay_cost=no_cost,
+    activity=create_food,
 )
 
 CrackFood = Ability(
-    _can_activate=always,
-    _choose_targets=no_targets,
-    _pay_cost=sacrifice_source_artifact,
-    _activity=gain_3_life,
+    can_activate=always,
+    choose_targets=no_targets,
+    pay_cost=sacrifice_source_artifact,
+    activity=gain_3_life,
     mana_cost={"None": 2},
 )
 
 CreateBlood = Ability(
-    _can_activate=always,
-    _choose_targets=no_targets,
-    _pay_cost=no_cost,
-    _activity=create_blood,
+    can_activate=always,
+    choose_targets=no_targets,
+    pay_cost=no_cost,
+    activity=create_blood,
 )
 
 CrackBlood = Ability(
-    _can_activate=blood_can_tap_and_discard,
-    _choose_targets=no_targets,
-    _pay_cost=sac_artifact_and_discard_a_card,
-    _activity=draw_a_card,
+    can_activate=blood_can_tap_and_discard,
+    choose_targets=no_targets,
+    pay_cost=sac_artifact_and_discard_a_card,
+    activity=draw_a_card,
     mana_cost={"None": 1},
 )
 
 VoldarenEpicure = Ability(
-    _can_activate=always,
-    _choose_targets=no_targets,
-    _pay_cost=no_cost,
-    _activity=create_blood_and_ping,
+    can_activate=always,
+    choose_targets=no_targets,
+    pay_cost=no_cost,
+    activity=create_blood_and_ping,
 )
 
 CreatureTapForGreen = Ability(
     is_mana_ability=True,
     mana_color="Green",
-    _can_activate=creature_can_tap_and_on_field,
-    _choose_targets=no_targets,
-    _pay_cost=tap_card,
-    _activity=add_g_mana,
+    can_activate=creature_can_tap_and_on_field,
+    choose_targets=no_targets,
+    pay_cost=tap_card,
+    activity=add_g_mana,
 )
 
 Punch = Ability(
-    _can_activate=fight_has_targets,
-    _choose_targets=target_two_creatures_to_fight,
-    _pay_cost=no_cost,
-    _activity=punch,
+    can_activate=fight_has_targets,
+    choose_targets=target_two_creatures_to_fight,
+    pay_cost=no_cost,
+    activity=punch,
 )
 
 Bolt = Ability(
-    _can_activate=always, # ToDo: hexproof & shroud
-    _choose_targets=target_single_creature_or_player,
-    _pay_cost=no_cost,
-    _activity=bolt,
+    can_activate=always, # ToDo: hexproof & shroud
+    choose_targets=target_single_creature_or_player,
+    pay_cost=no_cost,
+    activity=bolt,
 )
 
 GiantGrowth = Ability(
-    _can_activate=one_creature_exists,
-    _choose_targets=target_single_creature,
-    _pay_cost=no_cost,
-    _activity=eot_p3p3,
+    can_activate=one_creature_exists,
+    choose_targets=target_single_creature,
+    pay_cost=no_cost,
+    activity=eot_p3p3,
 )
 
 BlitzBallShot = Ability(
-    _can_activate=one_creature_exists,
-    _choose_targets=target_single_creature,
-    _pay_cost=no_cost,
-    _activity=eot_p3p3_and_trample,
+    can_activate=one_creature_exists,
+    choose_targets=target_single_creature,
+    pay_cost=no_cost,
+    activity=eot_p3p3_and_trample,
 )
 
 AlmightyBrushwagg = Ability(
-    _can_activate=always,
-    _choose_targets=no_targets,
-    _pay_cost=no_cost,
-    _activity=eot_p3p3_for_source,
+    can_activate=always,
+    choose_targets=no_targets,
+    pay_cost=no_cost,
+    activity=eot_p3p3_for_source,
     mana_cost={"Green": 1, "None": 3}
 )
 
 PriestOfTitania = Ability(
     is_mana_ability=True,
     mana_color="Green",
-    _can_activate=creature_can_tap_and_on_field,
-    _choose_targets=no_targets,
-    _pay_cost=tap_card,
-    _activity=add_g_for_number_of_elves,
+    can_activate=creature_can_tap_and_on_field,
+    choose_targets=no_targets,
+    pay_cost=tap_card,
+    activity=add_g_for_number_of_elves,
 )
 
 TimberwatchElf = Ability(
-    _can_activate=creature_can_tap_and_on_field,
-    _choose_targets=target_single_creature,
-    _pay_cost=tap_card,
-    _activity=eot_add_p1p1_for_number_of_elves,
+    can_activate=creature_can_tap_and_on_field,
+    choose_targets=target_single_creature,
+    pay_cost=tap_card,
+    activity=eot_add_p1p1_for_number_of_elves,
 )
 
 SpectralHuntCaller = Ability(
     mana_cost={"Green": 1, "None": 5},
-    _can_activate=creature_is_on_field,
-    _choose_targets=no_targets,
-    _pay_cost=no_cost,
-    _activity=eot_owners_creatures_gain_p1p1_and_trample,
+    can_activate=creature_is_on_field,
+    choose_targets=no_targets,
+    pay_cost=no_cost,
+    activity=eot_owners_creatures_gain_p1p1_and_trample,
 )
 
 SpringleafDrum = Ability(
     is_mana_ability=True,
     mana_color=["White", "Blue", "Black", "Red", "Green"],
-    _can_activate=artifact_can_tap_own_creature,
-    _choose_targets=target_untapped_creature_from_owner,
-    _pay_cost=tap_card_and_chosen_creature,
-    _activity=add_mana_of_any_color,
+    can_activate=artifact_can_tap_own_creature,
+    choose_targets=target_untapped_creature_from_owner,
+    pay_cost=tap_card_and_chosen_creature,
+    activity=add_mana_of_any_color,
 )
 
 LeadTheStampede = Ability(
-    _can_activate=always,
-    _choose_targets=no_targets,
-    _pay_cost=no_cost,
-    _activity=lead_the_stampede,
+    can_activate=always,
+    choose_targets=no_targets,
+    pay_cost=no_cost,
+    activity=lead_the_stampede,
 )
