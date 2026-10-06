@@ -64,9 +64,17 @@ def fight_has_targets(source: Card, owner: Player, opponent: Player) -> bool:
 
 def non_creature_spell_is_cast(stack_object: StackObject, source: Card, owner: Player, opponent: Player) -> bool:
     """Returns true if trigger=='Cast' and trigger_card is not a creature"""
-    print("Action:", stack_object.action)
-    print("Type:", type(stack_object.source))
-    return stack_object.action == "Cast" and not isinstance(stack_object.source, Creature)
+    return (
+        stack_object.action == "Cast" 
+        and not isinstance(stack_object.source, Creature)
+    )
+
+def instant_or_sorcery_is_cast(stack_object: StackObject, source: Card, owner: Player, opponent: Player) -> bool:
+    """Returns true if trigger=='Cast' and trigger_card is not a creature"""
+    return (
+        stack_object.action == "Cast" 
+        and isinstance(stack_object.source, (Instant, Sorcery))
+    )
 
 # SELECT TARAGETS
 
@@ -281,6 +289,10 @@ def ping_opponent(source: Card, owner: Player, opponent: Player, targets):
     """Deal 1 damage to the opponent."""
     opponent.life -= 1
 
+def ping_opponent_for_2(source: Card, owner: Player, opponent: Player, targets):
+    """Deal 1 damage to the opponent."""
+    opponent.life -= 2
+
 # INSTANCES
 
 LandTapForGreen = Ability(
@@ -348,6 +360,11 @@ VoldarenEpicure = Ability(
 KessigFlamebreather = TriggeredAbility(
     can_activate=non_creature_spell_is_cast,
     activity=ping_opponent,
+)
+
+Guttersnipe = TriggeredAbility(
+    can_activate=instant_or_sorcery_is_cast,
+    activity=ping_opponent_for_2,
 )
 
 CreatureTapForGreen = Ability(

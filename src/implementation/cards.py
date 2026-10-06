@@ -214,6 +214,16 @@ _ALL_CARDS = {
         triggered_ability=abilities.KessigFlamebreather,
     ),
 
+    "Guttersnipe": Creature(
+        name="Guttersnipe",
+        subtype=["Goblin", "Shaman"],
+        color=["Red"],
+        cost={"Red": 1, "None": 2},
+        base_power=2,
+        base_toughness=2,
+        triggered_ability=abilities.Guttersnipe,
+    ),
+
 }
 
 for key, card in _ALL_CARDS.items():
