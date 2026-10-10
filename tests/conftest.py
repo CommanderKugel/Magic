@@ -11,6 +11,7 @@ from src.Magic.Card import Card, Land, Artifact, Spell, Creature, Instant, Sorce
 from src.Magic.Stack import PriorityData
 from src.Magic.Ability import Ability, TriggeredAbility
 from src.Magic.Stack import StackObject
+from src.Magic.Cost import Cost
 from src.Player.Player import Player
 from src.implementation.cards import get_card
 
@@ -44,6 +45,16 @@ def game(mock_player_factory) -> Game:
     g.active_player = g.p1
     g.reactive_player = g.p2
     return g
+
+@pytest.fixture
+def mock_cost() -> Cost:
+    """Mock a cost."""
+    return Cost(
+        mana_cost={},
+        has_extra_cost=False,
+        can_pay_extra_cost=MagicMock(return_value=True),
+        pay_extra_cost=MagicMock(),
+    )
 
 @pytest.fixture
 def mock_mana_ability() -> Ability:
@@ -86,37 +97,41 @@ def mock_land() -> Land:
     return land
 
 @pytest.fixture
-def mock_artifact() -> Artifact:
+def mock_artifact(mock_cost) -> Artifact:
     """Mock an artifact."""
     artifact = get_card("Springleaf_Drum")
+    artifact.cost = mock_cost
     artifact.activated_ability = MagicMock()
     artifact.activated_ability.is_mana_ability = False
     return artifact
 
 @pytest.fixture
-def mock_trample_dino() -> Creature:
+def mock_trample_dino(mock_cost) -> Creature:
     """Mock a trampling Dino."""
     creature = get_card("Colossal_Dreadmaw")
+    creature.cost = mock_cost
     creature.name = "Mock_Dino"
     creature.summoning_sick = False
     return creature
 
 @pytest.fixture
-def mock_flying_birb() -> Creature:
+def mock_flying_birb(mock_cost) -> Creature:
     """Mock a flying Bird."""
-    creature = get_card("Storm_Crow")
-    creature.name = "Mock Birb"
-    creature.summoning_sickness = False
-    return creature
+    birb = get_card("Storm_Crow")
+    birb.cost = mock_cost
+    birb.name = "Mock Birb"
+    birb.summoning_sickness = False
+    return birb
 
 @pytest.fixture
-def mock_bear(mock_ability) -> Creature:
+def mock_bear(mock_ability, mock_cost) -> Creature:
     """Mock a vanilla creature."""
-    creature = get_card("Balduvian_Bears")
-    creature.name = "Mock_reature"
-    creature.summoning_sick = False
-    creature.activated_ability = mock_ability
-    return creature
+    bear = get_card("Balduvian_Bears")
+    bear.name = "Mock_reature"
+    bear.summoning_sick = False
+    bear.activated_ability = mock_ability
+    bear.cost = mock_cost
+    return bear
 
 @pytest.fixture
 def mock_bear_factory():
@@ -126,17 +141,19 @@ def mock_bear_factory():
         creature.name = "Mock_creature"
         creature.summoning_sick = False
         creature.activated_ability = MagicMock()
+        creature.mock_cost = MagicMock()
         return creature
     return _mock_bear
 
 @pytest.fixture
-def mock_elf_dork(mock_mana_ability):
+def mock_elf_dork(mock_mana_ability, mock_cost):
     """Mock Elf that taps for {G}."""
-    creature = get_card("Llanowar Elves")
-    creature.name = "Mock Elf Dork"
-    creature.summoning_sick = False
-    creature.activated_ability = mock_mana_ability
-    return creature
+    elf = get_card("Llanowar Elves")
+    elf.name = "Mock Elf Dork"
+    elf.summoning_sick = False
+    elf.activated_ability = mock_mana_ability
+    elf.cost = mock_cost
+    return elf
 
 @pytest.fixture
 def mock_elf_dork_factory():
@@ -146,23 +163,26 @@ def mock_elf_dork_factory():
         creature.name = "Mock Elf Dork"
         creature.summoning_sick = False
         creature.activated_ability = MagicMock()
+        creature.cost = MagicMock()
         return creature
     return _mock_elf_dork
 
 @pytest.fixture
-def mock_bolt(mock_ability) -> Instant:
+def mock_bolt(mock_ability, mock_cost) -> Instant:
     """Mock an instant spell."""
-    instant: Instant = get_card("Lightning_Bolt")
-    instant.name = "Mock_Instant"
-    instant.ability = mock_ability
-    return instant
+    bolt: Instant = get_card("Lightning_Bolt")
+    bolt.name = "Mock_Instant"
+    bolt.ability = mock_ability
+    bolt.cost = mock_cost
+    return bolt
 
 @pytest.fixture
-def mock_sorcery(mock_ability) -> Instant:
+def mock_sorcery(mock_ability, mock_cost) -> Instant:
     """Mock an instant spell."""
     sorcery: Instant = get_card("Horrific_Assault")
     sorcery.name = "Mock_Sorcery"
     sorcery.ability = mock_ability
+    sorcery.cost = mock_cost
     return sorcery
 
 def build_priority_data(game: Game, pass_counter=0) -> PriorityData:

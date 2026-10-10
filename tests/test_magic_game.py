@@ -986,10 +986,12 @@ class TestHelperMethods:
 
         game.cast_spell(data, mock_artifact)
 
-        game.p1.pay_for_manacost.assert_called_once_with(mock_artifact.cost, data.non_priority_player)
+        game.p1.pay_for_manacost.assert_called_once_with(mock_artifact.cost.mana_cost, data.non_priority_player)
         assert mock_artifact not in game.p1.hand, "Card was played, it should leave the hand."
         assert mock_artifact not in game.p1.nc_permanents, "Card was played, it should be on the stack."
         game.put_action_on_stack.assert_called_once_with(data, "Cast", mock_artifact, None)
+        mock_artifact.cost.pay_extra_cost.assert_not_called()
+        mock_artifact.cost.can_pay_extra_cost.assert_not_called()
 
     def text_cast_artifact_not_enough_mana(self, game, mock_artifact):
         """Casting creature is attempted and failed."""
@@ -998,10 +1000,13 @@ class TestHelperMethods:
         game.put_action_on_stack = MagicMock()
         game.p1.pay_for_manacost = MagicMock(return_value=False)
         game.cast_spell(data, mock_artifact)
-        game.p1.pay_for_manacost.assert_called_once_with(mock_artifact.cost, data.non_priority_player)
+        game.p1.pay_for_manacost.assert_called_once_with(mock_artifact.cost.mana_cost, data.non_priority_player)
         assert mock_artifact in game.p1.hand, "Card was not played, it should stay in hand."
         assert mock_artifact not in game.p1.nc_permanents, "Card was not played, should not etb."
         game.put_action_on_stack.assert_called_once_with(data, "Cast", mock_artifact, None)
+        mock_artifact.cost.pay_extra_cost.assert_not_called()
+        mock_artifact.cost.can_pay_extra_cost.assert_not_called()
+        
 
 
     # CASTING CREATURES
@@ -1015,10 +1020,12 @@ class TestHelperMethods:
 
         game.cast_spell(data, mock_bear)
 
-        game.p1.pay_for_manacost.assert_called_once_with(mock_bear.cost, data.non_priority_player)
+        game.p1.pay_for_manacost.assert_called_once_with(mock_bear.cost.mana_cost, data.non_priority_player)
         assert mock_bear not in game.p1.hand, "Card was played, it should leave the hand."
         assert mock_bear not in game.p1.creatures, "Card was played, it should be on the stack."
         game.put_action_on_stack.assert_called_once_with(data, "Cast", mock_bear, None)
+        mock_bear.cost.can_pay_extra_cost.assert_not_called()
+        mock_bear.cost.pay_extra_cost.assert_not_called()
 
     def text_cast_creature_not_enough_mana(self, game, mock_bear):
         """Casting creature is attempted and failed."""
@@ -1027,11 +1034,58 @@ class TestHelperMethods:
         game.put_action_on_stack = MagicMock()
         game.p1.pay_for_manacost = MagicMock(return_value=False)
         game.cast_spell(data, mock_bear)
-        game.p1.pay_for_manacost.assert_called_once_with(mock_bear.cost, data.non_priority_player)
+        game.p1.pay_for_manacost.assert_called_once_with(mock_bear.cost.mana_cost, data.non_priority_player)
         assert mock_bear in game.p1.hand, "Card was not played, it should stay in hand."
         assert mock_bear not in game.p1.creatures, "Card was not played, should not etb."
         game.put_action_on_stack.assert_called_once_with(data, "Cast", mock_bear, None)
+        mock_bear.cost.can_pay_extra_cost.assert_not_called()
+        mock_bear.cost.pay_extra_cost.assert_not_called()
 
+    # CREATURES WITH EXTRA COST
+
+    def test_cast_creature_with_extra_cost_successfully(self, game, mock_bear):
+        """Creature is cast and put on the stack."""
+        mock_bear.cost.has_extra_cost = True
+        print(mock_bear.cost)
+        game.p1.hand = [mock_bear]
+        data = build_priority_data(game)
+        game.put_action_on_stack = MagicMock()
+        game.p1.pay_for_manacost = MagicMock(return_value=True)
+
+        game.cast_spell(data, mock_bear)
+
+        mock_bear.cost.can_pay_extra_cost.assert_called_once_with(
+            mock_bear, data.priority_player, data.non_priority_player, None,
+        )
+        mock_bear.cost.pay_extra_cost.assert_called_once_with(
+            mock_bear, data.priority_player, data.non_priority_player, None,
+        )
+        game.p1.pay_for_manacost.assert_called_once_with(
+            mock_bear.cost.mana_cost, data.non_priority_player,
+        )
+        assert mock_bear not in game.p1.hand, "Card was played, it should leave the hand."
+        assert mock_bear not in game.p1.creatures, "Card was played, it should be on the stack."
+        game.put_action_on_stack.assert_called_once_with(data, "Cast", mock_bear, None)
+
+    def test_cast_creature_with_extra_cost_cannot_pay_extra(self, game, mock_bear):
+        """Casting creature is attempted and failed."""
+        mock_bear.cost.has_extra_cost = True
+        mock_bear.cost.can_pay_extra_cost = MagicMock(return_value=False)
+        game.p1.hand = [mock_bear]
+        data = build_priority_data(game)
+        game.put_action_on_stack = MagicMock()
+        game.p1.pay_for_manacost = MagicMock(return_value=False)
+
+        game.cast_spell(data, mock_bear)
+
+        mock_bear.cost.can_pay_extra_cost.assert_called_once_with(
+            mock_bear, data.priority_player, data.non_priority_player, None,
+        )
+        mock_bear.cost.pay_extra_cost.assert_not_called()
+        game.p1.pay_for_manacost.assert_not_called()
+        assert mock_bear in game.p1.hand, "Card was not played, it should stay in hand."
+        assert mock_bear not in game.p1.creatures, "Card was not played, should not etb."
+        game.put_action_on_stack.assert_not_called()
 
     # CASTING INSTANTS
 
@@ -1051,7 +1105,7 @@ class TestHelperMethods:
             mock_bolt, data.priority_player, data.non_priority_player,
         )
         game.p1.pay_for_manacost.assert_called_once_with(
-            mock_bolt.cost, data.non_priority_player
+            mock_bolt.cost.mana_cost, data.non_priority_player
         )      
         mock_bolt.ability.pay_cost.assert_called_once_with(
             mock_bolt, data.priority_player, data.non_priority_player, [],
@@ -1059,6 +1113,8 @@ class TestHelperMethods:
         assert mock_bolt not in game.p1.hand, "Card was played, it should leave the hand."
         assert mock_bolt not in game.p1.graveyard, "Card was played, it should be on the stack."
         game.put_action_on_stack.assert_called_once_with(data, "Cast", mock_bolt, [])
+        mock_bolt.cost.can_pay_extra_cost.assert_not_called()
+        mock_bolt.cost.pay_extra_cost.assert_not_called()
 
     def test_cast_instant_cannot_pay_mana(self, game, mock_bolt):
         """Instant mana cost cannot be payed and it is not cast."""
@@ -1076,12 +1132,14 @@ class TestHelperMethods:
             mock_bolt, data.priority_player, data.non_priority_player,
         )
         game.p1.pay_for_manacost.assert_called_once_with(
-            mock_bolt.cost, data.non_priority_player
+            mock_bolt.cost.mana_cost, data.non_priority_player
         )      
         mock_bolt.ability.pay_cost.assert_not_called()
         assert mock_bolt in game.p1.hand, "Card was not played, it should stay in hand."
         assert mock_bolt not in game.p1.graveyard, "Card was not played, it should not be on stack."
         game.put_action_on_stack.assert_not_called()
+        mock_bolt.cost.can_pay_extra_cost.assert_not_called()
+        mock_bolt.cost.pay_extra_cost.assert_not_called()
 
     def test_cast_instant_ability_cannot_activate(self, game, mock_bolt):
         """Instant ability cannot activate and it is not cast."""
@@ -1102,7 +1160,8 @@ class TestHelperMethods:
         assert mock_bolt in game.p1.hand, "Card was not played, it should stay in hand."
         assert mock_bolt not in game.p1.graveyard, "Card was not played, it should not be on stack."
         game.put_action_on_stack.assert_not_called()
-
+        mock_bolt.cost.can_pay_extra_cost.assert_not_called()
+        mock_bolt.cost.pay_extra_cost.assert_not_called()
 
     # CASTING SORCERIES
 
@@ -1122,7 +1181,7 @@ class TestHelperMethods:
             mock_sorcery, data.priority_player, data.non_priority_player,
         )
         game.p1.pay_for_manacost.assert_called_once_with(
-            mock_sorcery.cost, data.non_priority_player
+            mock_sorcery.cost.mana_cost, data.non_priority_player
         )      
         mock_sorcery.ability.pay_cost.assert_called_once_with(
             mock_sorcery, data.priority_player, data.non_priority_player, [],
@@ -1130,6 +1189,8 @@ class TestHelperMethods:
         assert mock_sorcery not in game.p1.hand, "Card was played, it should leave the hand."
         assert mock_sorcery not in game.p1.graveyard, "Card was played, it should be on the stack."
         game.put_action_on_stack.assert_called_once_with(data, "Cast", mock_sorcery, [])
+        mock_sorcery.cost.can_pay_extra_cost.assert_not_called()
+        mock_sorcery.cost.pay_extra_cost.assert_not_called()
 
     def test_cast_sorcery_cannot_pay_mana(self, game, mock_sorcery):
         """Sorcery mana cost cannot be payed and it is not cast."""
@@ -1147,12 +1208,14 @@ class TestHelperMethods:
             mock_sorcery, data.priority_player, data.non_priority_player,
         )
         game.p1.pay_for_manacost.assert_called_once_with(
-            mock_sorcery.cost, data.non_priority_player
+            mock_sorcery.cost.mana_cost, data.non_priority_player
         )      
         mock_sorcery.ability.pay_cost.assert_not_called()
         assert mock_sorcery in game.p1.hand, "Card was not played, it should stay in hand."
         assert mock_sorcery not in game.p1.graveyard, "Card was not played, it should not be on stack."
         game.put_action_on_stack.assert_not_called()
+        mock_sorcery.cost.can_pay_extra_cost.assert_not_called()
+        mock_sorcery.cost.pay_extra_cost.assert_not_called()
 
     def test_cast_sorcery_ability_cannot_activate(self, game, mock_sorcery):
         """Sorcery ability cannot activate and it is not cast."""
@@ -1173,7 +1236,8 @@ class TestHelperMethods:
         assert mock_sorcery in game.p1.hand, "Card was not played, it should stay in hand."
         assert mock_sorcery not in game.p1.graveyard, "Card was not played, it should not be on stack."
         game.put_action_on_stack.assert_not_called()
-
+        mock_sorcery.cost.can_pay_extra_cost.assert_not_called()
+        mock_sorcery.cost.pay_extra_cost.assert_not_called()
     
     # TRIGGERED ABILITIES
 

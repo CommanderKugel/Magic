@@ -4,6 +4,7 @@ from typing import Literal, Callable
 from src.Magic.Ability import Ability, TriggeredAbility
 from src.Magic.Literals import Color
 from src.Magic.Modifier import Modifier, KeywordBuff
+from src.Magic.Cost import Cost
 
 
 @dataclass(eq=False)
@@ -37,7 +38,7 @@ class Land(Card):
 @dataclass(eq=False)
 class Spell(Card):
     """Parent Class for Creature, Sorcery and Instant."""
-    cost: dict[Color, int] = None
+    cost: Cost = None
     sorcery_speed: bool = True
 
     def __hash__(self):

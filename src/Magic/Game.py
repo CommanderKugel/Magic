@@ -1,9 +1,11 @@
 from src.Player.Player import Player
-from src.Magic.Card import Card, Artifact, Creature, Land, Sorcery, Instant
+from src.Magic.Card import Card, Spell, Artifact, Creature, Land, Sorcery, Instant
 from src.Magic.Stack import StackObject, PriorityData, PriorityState
 from src.Magic.Library import shuffle_library
 from src.Magic.Modifier import Modifier
 from src.Magic.Literals import PriorityState, Action
+from src.Magic.Cost import Cost
+
 
 class Game:
     """Game sim of Magic: the gathering, only supporting 2 players for now."""
@@ -534,7 +536,11 @@ class Game:
             self.put_action_on_stack(data, "Ability", card, targets)
 
         # 9. Ability was activated successfully
-        # ToDo: triggered abilities        
+        # ToDo: triggered abilities
+
+    def determine_cost(self, card: Spell, owner: Player) -> Cost:
+        """Determine the cost to cast the Spell."""
+        return card.cost
 
     def cast_spell(self, data: PriorityData, card: Card) -> None:
         """Cast a spell. For more info, look at 'concepts/Cast_or_Activate.md'."""
@@ -576,13 +582,20 @@ class Game:
         # 6. Determine total cost
         # ToDo: Affinity
 
-        cost = card.cost
+        cost = self.determine_cost(card, data.priority_player)
 
         # 7. Use mana-abilities
         # 8. Pay the cost
         # ToDo: split creating mana and paying mana in 2 functions
 
-        if not data.priority_player.pay_for_manacost(cost, data.non_priority_player):
+        # extra cost
+
+        if cost.has_extra_cost:
+            if not cost.can_pay_extra_cost(card, data.priority_player, data.non_priority_player, targets):
+                return
+            cost.pay_extra_cost(card, data.priority_player, data.non_priority_player, targets)
+
+        if not data.priority_player.pay_for_manacost(cost.mana_cost, data.non_priority_player):
             return
 
         if isinstance(card, (Instant, Sorcery)):

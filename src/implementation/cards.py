@@ -3,6 +3,7 @@ import uuid
 import src.implementation.abilities as abilities
 
 from src.Magic.Card import Card, Land, Artifact, Creature, Sorcery, Instant
+from src.Magic.Cost import Cost
 
 
 def get_card(name: str, source: dict | None = None) -> Card:
@@ -40,7 +41,7 @@ _ALL_CARDS = {
         name="Balduvian_Bears",
         subtype=["Beast"],
         color=["Green"],
-        cost={"Green": 1, "None": 1},
+        cost=Cost(mana_cost={"Green": 1, "None": 1}),
         base_power=2,
         base_toughness=2,
     ),
@@ -49,7 +50,7 @@ _ALL_CARDS = {
         name="Almighty Brushwagg",
         subtype=["Brushwagg"],
         color=["Green"],
-        cost={"Green": 1},
+        cost=Cost(mana_cost={"Green": 1}),
         base_power=1,
         base_toughness=1,
         _trample=True,
@@ -60,7 +61,7 @@ _ALL_CARDS = {
         name="Colossal Dreadmaw",
         subtype=["Dinsaur"],
         color=["Green"],
-        cost={"Green": 2, "None": 4},
+        cost=Cost(mana_cost={"Green": 2, "None": 4}),
         base_power=6,
         base_toughness=6,
         _trample=True,
@@ -70,7 +71,7 @@ _ALL_CARDS = {
         name="Storm Crow",
         subtype=["Bird"],
         color=["Blue"],
-        cost={"Blue": 1, "None": 1},
+        cost=Cost(mana_cost={"Blue": 1, "None": 1}),
         base_power=1,
         base_toughness=2,
         _flying=True,
@@ -80,28 +81,28 @@ _ALL_CARDS = {
         name="Horrific Assault",
         ability=abilities.Punch,
         color=["Green"],
-        cost={"Green": 1},
+        cost=Cost(mana_cost={"Green": 1}),
     ),
 
     "Blitzball_Shot": Instant(
         name="Blitzball Shot",
         ability=abilities.BlitzBallShot,
         color=["Green"],
-        cost={"Green": 1, "None": 1},
+        cost=Cost(mana_cost={"Green": 1, "None": 1}),
     ),
 
     "Giant_Growth": Instant(
         name="Giant Growth",
         ability=abilities.GiantGrowth,
         color=["Green"],
-        cost={"Green": 1},
+        cost=Cost(mana_cost={"Green": 1}),
     ),
 
     "Spectral_Hunt-Caller": Creature(
         name="Spectral Hunt-Caller",
         subtype=["Wolf", "Spirit"],
         color=["Green"],
-        cost={"Green": 1, "None": 4},
+        cost=Cost(mana_cost={"Green": 1, "None": 4}),
         base_power=4,
         base_toughness=4,
         activated_ability=abilities.SpectralHuntCaller,
@@ -111,7 +112,7 @@ _ALL_CARDS = {
         name="Springleaf Drum",
         activated_ability=abilities.SpringleafDrum,
         color=["None"],
-        cost={"None": 1},
+        cost=Cost(mana_cost={"None": 1}),
     ),
 
     # ELVES
@@ -120,7 +121,7 @@ _ALL_CARDS = {
         name="Llanowar Elves",
         subtype=["Elf", "Druid"],
         color=["Green"],
-        cost={"Green": 1},
+        cost=Cost(mana_cost={"Green": 1}),
         base_power=1,
         base_toughness=1,
         activated_ability=abilities.CreatureTapForGreen,
@@ -130,7 +131,7 @@ _ALL_CARDS = {
         name="Elvish Mystic",
         subtype=["Elf", "Druid"],
         color=["Green"],
-        cost={"Green": 1},
+        cost=Cost(mana_cost={"Green": 1}),
         base_power=1,
         base_toughness=1,
         activated_ability=abilities.CreatureTapForGreen,
@@ -140,7 +141,7 @@ _ALL_CARDS = {
         name="Fyndhorn Elves",
         subtype=["Elf", "Druid"],
         color=["Green"],
-        cost={"Green": 1},
+        cost=Cost(mana_cost={"Green": 1}),
         base_power=1,
         base_toughness=1,
         activated_ability=abilities.CreatureTapForGreen,
@@ -150,7 +151,7 @@ _ALL_CARDS = {
         name="Priest of Titania",
         subtype=["Elf", "Druid"],
         color=["Green"],
-        cost={"Green": 1, "None": 1},
+        cost=Cost(mana_cost={"Green": 1, "None": 1}),
         base_power=1,
         base_toughness=1,
         activated_ability=abilities.PriestOfTitania,
@@ -160,7 +161,7 @@ _ALL_CARDS = {
         name="Timberwatch Elf",
         subtype=["Elf"],
         color=["Green"],
-        cost={"Green": 1, "None": 2},
+        cost=Cost(mana_cost={"Green": 1, "None": 2}),
         base_power=1,
         base_toughness=2,
         activated_ability=abilities.TimberwatchElf,
@@ -170,7 +171,7 @@ _ALL_CARDS = {
         name="Generous Ent",
         subtype=["Treefolk"],
         color=["Green"],
-        cost={"Green": 1, "None": 5},
+        cost=Cost(mana_cost={"Green": 1, "None": 5}),
         base_power=5,
         base_toughness=7,
         _reach=True,
@@ -182,7 +183,7 @@ _ALL_CARDS = {
         name="Lead the Stampede",
         ability=abilities.LeadTheStampede,
         color=["Green"],
-        cost={"Green": 1, "None": 2},
+        cost=Cost(mana_cost={"Green": 1, "None": 2}),
     ),
 
     # MADNESS
@@ -191,7 +192,7 @@ _ALL_CARDS = {
         name="Voldaren Epicure",
         subtype=["Vampire"],
         color=["Red"],
-        cost={"Red": 1},
+        cost=Cost(mana_cost={"Red": 1}),
         base_power=1,
         base_toughness=1,
         etb_ability=abilities.VoldarenEpicure,
@@ -201,14 +202,14 @@ _ALL_CARDS = {
         name="Lightbing Bolt",
         ability=abilities.Bolt,
         color=["Red"],
-        cost={"Red": 1},
+        cost=Cost(mana_cost={"Red": 1}),
     ),
 
     "Kessig_Flamebreather": Creature(
         name="Kessig Flamebreather",
         subtype=["Human", "Shaman"],
         color=["Red"],
-        cost={"Red": 1, "None": 1},
+        cost=Cost(mana_cost={"Red": 1, "None": 1}),
         base_power=1,
         base_toughness=3,
         triggered_ability=abilities.KessigFlamebreather,
@@ -218,7 +219,7 @@ _ALL_CARDS = {
         name="Guttersnipe",
         subtype=["Goblin", "Shaman"],
         color=["Red"],
-        cost={"Red": 1, "None": 2},
+        cost=Cost(mana_cost={"Red": 1, "None": 2}),
         base_power=2,
         base_toughness=2,
         triggered_ability=abilities.Guttersnipe,
