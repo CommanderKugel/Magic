@@ -1,7 +1,7 @@
 ✅ 18 Mountain
 ✅ 4 Voldaren_Epicure
-❌ 4 Kessig_Flamebreather
-❌ 3 Guttersnipe
+✅ 4 Kessig_Flamebreather
+✅ 3 Guttersnipe
 ❌ 4 Sneaky_Snacker
 ✅ 4 Lightning_Bolt
 ❌ 4 Lava_Dart
