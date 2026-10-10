@@ -318,6 +318,7 @@ ForestCycling = Ability(
     choose_targets=no_targets,
     pay_cost=discard_source,
     activity=tutor_forest,
+    cost=Cost(mana_cost={"None": 1}),
 )
 
 CreateFood = Ability(
