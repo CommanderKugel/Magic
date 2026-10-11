@@ -1,6 +1,5 @@
 import random
-from typing import Any
-
+from typing import Any, Callable
 
 from src.Magic.Card import Card, Spell, Land, Artifact, Creature, Instant, Sorcery
 from src.Magic.Library import draw_card
@@ -139,6 +138,7 @@ class Player:
         opp_player: bool = False,
         opp_creatures: bool = False,
         opp_lands: bool = False,
+        filter: Callable[[list], list] = None,
     ) -> Card | Any:
         """To be implemented by child class."""
         raise NotImplementedError()

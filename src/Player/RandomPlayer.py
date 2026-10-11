@@ -1,5 +1,5 @@
 import random
-from typing import Any
+from typing import Any, Callable
 
 from src.Magic.Card import Card, Creature, Land
 from src.Magic.Ability import Ability
@@ -20,6 +20,7 @@ class RandomPlayer(Player):
         opp_player: bool = False,
         opp_creatures: bool = False,
         opp_lands: bool = False,
+        filter: Callable[[list], list] = None
     ) -> Card | Any:
         """Choose a valid target at random."""
         targets: list[tuple[str, Card]] = []
@@ -42,6 +43,9 @@ class RandomPlayer(Player):
         if opp_lands:
             for land in opp.lands:
                 targets.append(land)
+
+        if filter is not None:
+            targets = filter(targets)
 
         return random.choice(targets)
 

@@ -1,5 +1,5 @@
 import random
-from typing import Any
+from typing import Any, Callable
 
 from src.Magic.Literals import Color
 from src.Magic.Card import Card, Land, Spell, Creature, Instant
@@ -37,6 +37,7 @@ class CLIPlayer(Player):
         opp_player: bool = False,
         opp_creatures: bool = False,
         opp_lands: bool = False,
+        filter: Callable[[list], list] = None
     ) -> Card | Any:
         """Choose a specific target."""
         targets: list[tuple[str, Card]] = []
@@ -59,6 +60,9 @@ class CLIPlayer(Player):
         if opp_lands:
             for land in opp.lands:
                 targets.append(("OppLand", land))
+
+        if filter is not None:
+            targets = filter(targets)
         
         for idx, (s, c) in enumerate(targets):
             print(f"{idx}: {s} - {c.name if isinstance(c, Card) else ""}")

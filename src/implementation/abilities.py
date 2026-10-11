@@ -157,8 +157,10 @@ def sac_artifact_and_discard_a_card(source: Artifact, owner: Player, opponent: P
 
 def sac_two_mountains(source: Card, owner: Player, opponent: Player, targets) -> None:
     """Owner sacrifices two mountains."""
+    def only_mountains(l: list[Creature]) -> list[Creature]:
+        return [m for m in l if m.name == "Mountain"]
     for _ in range(2):
-        m = owner.target(own_lands=True)
+        m = owner.target(own_lands=True, filter=only_mountains)
         owner.send_land_from_field_to_graveyard(m)
 
 
