@@ -1,0 +1,8 @@
+20 Mountain
+4 Voldaren_Epicure
+4 Kessig_Flamebreather
+4 Guttersnipe
+2 Faithless_Looting
+4 Lightning_Bolt
+4 Lava_Dart
+4 Fire_Blast

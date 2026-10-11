@@ -10,12 +10,12 @@ from src.implementation.cards import get_card
 
 ROOT_DIR = Path(__file__).resolve().parent
 
-bear_list_path = ROOT_DIR / "decklists/bear_list.txt"
+list_path = ROOT_DIR / "decklists/bolt_list.txt"
 
 results = []
 for i in range(100):
-    p1 = RandomPlayer("P1", 20, load_from_decklist(bear_list_path, get_card))
-    p2 = RandomPlayer("P2", 20, load_from_decklist(bear_list_path, get_card))
+    p1 = RandomPlayer("P1", 20, load_from_decklist(list_path, get_card))
+    p2 = RandomPlayer("P2", 20, load_from_decklist(list_path, get_card))
     game = Game(p1, p2)
     game.prepare_game()
     try:
