@@ -31,10 +31,12 @@ class CLIPlayer(Player):
         self, 
         opp = None,
         own_player: bool = False,
-        own_creatures: bool = False, 
+        own_creatures: bool = False,
+        own_lands: bool = False,
         own_hand: bool = False,
         opp_player: bool = False,
         opp_creatures: bool = False,
+        opp_lands: bool = False,
     ) -> Card | Any:
         """Choose a specific target."""
         targets: list[tuple[str, Card]] = []
@@ -46,11 +48,17 @@ class CLIPlayer(Player):
         if own_hand:
             for card in self.hand:
                 targets.append(("OwnHand", card))
+        if own_lands:
+            for land in self.lands:
+                targets.append(("OwnLand", land))
         if opp_player:
             targets.append(("OppPlayer", opp))
         if opp_creatures:
             for creature in opp.creatures:
                 targets.append(("OppCreature", creature))
+        if opp_lands:
+            for land in opp.lands:
+                targets.append(("OppLand", land))
         
         for idx, (s, c) in enumerate(targets):
             print(f"{idx}: {s} - {c.name if isinstance(c, Card) else ""}")

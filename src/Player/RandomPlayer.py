@@ -14,28 +14,36 @@ class RandomPlayer(Player):
         self, 
         opp = None,
         own_player: bool = False,
-        own_creatures: bool = False, 
+        own_creatures: bool = False,
+        own_lands: bool = False,
         own_hand: bool = False,
         opp_player: bool = False,
         opp_creatures: bool = False,
+        opp_lands: bool = False,
     ) -> Card | Any:
         """Choose a valid target at random."""
         targets: list[tuple[str, Card]] = []
         if own_player:
-            targets.append(("OwnPlayer", self))
+            targets.append(self)
         if own_creatures:
             for creature in self.creatures:
-                targets.append(("OwnCreature", creature))
+                targets.append(creature)
+        if own_lands:
+            for land in self.lands:
+                targets.append(land)
         if own_hand:
             for card in self.hand:
-                targets.append(("OwnHand", card))
+                targets.append(card)
         if opp_player:
             targets.append(("OppPlayer", opp))
         if opp_creatures:
             for creature in opp.creatures:
-                targets.append(("OppCreature", creature))
+                targets.append(creature)
+        if opp_lands:
+            for land in opp.lands:
+                targets.append(land)
 
-        return random.choice(targets)[1]
+        return random.choice(targets)
 
     def choose_int_value(self, max) -> int:
         """Distribute the damage across the blockers."""

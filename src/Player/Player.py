@@ -132,10 +132,12 @@ class Player:
         self, 
         opp = None, # Player
         own_player: bool = False,
-        own_creatures: bool = False, 
+        own_creatures: bool = False,
+        own_lands: bool = False,
         own_hand: bool = False,
         opp_player: bool = False,
         opp_creatures: bool = False,
+        opp_lands: bool = False,
     ) -> Card | Any:
         """To be implemented by child class."""
         raise NotImplementedError()
