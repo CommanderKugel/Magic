@@ -309,6 +309,30 @@ class TestCollectCastingSpells:
             assert not card.sorcery_speed
             assert card == mock_bolt
 
+class TestCollectCastingFlashbackSpells:
+    """Test function player.collect_casting_flashback_spells"""
+
+    def test_collect_flashback_instants(self, mock_player, mock_bolt, mock_cost):
+        """Instant speed spell with flashback is collected at instant speed."""
+        mock_bolt.flashback_cost = mock_cost
+        mock_player.graveyard = [mock_bolt]
+
+        actions = mock_player.collect_casting_flashback_spells(False, None)
+
+        assert len(actions) == 1
+        action, card = actions[0]
+        assert action == "CastFlashback"
+        assert card == mock_bolt
+
+    def test_not_collect_flashback_sorcery_at_instant_speed(self, mock_player, mock_sorcery, mock_cost):
+        """Instant speed spell with flashback is collected at instant speed."""
+        mock_sorcery.flashback_cost = mock_cost
+        mock_player.graveyard = [mock_sorcery]
+
+        actions = mock_player.collect_casting_flashback_spells(False, None)
+
+        assert len(actions) == 0
+
 class TestCollectActivatedAbilities:
     """Test function player.collect_activated_abilities"""
 

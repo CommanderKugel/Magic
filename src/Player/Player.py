@@ -1,9 +1,10 @@
 import random
 from typing import Any
 
-from src.Magic.Card import Card, Spell, Land, Artifact, Creature, Color
+
+from src.Magic.Card import Card, Spell, Land, Artifact, Creature, Instant, Sorcery
 from src.Magic.Library import draw_card
-from src.Magic.Literals import Action
+from src.Magic.Literals import Action, Color
 from src.Magic.Ability import Ability
 from src.Magic.Modifier import Modifier
 
@@ -57,7 +58,7 @@ class Player:
         }
 
     def discard_one_card(self, card: Card) -> None:
-        """Discard a card to graveyard. Choose a random one if no card is provided.
+        """Discard a card to graveyard.
         ONLY CALL THIS IF ITS SURE THAT THE CARD IS STILL IN THIS PLAYERS HAND!
         """
         card.reset()
@@ -242,6 +243,7 @@ class Player:
 
         # cast spells
         actions.extend(self.collect_casting_spells(sorcery_speed))
+        actions.extend(self.collect_casting_flashback_spells(sorcery_speed, opponent))
 
         # play lands
         if sorcery_speed and not hit_landdrop:
@@ -255,7 +257,7 @@ class Player:
 
         return actions
 
-    def collect_casting_spells(self, sorcery_speed=bool) -> list[tuple[Action, Spell]]:
+    def collect_casting_spells(self, sorcery_speed: bool) -> list[tuple[Action, Spell]]:
         """Generate a list of all spells that are possible to be cast."""
         return [
             ("Cast", card) 
@@ -289,5 +291,18 @@ class Player:
             if card.activated_ability is not None
             and card.activated_ability.is_mana_ability
             and card.activated_ability.can_activate(card, self, None)
+        ]
+
+    def collect_casting_flashback_spells(
+        self, sorcery_speed: bool, opponent,
+    ) -> list[tuple[Action, Card]]:
+        """Generate a list of all flashback-cast actions."""
+        return [
+            ("CastFlashback", card)
+            for card in self.graveyard
+            if isinstance(card, (Instant, Sorcery))
+            and card.flashback_cost is not None
+            and (sorcery_speed or not card.sorcery_speed)
+            and card.ability.can_activate(card, self, opponent)
         ]
     

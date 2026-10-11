@@ -140,9 +140,11 @@ class Creature(Spell):
 
 @dataclass(eq=False)
 class Sorcery(Spell):
+    flashback_cost: Cost = None
     ability: Ability | None = None
 
 @dataclass(eq=False)
 class Instant(Spell):
     sorcery_speed: bool = False
+    flashback_cost: Cost = None
     ability: Ability | None = None

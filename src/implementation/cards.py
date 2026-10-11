@@ -231,6 +231,14 @@ _ALL_CARDS = {
         color=["Red"],
         cost=[abilities.CostFireBlastHardcast, abilities.CostFireBlastAlt],
     ),
+
+    "Faithless_Looting": Sorcery(
+        name="Faithless Looting",
+        ability=abilities.FaithlessLooting,
+        color=["Red"],
+        cost=Cost(mana_cost={"Red": 1}),
+        flashback_cost=Cost(mana_cost={"Red": 1, "None": 2}),
+    ),
 }
 
 for key, card in _ALL_CARDS.items():

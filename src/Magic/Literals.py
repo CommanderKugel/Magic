@@ -5,6 +5,7 @@ Action = Literal[
     "Pass",
     "Play",
     "Cast",
+    "CastFlashback",
     "Ability",
     "EtbAbility",
 ]

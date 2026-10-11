@@ -467,7 +467,7 @@ class Game:
 
     def put_action_on_stack(self, data: PriorityData, action: Action, card: Card, targets: list[Card | Player]) -> None:
         """Put an Ability or Cast of a spell on the stack. Reset the pass counter. State is 'Action'."""
-        print(f"[{"ABILITY" if action == "Ability" else "CAST"}] {data.priority_player.name} plays {card.name}")
+        print(f"[{action}] {data.priority_player.name} plays {card.name}")
         stack_object = StackObject(
             action=action,
             source=card,
@@ -538,8 +538,10 @@ class Game:
         # 9. Ability was activated successfully
         # ToDo: triggered abilities
 
-    def determine_cost(self, card: Spell, owner: Player) -> Cost:
+    def determine_cost(self, card: Spell, owner: Player, action: Action) -> Cost:
         """Determine the cost to cast the Spell."""
+        if action == "CastFlashback":
+            return card.flashback_cost
         if isinstance(card.cost, Cost):
             return card.cost
         if isinstance(card.cost, list):
@@ -547,7 +549,7 @@ class Game:
             return card.cost[idx]
         raise ValueError
 
-    def cast_spell(self, data: PriorityData, card: Card) -> None:
+    def cast_spell(self, data: PriorityData, card: Card, action: Action = "Cast") -> None:
         """Cast a spell. For more info, look at 'concepts/Cast_or_Activate.md'."""
         
         # 1. Announce casting a spell
@@ -587,7 +589,7 @@ class Game:
         # 6. Determine total cost
         # ToDo: Affinity
 
-        cost = self.determine_cost(card, data.priority_player)
+        cost = self.determine_cost(card, data.priority_player, action)
 
         # 7. Use mana-abilities
         # 8. Pay the cost
@@ -614,8 +616,12 @@ class Game:
         # 1. again - put spell on the stack
         # Move to end to avoid having to revert and debug ridiculous boardstates
 
-        data.priority_player.hand.remove(card)
-        self.put_action_on_stack(data, "Cast", card, targets)
+        if action == "Cast":
+            data.priority_player.hand.remove(card)
+        if action == "CastFlashback":
+            data.priority_player.graveyard.remove(card)
+        
+        self.put_action_on_stack(data, action, card, targets)
 
         # 9. spell is cast successfully
         # ToDo: triggered abilities
@@ -652,7 +658,7 @@ class Game:
         targets = stack_object.targets
 
         # resolve Casting Spells
-        if action == "Cast":
+        if action == "Cast" or action == "CastFlashback":
             # Creature -> put it on the field
             if isinstance(card, Creature):
                 owner.put_creature_onto_field(card)
@@ -666,7 +672,10 @@ class Game:
             # Sorceries or Instants -> resolve abilities
             if isinstance(card, (Instant, Sorcery)):
                 card.ability.activity(card, owner, opponent, targets)
-                owner.graveyard.append(card)
+
+                # exile card after flashback -> dont put it into the GY
+                if action != "CastFlashback":
+                    owner.graveyard.append(card)
 
             # trigger ETB Abilities
             if card.etb_ability is not None:
@@ -734,8 +743,8 @@ class Game:
                     self.activate_ability(data, card)
 
                 # Cast Spells
-                if action == "Cast":
-                    self.cast_spell(data, card)
+                if action == "Cast" or action == "CastFlashback":
+                    self.cast_spell(data, card, action)
 
                 # goto 5. if not passed, else go to 6.
                 continue

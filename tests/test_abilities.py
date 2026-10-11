@@ -297,7 +297,7 @@ def test_bolt_triggers_kessig(game):
     assert game.stack[0].source == bolt
     assert game.stack[1].source == kf
 
-def test_bear_triggers_kessig(game, mock_bear):
+def test_bear_not_triggers_kessig(game, mock_bear):
     kf = get_card("Kessig_Flamebreather")
     game.p1.target = MagicMock(return_value=[])
     game.p1.put_creature_onto_field(kf)
@@ -313,6 +313,22 @@ def test_bear_triggers_kessig(game, mock_bear):
 
     assert len(game.stack) == 1
     assert game.stack[0].source == mock_bear
+
+def test_flashback_triggers_kessig(game):
+    kf = get_card("Kessig_Flamebreather")
+    fl: Sorcery = get_card("Faithless_Looting")
+    fl.ability.activity = MagicMock()
+    game.p1.put_creature_onto_field(kf)
+    game.p1.graveyard = [fl]
+    data = build_priority_data(game)
+    game.p1.pay_for_manacost = MagicMock(return_valur=True)
+
+    game.cast_spell(data, fl, "CastFlashback")
+
+    game.p1.graveyard == []
+    assert len(game.stack) == 2
+    assert game.stack[0].source == fl
+    assert game.stack[1].source == kf
 
 
 # FIRE BLAST
@@ -345,7 +361,7 @@ def test_fireblast_hardcast_successfully(game, mock_bear, mock_ability):
     fb.ability.choose_targets.assert_called_once_with(
         fb, data.priority_player, data.non_priority_player,
     )
-    game.determine_cost.assert_called_once_with(fb, data.priority_player)
+    game.determine_cost.assert_called_once_with(fb, data.priority_player, "Cast")
     
     game.p1.pay_for_manacost.assert_called_once_with(
         cost.mana_cost, data.non_priority_player,
@@ -390,7 +406,7 @@ def test_fireblast_altcost_cast_successfully(game, mock_bear, mock_ability, mock
     fb.ability.choose_targets.assert_called_once_with(
         fb, data.priority_player, data.non_priority_player,
     )
-    game.determine_cost.assert_called_once_with(fb, data.priority_player)
+    game.determine_cost.assert_called_once_with(fb, data.priority_player, "Cast")
 
     cost.can_pay_extra_cost.assert_called_once_with(
         fb, game.p1, game.p2, targets,
@@ -426,3 +442,30 @@ def test_fireblast_sacs_two_mountains(game):
     assert len(game.p1.graveyard) == 2
     assert game.p1.graveyard[0] == m1
     assert game.p1.graveyard[1] == m2
+
+
+# FAITHLESS LOOTING
+
+def test_faithless_looting(game):
+    fl: Sorcery = get_card("Faithless_Looting")
+    game.p1.target = MagicMock()
+    game.p1.draw = MagicMock()
+    game.p1.discard_one_card = MagicMock()
+
+    fl.ability.activity(fl, game.p1, game.p2, None)
+
+    game.p1.draw.assert_called_once_with(2)
+    assert game.p1.discard_one_card.call_count == 2
+
+def test_flashback_looting(game):
+    fl: Sorcery = get_card("Faithless_Looting")
+    fl.ability.activity = MagicMock()
+    game.p1.graveyard = [fl]
+    so = StackObject("CastFlashback", fl, game.p1, None)
+    data = build_priority_data(game)
+
+    game.stack = [so]
+    game.resolve_top_object_from_stack(data)
+
+    game.p1.graveyard == []
+    fl.ability.activity.assert_called_once()

@@ -70,14 +70,14 @@ def fight_has_targets(source: Card, owner: Player, opponent: Player) -> bool:
 def non_creature_spell_is_cast(stack_object: StackObject, source: Card, owner: Player, opponent: Player) -> bool:
     """Returns true if trigger=='Cast' and trigger_card is not a creature"""
     return (
-        stack_object.action == "Cast" 
+        (stack_object.action == "Cast" or stack_object.action == "CastFlashback")
         and not isinstance(stack_object.source, Creature)
     )
 
 def instant_or_sorcery_is_cast(stack_object: StackObject, source: Card, owner: Player, opponent: Player) -> bool:
     """Returns true if trigger=='Cast' and trigger_card is not a creature"""
     return (
-        stack_object.action == "Cast" 
+        (stack_object.action == "Cast" or stack_object.action == "CastFlashback")
         and isinstance(stack_object.source, (Instant, Sorcery))
     )
 
@@ -315,6 +315,14 @@ def ping_opponent_for_2(source: Card, owner: Player, opponent: Player, targets):
     """Deal 1 damage to the opponent."""
     opponent.life -= 2
 
+def draw_two_discard_two(source: Card, owner: Player, opponent: Player, targets):
+    """Draw two cards, then discard two cards."""
+    owner.draw(2)
+    d1 = owner.target(own_hand=True)
+    owner.discard_one_card(d1)
+    d2 = owner.target(own_hand=True)
+    owner.discard_one_card(d2)
+
 # INSTANCES
 
 LandTapForGreen = Ability(
@@ -427,6 +435,13 @@ CostFireBlastAlt = Cost(
     has_extra_cost=True,
     can_pay_extra_cost=two_mountains_exist,
     pay_extra_cost=sac_two_mountains,
+)
+
+FaithlessLooting = Ability(
+    can_activate=always,
+    choose_targets=no_targets,
+    pay_cost=no_cost,
+    activity=draw_two_discard_two
 )
 
 GiantGrowth = Ability(
