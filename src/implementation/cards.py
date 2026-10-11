@@ -198,13 +198,6 @@ _ALL_CARDS = {
         etb_ability=abilities.VoldarenEpicure,
     ),
 
-   "Lightning_Bolt": Instant(
-        name="Lightbing Bolt",
-        ability=abilities.Bolt,
-        color=["Red"],
-        cost=Cost(mana_cost={"Red": 1}),
-    ),
-
     "Kessig_Flamebreather": Creature(
         name="Kessig Flamebreather",
         subtype=["Human", "Shaman"],
@@ -225,6 +218,19 @@ _ALL_CARDS = {
         triggered_ability=abilities.Guttersnipe,
     ),
 
+   "Lightning_Bolt": Instant(
+        name="Lightbing Bolt",
+        ability=abilities.Bolt,
+        color=["Red"],
+        cost=Cost(mana_cost={"Red": 1}),
+    ),
+
+    "Fire_Blast": Instant(
+        name="Fire Blast",
+        ability=abilities.FireBlast,
+        color=["Red"],
+        cost=[abilities.CostFireBlastHardcast, abilities.CostFireBlastAlt],
+    ),
 }
 
 for key, card in _ALL_CARDS.items():

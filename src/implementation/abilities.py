@@ -11,6 +11,7 @@ from src.Magic.Library import (
     get_top_n_cards, 
     put_under_library_in_random_order,
 )
+from src.Magic.Cost import Cost
 
 
 # CAN ACTIVATE
@@ -49,6 +50,10 @@ def blood_can_tap_and_discard(source: Artifact, owner: Player, opponent: Player)
         and not source.tapped
         and len(owner.hand) >= 1
     )
+
+def two_mountains_exist(source: Card, owner: Player, opponent: Player, targets: list) -> bool:
+    """Check if owner has at least 2 mountains."""
+    return sum(1 for l in owner.lands if l.name == "Mountain") >= 2
 
 def one_creature_exists(source: Card, owner: Player, opponent: Player) -> bool:
     """Check if at least one targettable Creature exists."""
@@ -150,6 +155,13 @@ def sac_artifact_and_discard_a_card(source: Artifact, owner: Player, opponent: P
     owner.discard_one_card(target)
     owner.nc_permanents.remove(source)
 
+def sac_two_mountains(source: Card, owner: Player, opponent: Player, targets) -> None:
+    """Owner sacrifices two mountains."""
+    for _ in range(2):
+        m = owner.target(own_lands=True)
+        owner.send_land_from_field_to_graveyard(m)
+
+
 # ACTIVITY
 
 def add_g_mana(source: Card, owner: Player, opponent: Player, targets: list[Creature | Player] | None) -> None:
@@ -223,12 +235,22 @@ def bolt(source: Card, owner: Player, opponent: Player, targets: list[Creature |
     target = targets[0]
     if isinstance(target, Player):
         target.life -= 3
-    elif isinstance(target, Creature):
-        if (
-            target in opponent.creatures
-            or target in owner.creatures
-        ):
-            target.damage_counter += 3
+    elif (
+        isinstance(target, Creature)
+        and target in opponent.creatures + owner.creatures
+    ):
+        target.damage_counter += 3
+
+def deal_4_damage(source: Card, owner: Player, opponent: Player, targets: list[Creature | Player]) -> None:
+    """Deal 4 damage to the target."""
+    target = targets[0]
+    if isinstance(target, Player):
+        target.life -= 4
+    elif (
+        isinstance(target, Creature)
+        and target in opponent.creatures + owner.creatures
+    ):
+        target.damage_counter += 4
     
 def eot_p3p3(source: Card, owner: Player, opponent: Player, targets: list[Creature | Player] | None) -> None:
     """Target creature gets +3/+3 until end of turn."""
@@ -318,7 +340,7 @@ ForestCycling = Ability(
     choose_targets=no_targets,
     pay_cost=discard_source,
     activity=tutor_forest,
-    cost=Cost(mana_cost={"None": 1}),
+    mana_cost={"None": 1},
 )
 
 CreateFood = Ability(
@@ -389,6 +411,22 @@ Bolt = Ability(
     choose_targets=target_single_creature_or_player,
     pay_cost=no_cost,
     activity=bolt,
+)
+
+FireBlast = Ability(
+    can_activate=always, # ToDo: hexproof & shroud
+    choose_targets=target_single_creature_or_player,
+    pay_cost=no_cost,
+    activity=deal_4_damage,
+)
+CostFireBlastHardcast = Cost(
+    mana_cost={"Red": 2, "None": 4},
+)
+CostFireBlastAlt = Cost(
+    mana_cost=None,
+    has_extra_cost=True,
+    can_pay_extra_cost=two_mountains_exist,
+    pay_extra_cost=sac_two_mountains,
 )
 
 GiantGrowth = Ability(

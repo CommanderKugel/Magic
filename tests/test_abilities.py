@@ -15,6 +15,7 @@ from src.Magic.Card import Card, Land, Spell, Creature, Instant, Sorcery
 from src.Magic.Stack import PriorityData
 from src.Magic.Ability import Ability
 from src.Magic.Stack import StackObject
+from src.Magic.Cost import Cost
 from src.Player.Player import Player
 from src.implementation.cards import get_card
 
@@ -195,7 +196,7 @@ def test_shc_buffs_is_cleaned_up_correctly(game, mock_bear_factory):
         assert c not in trample.target
         assert c not in buff.target
 
-    # GENEROUS ENT
+# GENEROUS ENT
 
 def test_ent_creates_food(game):
     ent = get_card("Generous_Ent")
@@ -275,7 +276,7 @@ def test_lts_lib_size(mock_player, mock_bear_factory):
         assert isinstance(c, Creature)
 
 
-    # KESSIG FLAMEBREATHER
+# KESSIG FLAMEBREATHER
 
 def test_bolt_triggers_kessig(game):
     kf = get_card("Kessig_Flamebreather")
@@ -302,7 +303,7 @@ def test_bear_triggers_kessig(game, mock_bear):
     game.p1.put_creature_onto_field(kf)
     game.p1.hand = [mock_bear]
     data = build_priority_data(game)
-    game.p1.pay_for_manacost = MagicMock(retur_value=True)
+    game.p1.pay_for_manacost = MagicMock(return_value=True)
 
     assert kf in game.p1.triggered_abilities
 
@@ -312,3 +313,116 @@ def test_bear_triggers_kessig(game, mock_bear):
 
     assert len(game.stack) == 1
     assert game.stack[0].source == mock_bear
+
+
+# FIRE BLAST
+
+def test_fireblast_hardcast_successfully(game, mock_bear, mock_ability):
+    fb = get_card("Fire_Blast")
+    fb.ability = mock_ability
+    targets = [mock_bear]
+    fb.ability.choose_targets = MagicMock(return_value=targets)
+
+    assert isinstance(fb.cost, list)
+    cost = fb.cost[0]
+    assert isinstance(cost, Cost)
+    assert cost.can_pay_extra_cost is None
+    assert cost.pay_extra_cost is None
+
+    # choose to pay 6 mana
+    game.determine_cost = MagicMock(return_value=cost)
+    game.put_action_on_stack = MagicMock()
+    game.p1.hand = [fb]
+    game.p2.put_creature_onto_field(mock_bear)
+    game.p1.pay_for_manacost = MagicMock(return_value=True)
+    data = build_priority_data(game)
+
+    game.cast_spell(data, fb)
+
+    fb.ability.can_activate.assert_called_once_with(
+        fb, data.priority_player, data.non_priority_player,
+    )
+    fb.ability.choose_targets.assert_called_once_with(
+        fb, data.priority_player, data.non_priority_player,
+    )
+    game.determine_cost.assert_called_once_with(fb, data.priority_player)
+    
+    game.p1.pay_for_manacost.assert_called_once_with(
+        cost.mana_cost, data.non_priority_player,
+    )
+    fb.ability.pay_cost.assert_called_once_with(
+        fb, data.priority_player, data.non_priority_player, targets,
+    )
+    assert fb not in game.p1.hand
+    assert fb not in game.p1.graveyard
+    game.put_action_on_stack.assert_called_once_with(
+        data, "Cast", fb, targets,
+    )
+
+def test_fireblast_altcost_cast_successfully(game, mock_bear, mock_ability, mock_cost):
+    fb = get_card("Fire_Blast")
+    fb.ability = mock_ability
+    targets = [mock_bear]
+    fb.ability.choose_targets = MagicMock(return_value=targets)
+
+    assert isinstance(fb.cost, list)
+    assert isinstance(fb.cost[1], Cost)
+    fb.cost[1].can_pay_extra_cost = MagicMock(return_value=True)
+    fb.cost[1].pay_extra_cost = MagicMock()
+    cost = fb.cost[1]
+    assert cost.has_extra_cost
+
+    # choose to sac 2 mountains
+    game.determine_cost = MagicMock(return_value=cost)
+    game.put_action_on_stack = MagicMock()
+    game.p1.hand = [fb]
+    game.p1.put_land_onto_field(get_card("Mountain"))
+    game.p1.put_land_onto_field(get_card("Mountain"))
+    game.p2.put_creature_onto_field(mock_bear)
+    game.p1.pay_for_manacost = MagicMock(return_value=True)
+    data = build_priority_data(game)
+
+    game.cast_spell(data, fb)
+
+    fb.ability.can_activate.assert_called_once_with(
+        fb, data.priority_player, data.non_priority_player,
+    )
+    fb.ability.choose_targets.assert_called_once_with(
+        fb, data.priority_player, data.non_priority_player,
+    )
+    game.determine_cost.assert_called_once_with(fb, data.priority_player)
+
+    cost.can_pay_extra_cost.assert_called_once_with(
+        fb, game.p1, game.p2, targets,
+    )
+    cost.pay_extra_cost.assert_called_once_with(
+        fb, game.p1, game.p2, targets,
+    )
+    
+    game.p1.pay_for_manacost.assert_not_called()
+    fb.ability.pay_cost.assert_called_once_with(
+        fb, data.priority_player, data.non_priority_player, targets,
+    )
+    assert fb not in game.p1.hand
+    assert fb not in game.p1.graveyard
+    game.put_action_on_stack.assert_called_once_with(
+        data, "Cast", fb, targets,
+    )
+
+def test_fireblast_sacs_two_mountains(game):
+    fb = get_card("Fire_Blast")
+    m1 = get_card("Mountain")
+    m2 = get_card("Mountain")
+    game.p1.hand = [fb]
+    game.p1.put_land_onto_field(m1)
+    game.p1.put_land_onto_field(m2)
+    game.p1.target = MagicMock(side_effect=[game.p2, m1, m2])
+    game.p1.choose_int_value = MagicMock(return_value=1)
+    data = build_priority_data(game)
+
+    game.cast_spell(data, fb)
+
+    assert game.p1.lands == []
+    assert len(game.p1.graveyard) == 2
+    assert game.p1.graveyard[0] == m1
+    assert game.p1.graveyard[1] == m2

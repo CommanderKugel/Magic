@@ -540,7 +540,12 @@ class Game:
 
     def determine_cost(self, card: Spell, owner: Player) -> Cost:
         """Determine the cost to cast the Spell."""
-        return card.cost
+        if isinstance(card.cost, Cost):
+            return card.cost
+        if isinstance(card.cost, list):
+            idx = owner.choose_int_value(len(card.cost) - 1)
+            return card.cost[idx]
+        raise ValueError
 
     def cast_spell(self, data: PriorityData, card: Card) -> None:
         """Cast a spell. For more info, look at 'concepts/Cast_or_Activate.md'."""
@@ -595,7 +600,12 @@ class Game:
                 return
             cost.pay_extra_cost(card, data.priority_player, data.non_priority_player, targets)
 
-        if not data.priority_player.pay_for_manacost(cost.mana_cost, data.non_priority_player):
+        if (
+            cost.mana_cost is not None
+            and not data.priority_player.pay_for_manacost(
+                cost.mana_cost, data.non_priority_player,
+            )
+        ):
             return
 
         if isinstance(card, (Instant, Sorcery)):

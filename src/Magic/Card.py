@@ -38,7 +38,7 @@ class Land(Card):
 @dataclass(eq=False)
 class Spell(Card):
     """Parent Class for Creature, Sorcery and Instant."""
-    cost: Cost = None
+    cost: Cost | list[Cost] = None
     sorcery_speed: bool = True
 
     def __hash__(self):
