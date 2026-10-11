@@ -51,6 +51,10 @@ def blood_can_tap_and_discard(source: Artifact, owner: Player, opponent: Player)
         and len(owner.hand) >= 1
     )
 
+def one_mountain_exists(source: Card, owner: Player, opponent: Player, targets: list) -> bool:
+    """Check if owner has at least 1 mountain."""
+    return any(m for m in owner.lands if m.name == "Mountain")
+
 def two_mountains_exist(source: Card, owner: Player, opponent: Player, targets: list) -> bool:
     """Check if owner has at least 2 mountains."""
     return sum(1 for l in owner.lands if l.name == "Mountain") >= 2
@@ -155,6 +159,13 @@ def sac_artifact_and_discard_a_card(source: Artifact, owner: Player, opponent: P
     owner.discard_one_card(target)
     owner.nc_permanents.remove(source)
 
+def sac_one_mountain(source: Card, owner: Player, opponent: Player, targets) -> None:
+    """Owner sacrifices a mountain."""
+    def only_mountains(l: list[Creature]) -> list[Creature]:
+        return [m for m in l if m.name == "Mountain"]
+    m = owner.target(own_lands=True, filter=only_mountains)
+    owner.send_land_from_field_to_graveyard(m)
+
 def sac_two_mountains(source: Card, owner: Player, opponent: Player, targets) -> None:
     """Owner sacrifices two mountains."""
     def only_mountains(l: list[Creature]) -> list[Creature]:
@@ -232,7 +243,7 @@ def punch(source: Instant | Sorcery, owner: Player, opponent: Player, targets: l
     if puncher in owner.creatures and bag in opponent.creatures:
         bag.damage_counter += puncher.get_power()
 
-def bolt(source: Card, owner: Player, opponent: Player, targets: list[Creature | Player] | None) -> None:
+def bolt(source: Card, owner: Player, opponent: Player, targets: list[Creature | Player]) -> None:
     """Deal 3 damage to the sources target."""
     target = targets[0]
     if isinstance(target, Player):
@@ -242,6 +253,17 @@ def bolt(source: Card, owner: Player, opponent: Player, targets: list[Creature |
         and target in opponent.creatures + owner.creatures
     ):
         target.damage_counter += 3
+
+def dart(source: Card, owner: Player, opponent: Player, targets: list[Creature | Player]) -> None:
+    """Deal 1 damage to the sources target."""
+    target = targets[0]
+    if isinstance(target, Player):
+        target.life -= 1
+    elif (
+        isinstance(target, Creature)
+        and target in opponent.creatures + owner.creatures
+    ):
+        target.damage_counter += 1
 
 def deal_4_damage(source: Card, owner: Player, opponent: Player, targets: list[Creature | Player]) -> None:
     """Deal 4 damage to the target."""
@@ -421,6 +443,19 @@ Bolt = Ability(
     choose_targets=target_single_creature_or_player,
     pay_cost=no_cost,
     activity=bolt,
+)
+
+LavaDart = Ability(
+    can_activate=always, # ToDo: hexproof & shroud
+    choose_targets=target_single_creature_or_player,
+    pay_cost=no_cost,
+    activity=dart,
+)
+FlashbackCostLavadart = Cost(
+    mana_cost=None,
+    has_extra_cost=True,
+    can_pay_extra_cost=one_mountain_exists,
+    pay_extra_cost=sac_one_mountain,
 )
 
 FireBlast = Ability(

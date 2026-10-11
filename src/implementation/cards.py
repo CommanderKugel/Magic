@@ -225,6 +225,14 @@ _ALL_CARDS = {
         cost=Cost(mana_cost={"Red": 1}),
     ),
 
+    "Lava_Dart": Instant(
+        name="Lava Dart",
+        ability=abilities.LavaDart,
+        color=["Red"],
+        cost=Cost(mana_cost={"Red": 1}),
+        flashback_cost=abilities.FlashbackCostLavadart,
+    ),
+
     "Fire_Blast": Instant(
         name="Fire Blast",
         ability=abilities.FireBlast,
