@@ -43,6 +43,12 @@ def artifact_can_tap_own_creature(source: Artifact, owner: Player, opponent: Pla
         and any(c for c in owner.creatures if not c.tapped)
     )
 
+def has_card_in_hand(source: Card, owner: Player, *args) -> bool:
+    """Checks if the owner has at least one card in hand."""
+    if source in owner.hand:
+        return len(owner.hand) > 1
+    return len(owner.hand) > 0
+
 def blood_can_tap_and_discard(source: Artifact, owner: Player, opponent: Player) -> bool:
     """Return True if the blood can be cracked."""
     return (
@@ -100,9 +106,11 @@ def target_single_creature(source: Card, owner: Player, opponent: Player) -> lis
     )
     return [target]
 
-def target_single_handcard(source: Card, owner: Player, opponent: Player) -> list[Card | Player]:
+def target_one_owners_handcard(source: Card, owner: Player, opponent: Player) -> list[Card | Player]:
     """Choose one handcard."""
-    target = owner.target(own_hand=True)
+    def filter(hand: list[Card]) -> list[Card]:
+        return [c for c in hand if c != source]
+    target = owner.target(own_hand=True, filter=filter)
     return [target]
 
 def target_untapped_creature_from_owner(source: Card, owner: Player, opponent: Player) -> list[Card]:
@@ -148,6 +156,11 @@ def tap_card_and_chosen_creature(source: Card, owner: Player, opponent: Player, 
 def discard_source(source: Card, owner: Player, opponent: Player, targets: list[Creature]) -> None:
     """Check if the source card is in Hand."""
     owner.discard_one_card(source)
+
+def discard_a_card(source: Card, owner: Player, opponent: Player, targets: list[Card]) -> None:
+    """Discard a card from hand."""
+    card = targets[0]
+    owner.discard_one_card(card)
 
 def sacrifice_source_artifact(source: Artifact, owner: Player, opponent: Player, targets) -> None:
     """Sacrifice the source artifact."""
@@ -347,6 +360,12 @@ def draw_two_discard_two(source: Card, owner: Player, opponent: Player, targets)
     d2 = owner.target(own_hand=True)
     owner.discard_one_card(d2)
 
+def grab_the_price(source: Card, owner: Player, opponent: Player, targets: list[Card]):
+    """Draw 2 cards. If discarded card is not a land, opponent looses 2 life."""
+    owner.draw(2)
+    if not isinstance(targets[0], Land):
+        opponent.life -= 2
+
 # INSTANCES
 
 LandTapForGreen = Ability(
@@ -472,6 +491,13 @@ CostFireBlastAlt = Cost(
     has_extra_cost=True,
     can_pay_extra_cost=two_mountains_exist,
     pay_extra_cost=sac_two_mountains,
+)
+
+GrabThePrice = Ability(
+    can_activate=has_card_in_hand,
+    choose_targets=target_one_owners_handcard,
+    pay_cost=discard_a_card,
+    activity=grab_the_price,
 )
 
 FaithlessLooting = Ability(

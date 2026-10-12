@@ -469,3 +469,26 @@ def test_flashback_looting(game):
 
     game.p1.graveyard == []
     fl.ability.activity.assert_called_once()
+
+
+# GRAB THE PRICE
+
+def test_gtp_can_activate(game, mock_bear):
+    gtp: Sorcery = get_card("Grab_the_Price")
+    game.p1.hand = [gtp, mock_bear]
+
+    assert gtp.ability.can_activate(gtp, game.p1, game.p2)
+
+def gtp_cant_discard_self(game, mock_bear):
+    gtp: Sorcery = get_card("Grab_the_Price")
+    game.p1.hand = [gtp, mock_bear]
+
+    targets = gtp.ability.choose_targets(gtp, game.p1, game.p2)
+
+    assert targets == [mock_bear]
+
+def gtp_cannot_activate_with_only_self_in_hand(game):
+    gtp: Sorcery = get_card("Grab_the_Price")
+    game.p1.hand = [gtp]
+    
+    assert not gtp.ability.can_activate(game, game.p1, game.p2)

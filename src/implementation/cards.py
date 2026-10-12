@@ -247,6 +247,13 @@ _ALL_CARDS = {
         cost=Cost(mana_cost={"Red": 1}),
         flashback_cost=Cost(mana_cost={"Red": 1, "None": 2}),
     ),
+
+    "Grab_the_Price": Sorcery(
+        name="Grab the Price",
+        ability=abilities.GrabThePrice,
+        color=["Red"],
+        cost=Cost(mana_cost={"Red": 1, "None": 1}),
+    )
 }
 
 for key, card in _ALL_CARDS.items():

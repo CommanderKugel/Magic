@@ -6,3 +6,4 @@
 4 Lightning_Bolt
 4 Lava_Dart
 4 Fire_Blast
+4 Grab_the_Price
