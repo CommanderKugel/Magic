@@ -7,8 +7,8 @@ from src.Player.Player import Player, Action, Color
 
 
 class RandomPlayer(Player):
-    def __init__(self, name, starting_life, library):
-        super().__init__(name, starting_life, library)
+    def __init__(self, name, starting_life, library, game=None):
+        super().__init__(name, starting_life, library, game)
 
     def target(
         self, 

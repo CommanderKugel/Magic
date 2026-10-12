@@ -219,7 +219,7 @@ _ALL_CARDS = {
     ),
 
    "Lightning_Bolt": Instant(
-        name="Lightbing Bolt",
+        name="Lightning Bolt",
         ability=abilities.Bolt,
         color=["Red"],
         cost=Cost(mana_cost={"Red": 1}),
@@ -238,6 +238,14 @@ _ALL_CARDS = {
         ability=abilities.FireBlast,
         color=["Red"],
         cost=[abilities.CostFireBlastHardcast, abilities.CostFireBlastAlt],
+    ),
+
+    "Fiery_Temper": Instant(
+        name="Fiery Temper",
+        ability=abilities.Bolt,
+        color=["Red"],
+        cost=Cost(mana_cost={"R": 2, "None": 1}),
+        madness_cost=Cost(mana_cost={"Red": 1}),
     ),
 
     "Faithless_Looting": Sorcery(

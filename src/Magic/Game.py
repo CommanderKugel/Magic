@@ -12,6 +12,8 @@ class Game:
     def __init__(self, p1: Player, p2: Player):
         self.p1 = p1
         self.p2 = p2
+        self.p1.game = self
+        self.p2.game = self
         
         self.turn = 0
         self.active_player: Player
@@ -20,6 +22,7 @@ class Game:
         self.hit_landdrop = False
 
         self.stack: list[StackObject] = []
+        self.action_buffer: list[tuple[Action, Card]] = []
 
     def __repr__(self):
         return (
@@ -465,6 +468,17 @@ class Game:
         data.state = "Passing"
         print(f"[PASSING] {data.priority_player.name} passes")
 
+    def handle_action_buffer(self, data: PriorityData) -> None:
+        """Handle the action buffer. e.g. cast cards for madness cost after casting card completes."""
+        if len(self.action_buffer) == 0:
+            return
+        for (a, c) in self.action_buffer[:]:
+            if a == "CastMadness":
+                self.cast_spell(data, c, a)
+                self.action_buffer.remove((a, c))
+            else:
+                raise ValueError()
+
     def put_action_on_stack(self, data: PriorityData, action: Action, card: Card, targets: list[Card | Player]) -> None:
         """Put an Ability or Cast of a spell on the stack. Reset the pass counter. State is 'Action'."""
         print(f"[{action}] {data.priority_player.name} plays {card.name}")
@@ -537,6 +551,8 @@ class Game:
 
         # 9. Ability was activated successfully
         # ToDo: triggered abilities
+
+        self.handle_action_buffer(data)
 
     def determine_cost(self, card: Spell, owner: Player, action: Action) -> Cost:
         """Determine the cost to cast the Spell."""
@@ -618,7 +634,7 @@ class Game:
 
         if action == "Cast":
             data.priority_player.hand.remove(card)
-        if action == "CastFlashback":
+        if action == "CastFlashback" or action == "CastMadness":
             data.priority_player.graveyard.remove(card)
         
         self.put_action_on_stack(data, action, card, targets)
@@ -632,6 +648,8 @@ class Game:
                 self.stack[-1], c, data.priority_player, data.non_priority_player,
             ):
                 self.put_action_on_stack(data, "TriggeredAbility", c, None)
+
+        self.handle_action_buffer(data)
 
 
     def swap_priority(self, data: PriorityData) -> None:
@@ -658,7 +676,8 @@ class Game:
         targets = stack_object.targets
 
         # resolve Casting Spells
-        if action == "Cast" or action == "CastFlashback":
+        if action in ["Cast", "CastFlashback", "CastMadness"]:
+
             # Creature -> put it on the field
             if isinstance(card, Creature):
                 owner.put_creature_onto_field(card)

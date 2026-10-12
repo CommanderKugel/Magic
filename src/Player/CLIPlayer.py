@@ -24,8 +24,8 @@ def _is_valid_action(i: str, max_idx: int) -> bool:
     return True
 
 class CLIPlayer(Player):
-    def __init__(self, name, starting_life, library):
-        super().__init__(name, starting_life, library)
+    def __init__(self, name, starting_life, library, game=None):
+        super().__init__(name, starting_life, library, game)
 
     def target(
         self, 

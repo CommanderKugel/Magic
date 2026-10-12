@@ -12,7 +12,8 @@ PASS: tuple[Action, None] = ("Pass", None)
 
 
 class Player:
-    def __init__(self, name: str, starting_life: int,  library: list[Card]):
+    def __init__(self, name: str, starting_life: int,  library: list[Card], game):
+        self.game = game
         self.name: str = name
 
         self.life = starting_life
@@ -64,9 +65,14 @@ class Player:
         self.graveyard.append(card)
         self.hand.remove(card)
 
-        # ToDo: madness
-        # ToDo: triggered abilities
+        if (
+            isinstance(card, Spell) 
+            and card.madness_cost is not None
+            and self.binary_choice("")
+        ):
+            self.game.action_buffer.append(("CastMadness", card))
 
+        # ToDo: triggered abilities
 
     def put_artifact_onto_field(self, artifact: Artifact) -> None:
         """Put an artifact on the field."""

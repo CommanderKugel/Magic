@@ -39,6 +39,7 @@ class Land(Card):
 class Spell(Card):
     """Parent Class for Creature, Sorcery and Instant."""
     cost: Cost | list[Cost] = None
+    madness_cost: Cost = None
     sorcery_speed: bool = True
 
     def __hash__(self):

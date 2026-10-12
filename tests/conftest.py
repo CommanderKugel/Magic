@@ -21,14 +21,14 @@ from src.implementation.cards import get_card
 @pytest.fixture
 def mock_player() -> Player:
     """Create minimal instance of a Player."""
-    return Player("P", 20, [])
+    return Player("P", 20, [], Mock())
 
 @pytest.fixture
 def mock_player_factory():
     """Factory to create minimal instances of a Player."""
     def _mock_player(name: str) -> Player:
         """Create minimal instance of a Player."""
-        p = Player(name, 20, [])
+        p = Player(name, 20, [], Mock())
         p.collect_casting_spells = MagicMock(return_value=[])
         p.collect_activated_abilities = MagicMock(return_value=[])
         p.collect_landdrops = MagicMock(return_value=[])

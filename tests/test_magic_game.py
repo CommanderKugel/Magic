@@ -1284,6 +1284,40 @@ class TestHelperMethods:
         )
         game.put_action_on_stack.assert_called_once()
 
+    
+    def test_discarding_madness_can_play_madness(self, game, mock_bolt, mock_cost):
+        """Discarding card with madness adds it to action buffer."""
+        game.p1.binary_choice = MagicMock(return_value=True)
+        mock_bolt.madness_cost = mock_cost
+        game.p1.hand = [mock_bolt]
+        game.p1.discard_one_card(mock_bolt)
+
+        assert ("CastMadness", mock_bolt) in game.action_buffer
+
+    def test_buffer_casts_madness_cards(self, game, mock_bolt, mock_cost):
+        """Game.handle_buffer casts madness cards in the Buffer."""
+        data = build_priority_data(game)
+        mock_bolt.madness_cost = mock_cost
+        game.action_buffer = [("CastMadness", mock_bolt)]
+        game.cast_spell = MagicMock()
+
+        game.handle_action_buffer(data)
+
+        game.cast_spell.assert_called_once_with(
+            data, mock_bolt, "CastMadness",
+        )
+
+    def test_madness_card_resolves(self, game, mock_bolt, mock_cost, mock_ability):
+        """Madness card normally resolves from stack."""
+        mock_bolt.madness_cost = mock_cost
+        mock_bolt.ability = mock_ability
+        data = build_priority_data(game)
+        game.stack = [StackObject("CastMadness", mock_bolt, game.p1, [])]
+
+        game.resolve_top_object_from_stack(data)
+
+        mock_bolt.ability.activity.assert_called_once()
+        assert mock_bolt in game.p1.graveyard
 
     # PASSING
 
