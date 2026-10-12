@@ -6,7 +6,7 @@
 ✅ 4 Lightning_Bolt
 ✅ 4 Lava_Dart
 ✅ 3 Fire_Blast
-❌ 4 Fiery_Temper
+✅ 4 Fiery_Temper
 ❌ 4 Highway_Robbery
-❌ 4 Grab_the_Prize
+✅ 4 Grab_the_Prize
 ✅ 4 Faithless_Looting
